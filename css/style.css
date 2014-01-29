@@ -23,7 +23,7 @@ a:hover {
 	clear: both;
 }
 
-.lk {
+.lego_lk {
 
 }
 
@@ -32,7 +32,7 @@ a:hover {
 /* /base
 ---------------------------------------------------------------------------------- */
 
-.container {
+.lego_container {
 	display: table;
 	min-width: 1400px;
 	margin: 0 auto;
@@ -40,13 +40,13 @@ a:hover {
 	background: #555;
 	}
 
-.aside,
-.main {
+.lego_aside,
+.lego_main {
 	display: table-cell;
 	vertical-align: top;
 	}
 
-.aside {
+.lego_aside {
 	padding: 20px 0;
 	min-width: 200px;
 	max-width: 300px;
@@ -55,21 +55,20 @@ a:hover {
 /* left column
 ---------------------------------------------------------------------------------- */
 
-.toggler {
+.lego_toggler {
 	margin: 10px;
 }
-.toggle_i {
+.lego_toggle_i {
 	display: inline-block;
 	padding: 3px;
 	font-size: 12px;
 }
-.toggle_i.__active {
+.lego_toggle_i.__active {
 	background: #FF7F00;
 	color: #fff;
 }
 
-.aside_search {
-	display: block;
+.lego_aside_search {
 	width: 85%;
 	margin-left: 10px;
 	padding: 5px;
@@ -77,38 +76,49 @@ a:hover {
 	border: 1px solid #bababa;
 	}
 
-.search-result {
+.lego_search-result {
 	padding: 10px;
 	}
 
-.search-result_w {
+	.lego_search-result.__list .lego_search-result_i {
+		display: block;
+		width: auto;
+
+		}
+	.lego_search-result.__list .lego_search-result_img {
+		display: none;
+
+		}
+
+
+.lego_search-result_w {
 
 	}
 
-.search-result_h {
+.lego_search-result_h {
 	position: relative;
-	display: block;
 	margin-bottom: 10px;
 	color: #bababa;
 	text-decoration: none !important;
+	font-size: 14px;
 	cursor: pointer;
 	}
 
-	.search-result_h:before{
+	.lego_search-result_h:before{
 		content: '▼';
 		margin-right: 5px;
 		font-size: 12px;
 		}
 
-	.search-result_w.__closed .search-result_h:before{
+	.lego_search-result_w.__closed .lego_search-result_h:before{
 		content: '►';
 		}
 
-	.search-result_w.__closed .search-result_i {
+	.lego_search-result_w.__closed .lego_search-result_i {
 		display: none;
 		}
 
-.search-result_i {
+.lego_search-result_i {
 	display: inline-block;
 	width: 85px;
 	vertical-align: top;
@@ -116,7 +126,7 @@ a:hover {
 	margin-right: 2px;
 	}
 
-.search-result_n {
+.lego_search-result_n {
 	font-size: 12px;
 	color: #fff;
 	}
@@ -128,75 +138,75 @@ a:hover {
 /* right column
 ---------------------------------------------------------------------------------- */
 
-.export-select {
+.lego_export-select {
 	display: block;
 	margin: 0 auto;
 	}
 
-.widget {
+.lego_widget {
 	color: #bababa;
 	padding: 0 10px 20px;
 
 	font-size: 14px;
 	}
 
-.widget:nth-of-type(1){
+.lego_widget:nth-of-type(1){
 	margin-top: 30px;
 	}
 
-.widget_h {
+.lego_widget_h {
 	border-bottom: 1px solid #bababa;
 	margin-bottom: 15px;
 
 	font-size: 16px;
 	}
 
-.widget_ul {
+.lego_widget_ul {
 	padding: 0;
 	margin: 0;
 	list-style-type: none;
 	}
 
-.widget_ul-i {
+.lego_widget_ul-i {
 	line-height: 24px;
 	}
 
-.widget_ul-i .lk {
+.lego_widget_ul-i .lego_lk {
 	display: inline-block;
 	}
 
-.widget_ul-i .ic {
+.lego_widget_ul-i .lego_ic {
 	display: none;
 	}
 
-.widget_ul-i:hover .ic_close {
+.lego_widget_ul-i:hover .lego_ic_close {
 	display: inline-block;
 	vertical-align: middle;
 	}
 
-.widget_form {
+.lego_widget_form {
 
 	}
 
-.form-i {
+.lego_form-i {
 	margin-bottom: 15px;
 	}
 
-.form-i_w {
+.lego_form-i_w {
 	clear: left;
 	margin-bottom: 5px;
 	}
 
-.form-i_w .it,
-.form-i_w .form-i_txt {
+.lego_form-i_w .lego_it,
+.lego_form-i_w .lego_form-i_txt {
 	display: inline-block;
 	}
 
-.form-i_w .form-i_txt {
+.lego_form-i_w .lego_form-i_txt {
 	vertical-align: -3px; /* vertical centering */
 	}
 
-.form-i .checkbox {
+.lego_form-i .lego_checkbox {
 	position: relative;
 	top: 5px;
 	float: left;
@@ -204,41 +214,41 @@ a:hover {
 	margin-right: 5px;
 	}
 
-.label {
+.lego_label {
 	display: block;
 	margin-bottom: 5px;
 	color: #ddd;
 	}
 
-.it {
+.lego_it {
 	box-sizing: border-box;
 	padding: 2px 3px;
 	font-size: 13px;
 	color: #555;
 	}
 
-.it.__short,
+.lego_it.__short,
 .__short {
 	width: 80px;
 	}
 
-.it.__medium {
+.lego_it.__medium {
 	width: 155px;
 	}
 
 
 
-.ic {
+.lego_ic {
 	width: 16px;
 	height: 16px;
 	background-repeat: no-repeat;
 	}
 
-.ic.ic_close {
+.lego_ic.lego_ic_close {
 	background: url(../i/close.png);
 	}
 
-	.ic.ic_close:hover {
+	.lego_ic.lego_ic_close:hover {
 		background: url(../i/close_h.png);
 		}
 
@@ -249,7 +259,7 @@ a:hover {
 /* center column
 ---------------------------------------------------------------------------------- */
 
-.main {
+.lego_main {
 	width: 1000px;
 	border-top: 20px solid #555;
 	background: #999; /* color of cover  */
@@ -262,51 +272,51 @@ a:hover {
 /* layers
 ---------------------------------------------------------------------------------- */
 
-.layer {
+.lego_layer {
 	position: relative;
 	width: 1000px;
 	}
 
 /* two column layout */
-.layer.__two-col {
+.lego_layer.__two-col {
 
 	}
 
-.toolbar,
-.sidebar,
-.navbar,
-.content {
+.lego_toolbar,
+.lego_sidebar,
+.lego_navbar,
+.lego_content {
 	background: #FFE4ED;
 	}
 
-.content_w {
+.lego_content_w {
 	margin-top: 45px;
 	width: 100%;
 
 	background: #fff;
 	}
 
-.navbar {
+.lego_navbar {
 	float: right;
 	height: 40px;
 	width: 720px;
 	margin-bottom: 20px;
 	}
 
-.toolbar {
+.lego_toolbar {
 	top: 0; left: 0;
 	width: 100%;
 	height: 48px;
 	}
 
-.sidebar {
+.lego_sidebar {
 	float: left;
 	margin: -25px 0 0 15px;
 	width: 230px;
 	min-height: 685px;
 	}
 
-.content {
+.lego_content {
 	float: right;
 	width: 720px;
 	min-height: 600px;
