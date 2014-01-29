@@ -9,13 +9,14 @@
 .aside,
 .main {
 	display: table-cell;
+	vertical-align: top;
 	}
 
 .aside {
 	width: 200px;
 	}
 
-.search {
+.aside_search {
 	width: 150px;
 	margin: 15px;
 
@@ -26,4 +27,8 @@
 	
 
 
+}
+
+.layer {
+	min-height: 500px;
 }
