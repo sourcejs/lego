@@ -9,6 +9,41 @@
 	<link rel="stylesheet" href="./css/nmain_postponed.css">
 	<link rel="stylesheet" href="./css/nmain.css">
 	<link rel="stylesheet" href="./css/style.css">
+
+    <script id="dummy-html" type="text/x-handlebars-template">
+        <span class="editor">
+            <span class="editor_x">&times;</span>
+            <div class="ucard-b __sc">
+                <div class="ust ust__sm">
+                    <div class="ust-tx">
+                        <a href="#777" class="ust-tx_a" title="Текст статуса, блок тянется на ширину родителя">Текст статуса, блок тянется на ширину родителя</a>
+                    </div>
+                    <span class="ust-ar"></span>
+                </div>
+                <div class="ucard-b_img">
+                    <a class="ucard-b_img_a" href="#">
+                        <img class="ucard-b_img_cnt" src="http://placekitten.com/85/85"/>
+                    </a>
+                </div>
+            </div>
+        </span>
+    </script>
+
+    <script id="search-result-list" type="text/x-handlebars-template">
+        {{#each this}}
+            <div class="lego_search-result_w">
+                <div class="lego_search-result_h">{{@key}}</div>
+                {{#each this}}
+                    <a href="{{url}}" class="lego_search-result_i" data-target="{{target}}">
+                        <!--TODO: change to real image url-->
+                        <img class="lego_search-result_img" src="http://placekitten.com/85/85" alt=""/>
+                        <div class="lego_search-result_n">{{title}}</div>
+                    </a>
+                {{/each}}
+            </div>
+        {{/each}}
+    </script>
+
 </head>
 <body>
 	 <div class="lego_container">
@@ -22,70 +57,35 @@
 			<div class="lego_search-result">
 				<div class="lego_search-result_w">
 					<div href="#" class="lego_search-result_h">Лэйауты</div>
+                    <a href="#" class="lego_search-result_i">
+                        <img class="lego_search-result_img" src="./i/layout_1col.png" alt=""/>
+                        <div class="lego_search-result_n">1 колонка</div>
+                    </a>
 					<a href="#" class="lego_search-result_i">
 						<img class="lego_search-result_img" src="./i/layout_2col.png" alt=""/>
 						<div class="lego_search-result_n">2 колонки</div>
-					</a>
-					<a href="#" class="lego_search-result_i">
-						<img class="lego_search-result_img" src="./i/layout_1col.png" alt=""/>
-						<div class="lego_search-result_n">1 колонка</div>
 					</a>
 					<a href="#" class="lego_search-result_i">
 						<img class="lego_search-result_img" src="./i/layout_3col.png" alt=""/>
 						<div class="lego_search-result_n">3 колонки</div>
 					</a>
 				</div>
-
-				<div class="lego_search-result_w">
-					<div class="lego_search-result_h">Навигация</div>
-					<a href="#" class="lego_search-result_i">
-						<img class="lego_search-result_img" src="http://placekitten.com/85/85" alt=""/>
-						<div class="lego_search-result_n">Горизонт. навигация</div>
-					</a>
-					<a href="#" class="lego_search-result_i">
-						<img class="lego_search-result_img" src="http://placekitten.com/85/85" alt=""/>
-						<div class="lego_search-result_n">Вертикальная навигация</div>
-					</a>
-					<a href="#" class="lego_search-result_i">
-						<img class="lego_search-result_img" src="http://placekitten.com/85/85" alt=""/>
-						<div class="lego_search-result_n">Тулбар</div>
-					</a>
-					<a href="#" class="lego_search-result_i">
-						<img class="lego_search-result_img" src="http://placekitten.com/85/85" alt=""/>
-						<div class="lego_search-result_n">Табы</div>
-					</a>
-				</div>
-
-				<div class="lego_search-result_w __closed">
-					<div class="lego_search-result_h">Списки</div>
-					<a href="#" class="lego_search-result_i">
-						<img class="lego_search-result_img" src="http://placekitten.com/85/85" alt=""/>
-						<div class="lego_search-result_img" class="lego_search-result_n">Люди</div>
-					</a>
-					<a href="#" class="lego_search-result_i">
-						<img class="lego_search-result_img" src="http://placekitten.com/85/85" alt=""/>
-						<div class="lego_search-result_n">PYMK</div>
-					</a>
-					<a href="#" class="lego_search-result_i">
-						<img class="lego_search-result_img" src="http://placekitten.com/85/85" alt=""/>
-						<div class="lego_search-result_n">Реклама</div>
-					</a>
-				</div>
+                <div id="lego_search-result"></div>
 			</div>
 	 	</div>
 	 	<div class="lego_main">
 	 		<div class="lego_layer">
-	 			<div class="lego_toolbar">
+	 			<div class="lego_toolbar" data-target="toolbar">
 
 	 			</div>
 				<div class="lego_content_w cf">
-					<div class="lego_sidebar">
+					<div class="lego_sidebar" data-target="secondary">
 
 					</div>
-					<div class="lego_navbar">
+					<div class="lego_navbar" data-target="navbar">
 
 					</div>
-					<div class="lego_content">
+					<div class="lego_content" data-target="wide">
 
 					</div>
 				</div>
@@ -173,6 +173,8 @@
 	 </div>
 	 <script src="./js/jquery.js"></script>
 	 <script src="./js/html2canvas.js"></script>
-	 <script src="./js/main.js"></script>
+     <script src="./js/handlebars.js"></script>
+     <script src="./js/main.js"></script>
+     <script src="./js/search.js"></script>
 </body>
 </html>
