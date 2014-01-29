@@ -1,5 +1,6 @@
 /* Module dependencies */
 var express = require('express')
+    , fs = require('fs')
     , colors = require('colors');
 
 /* Globals */
@@ -39,6 +40,17 @@ global.app.use(logErrors);
 global.app.use(clientErrorHandler);
 global.app.use(errorHandler);
 /* /Error handling */
+
+/* Creating image for share */
+app.get('/screenshot', function (req, res) {
+    var base64 = new Buffer(req.query.base64.replace(/^data:image\/png;base64,/,""), 'base64').toString('binary');
+
+    res.writeHead(200, {
+        'Content-Type': 'image/png',
+        'Content-disposition': 'attachment; filename=out.png' });
+    res.end(base64, 'binary');
+});
+/* /Creating image for share */
 
 
 if (!module.parent) {
