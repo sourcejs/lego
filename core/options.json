@@ -1,0 +1,6 @@
+{
+    "common": {
+        "port": 7777,
+        "pathToSpecs": "public"
+    }
+}
