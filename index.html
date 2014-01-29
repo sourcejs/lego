@@ -10,13 +10,81 @@
 	 <div class="container">
 	 	<div class="aside">
 	 		<input class="aside_search" type="search" name="searh" id="search" placeholder="Search"/>
+
+			<div class="toggler">
+				<a class="toggle_i __active" href="#">Плитка</a>
+				<a class="toggle_i" href="#">Список</a>
+			</div>
 			<div class="search-result">
-				<!-- some results-->
+				<div class="search-result_w">
+					<div href="#" class="search-result_h">Лэйауты</div>
+					<a href="#" class="search-result_i">
+						<img src="./i/layout_2col.png" alt=""/>
+						<div class="search-result_n">2 колонки</div>
+					</a>
+					<a href="#" class="search-result_i">
+						<img src="./i/layout_1col.png" alt=""/>
+						<div class="search-result_n">1 колонка</div>
+					</a>
+					<a href="#" class="search-result_i">
+						<img src="./i/layout_3col.png" alt=""/>
+						<div class="search-result_n">3 колонки</div>
+					</a>
+				</div>
+
+				<div class="search-result_w">
+					<div class="search-result_h">Навигация</div>
+					<a href="#" class="search-result_i">
+						<img src="http://placekitten.com/85/85" alt=""/>
+						<div class="search-result_n">Горизонт. навигация</div>
+					</a>
+					<a href="#" class="search-result_i">
+						<img src="http://placekitten.com/85/85" alt=""/>
+						<div class="search-result_n">Вертикальная навигация</div>
+					</a>
+					<a href="#" class="search-result_i">
+						<img src="http://placekitten.com/85/85" alt=""/>
+						<div class="search-result_n">Тулбар</div>
+					</a>
+					<a href="#" class="search-result_i">
+						<img src="http://placekitten.com/85/85" alt=""/>
+						<div class="search-result_n">Табы</div>
+					</a>
+				</div>
+
+				<div class="search-result_w __closed">
+					<div class="search-result_h">Списки</div>
+					<a href="#" class="search-result_i">
+						<img src="http://placekitten.com/85/85" alt=""/>
+						<div class="search-result_n">Люди</div>
+					</a>
+					<a href="#" class="search-result_i">
+						<img src="http://placekitten.com/85/85" alt=""/>
+						<div class="search-result_n">PYMK</div>
+					</a>
+					<a href="#" class="search-result_i">
+						<img src="http://placekitten.com/85/85" alt=""/>
+						<div class="search-result_n">Реклама</div>
+					</a>
+				</div>
 			</div>
 	 	</div>
 	 	<div class="main">
 	 		<div class="layer">
-	 			
+	 			<div class="toolbar">
+
+	 			</div>
+				<div class="content_w cf">
+					<div class="sidebar">
+
+					</div>
+					<div class="navbar">
+
+					</div>
+					<div class="content">
+
+					</div>
+				</div>
 	 		</div>
 	 	</div>
 	 	<div class="aside">
@@ -25,6 +93,77 @@
 	 			<option value="html">Export to HTML</option>
 	 		</select>
 
+			<div class="widget">
+				<div class="widget_h">Content</div>
+				<ul class="widget_ul">
+					<li class="widget_ul-i"><a class="lk" href="#">Layouts.2k</a> <a class="ic ic_close" href="#"></a></li>
+					<li class="widget_ul-i"><a class="lk" href="#">Nav.toolbar</a> <a class="ic ic_close" href="#"></a></li>
+					<li class="widget_ul-i"><a class="lk" href="#">Nav.global</a> <a class="ic ic_close" href="#"></a></li>
+					<li class="widget_ul-i"><a class="lk" href="#">Nav.vertical</a> <a class="ic ic_close" href="#"></a></li>
+					<li class="widget_ul-i"><a class="lk" href="#">List.PYMK</a> <a class="ic ic_close" href="#"></a></li>
+					<li class="widget_ul-i"><a class="lk" href="#">List.peoples</a> <a class="ic ic_close" href="#"></a></li>
+					<li class="widget_ul-i"><a class="lk" href="#">List.adv</a> <a class="ic ic_close" href="#"></a></li>
+				</ul>
+			</div>
+
+			<div class="widget">
+				<div class="widget_h">Modificators</div>
+				<form class="widget_form">
+					<div class="form-i">
+						<label class="label" for="version">Version</label>
+						<select class="__short" name="version" id="version">
+							<option value="0.2">0.2</option>
+							<option value="0.3">0.3</option>
+							<option value="0.4">0.4</option>
+						</select>
+					</div>
+
+					<div class="form-i">
+						<label class="label" for="numbers">Numbers</label>
+						<input class="it __short" id="numbers" type="text"/>
+					</div>
+
+					<div class="form-i">
+						<label class="label" for="width">Width</label>
+						<select class="__short" name="" id="">
+							<option value="150">150</option>
+							<option value="200">200</option>
+							<option value="250">250</option>
+						</select>
+						<input class="it __short" id="width" type="text"/>
+					</div>
+
+					<div class="form-i">
+						<label class="label" for="width">Список чекбоксов и текстовых полей</label>
+						<div class="form-i_w">
+							<input class="checkbox" type="checkbox" name="" id=""/>	<input class="it __medium" id="" type="text" value="Сделать подарок"/>
+						</div>
+						<div class="form-i_w">
+							<input class="checkbox" type="checkbox" name="" id=""/> <input class="it __medium" id="" type="text" value="Мои подарки"/>
+						</div>
+					</div>
+
+					<div class="form-i">
+						<label class="label" for="width">Список с чекбоксами</label>
+						<div class="form-i_w">
+							<input class="checkbox" type="checkbox" name="" id=""/>	<span class="form-i_txt">Lorem ipsum.</span>
+						</div>
+						<div class="form-i_w">
+							<input class="checkbox" type="checkbox" name="" id=""/> <span class="form-i_txt">Lorem ipsum dolor.</span>
+						</div>
+					</div>
+
+					<div class="form-i">
+						<label class="label" for="width">Список без чекбоксов</label>
+						<div class="form-i_w">
+							<span class="form-i_txt">Lorem ipsum.</span>
+						</div>
+						<div class="form-i_w">
+							<span class="form-i_txt">Lorem ipsum dolor.</span>
+						</div>
+					</div>
+				</form>
+			</div>
 	 	</div>
 	 </div>
 	 <script src="./js/jquery.js"></script>

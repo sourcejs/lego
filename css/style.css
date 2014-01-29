@@ -1,6 +1,40 @@
+/* base
+---------------------------------------------------------------------------------- */
+
+body {
+	background: #555;
+}
+
+a:link,
+a:visited {
+	color: #ddd;
+	text-decoration: none;
+}
+a:hover {
+	text-decoration: underline;
+}
+.cf:before,
+.cf:after {
+	content: " ";
+	display: table;
+}
+
+.cf:after {
+	clear: both;
+}
+
+.lk {
+
+}
+
+
+
+/* /base
+---------------------------------------------------------------------------------- */
+
 .container {
 	display: table;
-	width: 1400px;
+	min-width: 1400px;
 	margin: 0 auto;
 
 	background: #555;
@@ -14,27 +48,273 @@
 
 .aside {
 	padding: 20px 0;
-	width: 200px;
+	min-width: 200px;
+	max-width: 300px;
 	}
 
-.aside_search {
-	width: 150px;
-	margin: 0 15px;
-	padding: 5px;
+/* left column
+---------------------------------------------------------------------------------- */
 
-	border: 0;
-	border-top: 1px solid #bababa;
-	border-bottom: 1px solid #bababa;
-	}
-
-.export-select {
-
+.toggler {
+	margin: 10px;
+}
+.toggle_i {
+	display: inline-block;
+	padding: 3px;
+	font-size: 12px;
+}
+.toggle_i.__active {
+	background: #FF7F00;
+	color: #fff;
 }
 
-.main {
-	background: #eee;
+.aside_search {
+	display: block;
+	width: 85%;
+	margin-left: 10px;
+	padding: 5px;
+
+	border: 1px solid #bababa;
 	}
 
-.layer {
-	min-height: 500px;
+.search-result {
+	padding: 10px;
 	}
+
+.search-result_w {
+
+	}
+
+.search-result_h {
+	position: relative;
+	display: block;
+	margin-bottom: 10px;
+	color: #bababa;
+	text-decoration: none !important;
+	cursor: pointer;
+	}
+
+	.search-result_h:before{
+		content: '▼';
+		margin-right: 5px;
+		font-size: 12px;
+		}
+
+	.search-result_w.__closed .search-result_h:before{
+		content: '►';
+		}
+
+	.search-result_w.__closed .search-result_i {
+		display: none;
+		}
+
+.search-result_i {
+	display: inline-block;
+	width: 85px;
+	vertical-align: top;
+	margin-bottom: 10px;
+	margin-right: 2px;
+	}
+
+.search-result_n {
+	font-size: 12px;
+	color: #fff;
+	}
+
+/* /left column
+---------------------------------------------------------------------------------- */
+
+
+/* right column
+---------------------------------------------------------------------------------- */
+
+.export-select {
+	display: block;
+	margin: 0 auto;
+	}
+
+.widget {
+	color: #bababa;
+	padding: 0 10px 20px;
+
+	font-size: 14px;
+	}
+
+.widget:nth-of-type(1){
+	margin-top: 30px;
+	}
+
+.widget_h {
+	border-bottom: 1px solid #bababa;
+	margin-bottom: 15px;
+
+	font-size: 16px;
+	}
+
+.widget_ul {
+	padding: 0;
+	margin: 0;
+	list-style-type: none;
+	}
+
+.widget_ul-i {
+	line-height: 24px;
+	}
+
+.widget_ul-i .lk {
+	display: inline-block;
+	}
+
+.widget_ul-i .ic {
+	display: none;
+	}
+
+.widget_ul-i:hover .ic_close {
+	display: inline-block;
+	vertical-align: middle;
+	}
+
+.widget_form {
+
+	}
+
+.form-i {
+	margin-bottom: 15px;
+	}
+
+.form-i_w {
+	clear: left;
+	margin-bottom: 5px;
+	}
+
+.form-i_w .it,
+.form-i_w .form-i_txt {
+	display: inline-block;
+	}
+
+.form-i_w .form-i_txt {
+	vertical-align: -3px; /* vertical centering */
+	}
+
+.form-i .checkbox {
+	position: relative;
+	top: 5px;
+	float: left;
+
+	margin-right: 5px;
+	}
+
+.label {
+	display: block;
+	margin-bottom: 5px;
+	color: #ddd;
+	}
+
+.it {
+	box-sizing: border-box;
+	padding: 2px 3px;
+	font-size: 13px;
+	color: #555;
+	}
+
+.it.__short,
+.__short {
+	width: 80px;
+	}
+
+.it.__medium {
+	width: 155px;
+	}
+
+
+
+.ic {
+	width: 16px;
+	height: 16px;
+	background-repeat: no-repeat;
+	}
+
+.ic.ic_close {
+	background: url(../i/close.png);
+	}
+
+	.ic.ic_close:hover {
+		background: url(../i/close_h.png);
+		}
+
+/* /right column
+---------------------------------------------------------------------------------- */
+
+
+/* center column
+---------------------------------------------------------------------------------- */
+
+.main {
+	width: 1000px;
+	border-top: 20px solid #555;
+	background: #999; /* color of cover  */
+	}
+
+/* /center column
+---------------------------------------------------------------------------------- */
+
+
+/* layers
+---------------------------------------------------------------------------------- */
+
+.layer {
+	position: relative;
+	width: 1000px;
+	}
+
+/* two column layout */
+.layer.__two-col {
+
+	}
+
+.toolbar,
+.sidebar,
+.navbar,
+.content {
+	background: #FFE4ED;
+	}
+
+.content_w {
+	margin-top: 45px;
+	width: 100%;
+
+	background: #fff;
+	}
+
+.navbar {
+	float: right;
+	height: 40px;
+	width: 720px;
+	margin-bottom: 20px;
+	}
+
+.toolbar {
+	top: 0; left: 0;
+	width: 100%;
+	height: 48px;
+	}
+
+.sidebar {
+	float: left;
+	margin: -25px 0 0 15px;
+	width: 230px;
+	min-height: 685px;
+	}
+
+.content {
+	float: right;
+	width: 720px;
+	min-height: 600px;
+	}
+
+
+
+
+/* /layers
+---------------------------------------------------------------------------------- */
+
