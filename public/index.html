@@ -3,7 +3,6 @@
 <head>
 	<meta charset="UTF-8">
 	<title>Design Lego</title>
-	<link rel="stylesheet" href="./css/normalize.css">
 	<link rel="stylesheet" href="./css/ncore.css">
 	<link rel="stylesheet" href="./css/ncore_postponed.css">
 	<link rel="stylesheet" href="./css/nmain_postponed.css">
@@ -34,7 +33,7 @@
             <div class="lego_search-result_w">
                 <div class="lego_search-result_h">{{@key}}</div>
                 {{#each this}}
-                    <a href="{{url}}" class="lego_search-result_i" data-target="{{target}}">
+                    <a href="{{url}}" class="lego_lk lego_search-result_i" data-target="{{target}}">
                         <!--TODO: change to real image url-->
                         <img class="lego_search-result_img" src="http://placekitten.com/85/85" alt=""/>
                         <div class="lego_search-result_n">{{title}}</div>
@@ -57,19 +56,19 @@
 			<div class="lego_search-result js-layouts-list">
 				<div class="lego_search-result_w">
 					<div href="#" class="lego_search-result_h">Лэйауты</div>
-                    <a href="#" class="lego_search-result_i">
+                    <a href="#" class="lego_lk lego_search-result_i">
                         <img class="lego_search-result_img" src="./i/layout_1col.png" alt=""/>
                         <div class="lego_search-result_n"  data-layout="one-column">1 колонка</div>
                     </a>
-					<a href="#" class="lego_search-result_i">
+					<a href="#" class="lego_lk lego_search-result_i">
 						<img class="lego_search-result_img" src="./i/layout_2col.png" alt=""/>
 						<div class="lego_search-result_n" data-layout="two-column">2 колонки</div>
 					</a>
-					<a href="#" class="lego_search-result_i">
+					<a href="#" class="lego_lk lego_search-result_i">
 						<img class="lego_search-result_img" src="./i/layout_3col.png" alt=""/>
 						<div class="lego_search-result_n" data-layout="three-column">3 колонки</div>
 					</a>
-					<a href="#" class="lego_search-result_i">
+					<a href="#" class="lego_lk lego_search-result_i">
 						<img class="lego_search-result_img" src="./i/layout_default.png" alt=""/>
 						<div class="lego_search-result_n" data-layout="default">По-умолчанию</div>
 					</a>
