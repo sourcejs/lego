@@ -96,5 +96,16 @@ $(document).ready(function(){
         }
     });
 
+    $('.js-layouts-list').on('click', '.lego_search-result_i', function(e){
+        e.preventDefault();
+
+        var layerMode = $(this).find('.lego_search-result_n').data('layout');
+
+        $('.lego_layer')
+            .removeClass('__default __one-column __two-column __three-column')
+            .addClass('__' + layerMode);
+
+    });
+
 });
 

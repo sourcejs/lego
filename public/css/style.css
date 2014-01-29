@@ -5,14 +5,16 @@ body {
 	background: #555;
 }
 
-a:link,
-a:visited {
+.lego_lk:link,
+.lego_lk:visited {
 	color: #ddd;
 	text-decoration: none;
 }
-a:hover {
+
+.lego_lk:hover {
 	text-decoration: underline;
 }
+
 .cf:before,
 .cf:after {
 	content: " ";
@@ -22,11 +24,6 @@ a:hover {
 .cf:after {
 	clear: both;
 }
-
-.lego_lk {
-
-}
-
 
 
 /* /base
@@ -272,58 +269,124 @@ a:hover {
 /* layers
 ---------------------------------------------------------------------------------- */
 
+/* default styles for all layers */
 .lego_layer {
 	position: relative;
 	width: 1000px;
 	}
 
-/* two column layout */
-.lego_layer.__two-col {
 
+.lego_layer.__default .lego_content_w {
+	margin-top: 0;
 	}
 
-.lego_toolbar,
+/* by default all block exclude content_w are hidden */
+.lego_right-column,
 .lego_sidebar,
-.lego_navbar,
-.lego_content {
+.lego_toolbar,
+.lego_navbar {
+	display: none;
 	background: #FFE4ED;
+}
+
+.lego_toolbar {
+	width: 100%;
+	height: 48px;
 	}
+
+
+.lego_sidebar {
+	float: left;
+	margin: -25px 0 0 15px;
+	width: 210px;
+	min-height: 685px;
+}
 
 .lego_content_w {
-	margin-top: 45px;
 	width: 100%;
-
+	margin-top: 45px;
 	background: #fff;
+	}
+
+.lego_content {
+	min-height: 600px;
+	width: 1000px;
+
+	background: #FFE4ED;
 	}
 
 .lego_navbar {
 	float: right;
 	height: 40px;
-	width: 720px;
+	width: 730px;
 	margin-bottom: 20px;
-	}
+	margin-right: 15px;
+}
 
-.lego_toolbar {
-	top: 0; left: 0;
-	width: 100%;
-	height: 48px;
-	}
-
-.lego_sidebar {
-	float: left;
-	margin: -25px 0 0 15px;
-	width: 230px;
-	min-height: 685px;
-	}
-
-.lego_content {
+.lego_right-column {
 	float: right;
-	width: 720px;
+	width: 215px;
 	min-height: 600px;
+	margin: 0 15px;
 	}
 
+/* default */
 
+.lego_layer.__default .lego_content{
+	text-align: center;
+	padding-top: 100px;
+	}
+.lego_layer.__default .lego_content_dec {
+	display: inline-block;
 
+	}
+
+/* two column layout */
+.lego_layer.__two-column .lego_navbar,
+.lego_layer.__two-column .lego_sidebar,
+.lego_layer.__two-column .lego_content,
+.lego_layer.__two-column .lego_toolbar { display: block; }
+
+.lego_layer.__two-column .lego_sidebar {
+	width: 230px;
+	}
+
+.lego_layer.__two-column .lego_navbar {
+	width: 715px;
+	}
+
+.lego_layer.__two-column .lego_content {
+	float: right;
+	width: 715px;
+	margin-right: 15px;
+
+	text-align: left;
+	}
+
+/* one column */
+.lego_layer.__one-column .lego_toolbar,
+.lego_layer.__one-column .lego_content {
+	display: block;
+	}
+
+.lego_layer.__one-column .lego_content {
+	width: 970px;
+
+	margin: 15px;
+	text-align: left;
+	}
+
+/* three column */
+.lego_layer.__three-column .lego_navbar,
+.lego_layer.__three-column .lego_sidebar,
+.lego_layer.__three-column .lego_content,
+.lego_layer.__three-column .lego_toolbar,
+.lego_layer.__three-column .lego_right-column { display: block; }
+
+.lego_layer.__three-column .lego_content {
+	float: right;
+	width: 500px;
+	}
 
 /* /layers
 ---------------------------------------------------------------------------------- */
