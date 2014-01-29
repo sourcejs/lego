@@ -40,7 +40,7 @@ var filterValidSpecs = function(pagesTree) {
 }
 
 $.ajax({
-    url: 'http://localhost:8080/data/pages_tree.json',
+    url: 'http://okp.me/data/pages_tree.json',
     success: function(data) {
         filterValidSpecs(data);
     }
