@@ -2,5 +2,11 @@
     "common": {
         "port": 7777,
         "pathToSpecs": "public"
+    },
+
+    "specsMaster": {
+        "current": "",
+        "dev": "http://127.0.0.1",
+        "prod": "http://okp.me:8080"
     }
 }

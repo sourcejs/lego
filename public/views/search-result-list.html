@@ -1,0 +1,12 @@
+{{#each this}}
+    <div class="lego_search-result_w">
+        <div class="lego_search-result_h">{{@key}}</div>
+        {{#each this}}
+            <a href="{{url}}" class="lego_lk lego_search-result_i" data-target="{{target}}">
+                <!--TODO: change to real image url-->
+                <img class="lego_search-result_img" src="http://placekitten.com/85/85" alt=""/>
+                <div class="lego_search-result_n">{{title}}</div>
+            </a>
+        {{/each}}
+    </div>
+{{/each}}

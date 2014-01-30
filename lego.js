@@ -1,6 +1,8 @@
 /* Module dependencies */
 var express = require('express')
     , fs = require('fs')
+    , mustache = require('mustache')
+    , gzippo = require('gzippo')
     , colors = require('colors');
 
 /* Globals */
@@ -12,10 +14,33 @@ global.app.set('public', __dirname + '/' + global.opts.common.pathToSpecs);
 global.MODE = process.env.NODE_ENV || 'development';
 /* /Globals */
 
-/* Serve static content */
-global.app.use(express.compress()); //gzip
 
-global.app.use(express.static(global.app.get('public')));
+/* Preparing enviroment */
+global.opts.specsMaster.current = global.MODE === 'production' ? global.opts.specsMaster.prod : global.opts.specsMaster.dev;
+
+
+/* Route for static files */
+app.set('route', __dirname + '/public');
+app
+	.use(gzippo.staticGzip(app.get('route')))
+	.use(gzippo.compress());
+
+/* Main page */
+var arr = ['/','/index','/index.html','/home'];
+arr.map(function(item) {
+    app.get(item, function(req, res) {
+        var indexPage = fs.readFileSync(__dirname+'/public/views/index.html', "utf8");
+        var legoLayer = fs.readFileSync(__dirname+'/public/views/lego-layer.html', "utf8");
+
+        var htmlToSend = mustache.to_html(indexPage, {
+            legoLayer: legoLayer,
+            globalOptions: JSON.stringify(global.opts)
+        });
+
+        res.send(htmlToSend);
+    });
+});
+
 
 /* Error handling */
 function logErrors(err, req, res, next) {
@@ -39,13 +64,14 @@ function errorHandler(err, req, res, next) {
 global.app.use(logErrors);
 global.app.use(clientErrorHandler);
 global.app.use(errorHandler);
-/* /Error handling */
 
-/* Creating image for share */
-//app.get('/screenshot', function (req, res) {
-//
-//});
-/* /Creating image for share */
+
+
+/* Save working html */
+app.get('/screenshot', function (req, res) {
+
+});
+
 
 
 if (!module.parent) {

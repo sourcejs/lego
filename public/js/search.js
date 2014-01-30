@@ -1,11 +1,7 @@
-/**
- * Created by denis.przendzinskis on 29/01/14.
- */
-
 // GLOBAL
 var parsedTree = {}
     , parsed = false
-    , template = Handlebars.compile($("#search-result-list").html());
+    , template = '';
 // /GLOBAL
 
 var filterValidSpecs = function(pagesTree) {
@@ -36,11 +32,20 @@ var filterValidSpecs = function(pagesTree) {
         }
     }
     parsed = true;
-    $("#lego_search-result").html(template(parsedTree));
-}
 
+    $.ajax({
+        url: '/views/search-result-list.html',
+        success: function(data) {
+            template = Handlebars.compile(data);
+            $("#lego_search-result").html(template(parsedTree));
+        }
+    });
+
+};
+
+var specsMaster = globalOptions.specsMaster.current;
 $.ajax({
-    url: 'http://okp.me/data/pages_tree.json',
+    url: specsMaster+'/data/pages_tree.json',
     success: function(data) {
         filterValidSpecs(data);
     }
@@ -79,7 +84,7 @@ var fuzzySearch = function(q, allData) {
         }
     }
     return result;
-}
+};
 
 $('#search').on("keyup", function(){
 
@@ -96,10 +101,3 @@ $('#search').on("keyup", function(){
         $("#lego_search-result").html("Байты не готовы!!!");
     }
 });
-
-
-
-
-
-
-

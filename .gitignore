@@ -6,3 +6,6 @@
 /public/data
 
 node_modules
+
+# Exported HTMLs from lego
+/public/exported
