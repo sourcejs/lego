@@ -170,7 +170,8 @@ $(document).ready(function(){
         e.preventDefault();
 
         var url = chosenNavigation.attr('href').substring(1);
-        $.ajax('http://localhost:8080/api', {
+        var specsMaster = globalOptions.specsMaster.current;
+        $.ajax(specsMaster+'/api', {
             data: {
                 specID: url
             },

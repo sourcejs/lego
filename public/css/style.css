@@ -263,6 +263,7 @@ body {
 .lego_layer {
 	position: relative;
 	width: 1000px;
+    overflow: hidden;
 	}
 
 /* without background of grid */

@@ -6,8 +6,9 @@ var modifiers = (function() {
 	function getCSSMod( callback ) {
 		var callback = callback || function() {};
 
+        var specsMaster = globalOptions.specsMaster.current;
 		$.ajax({
-			url: "http://127.0.0.1:8080/api",
+			url: specsMaster+"/api",
 			type: 'POST',
 			data: {
 				task: 'parseModifiers'
@@ -23,8 +24,9 @@ var modifiers = (function() {
 	function getHTMLpart( activeElement, callback ) {
 		var callback = callback || function() {};
 
+		var specsMaster = globalOptions.specsMaster.current;
 		$.ajax({
-			url: 'http://127.0.0.1:8080/api',
+			url: specsMaster+"/api",
 			data: {
 				specID: activeElement.specFileUrl.substr(1)
 			},
