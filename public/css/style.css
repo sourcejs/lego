@@ -159,7 +159,11 @@ body {
 	}
 
 .lego_widget_ul-i {
-	line-height: 24px;
+	position: relative;
+	padding-right: 20px;
+	padding-bottom: 5px;
+
+	font-size: 12px;
 	}
 
 .lego_widget_ul-i .lego_lk {
@@ -168,11 +172,12 @@ body {
 
 .lego_widget_ul-i .lego_ic {
 	display: none;
+	position: absolute;
+	top: -1px; right: 0;
 	}
 
 .lego_widget_ul-i:hover .lego_ic_close {
-	display: inline-block;
-	vertical-align: middle;
+	display: block;
 	}
 
 .lego_widget_form {
@@ -185,7 +190,7 @@ body {
 
 .lego_form-i_w {
 	clear: left;
-	margin-bottom: 5px;
+	margin-bottom: 10px;
 	}
 
 .lego_form-i_w .lego_it,
