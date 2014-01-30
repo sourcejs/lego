@@ -7,7 +7,7 @@ var parsedTree = {}
 
 
 var specsMaster = globalOptions.specsMaster.current;
-$.ajax('http://okp.me/api', {
+$.ajax(specsMaster+'/api', {
     data: {
         task: 'getCats',
         specID: '',
