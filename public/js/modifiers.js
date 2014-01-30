@@ -154,6 +154,18 @@ var modifiers = (function() {
 
 	}
 
+	function saveBlockSettings( activeElement ) {
+		var userSection = $('input[name="variations"]:checked').closest('.lego_form-i_w').index();
+
+		activeElement.node.setAttribute('data-section', userSection);
+	}
+
+	function loadBlockSettings( activeElement ) {
+		var getSectionIndex = activeElement.node.getAttribute('data-section') || 0;
+
+		$('.js-variations .lego_form-i_w').eq(getSectionIndex).find('input').prop('checked', true);
+	}
+
 	return {
 
 		init: function( callback ) {
@@ -162,36 +174,61 @@ var modifiers = (function() {
 			return this;
 		},
 
-		lookForHTMLMod: function() {
+		lookForHTMLMod: function( node ) {
 			if ( !allModifiers ) {
 				setTimeout(function() {
 					getCSSMod( function() {
-						modifiers.lookForHTMLMod();
+						modifiers.lookForHTMLMod( node );
 					} )
 				}, 1000)
 				return this;
 			}
 
-			activeElement = {};
+			if (node === undefined) {
+				activeElement = {};
 
-			activeElement.node = document.querySelector('[data-active="true"]');
-			activeElement.specFileUrl = activeElement.node.getAttribute('data-url');
+				activeElement.node = document.querySelector('[data-active="true"]');
+				activeElement.specFileUrl = activeElement.node.getAttribute('data-url');
 
-			getHTMLpart(activeElement, function(data) {
+				getHTMLpart(activeElement, function(data) {
 
-				var innerActiveElement = activeElement;
-				modifiers.cleanModificationData();
-				activeElement = innerActiveElement;
+					var innerActiveElement = activeElement;
+					modifiers.cleanModificationData();
+					activeElement = innerActiveElement;
 
-				searchVariations(data);
+					searchVariations(data);
 
-				// Project className
-				activeElement.baseClass = data.className;
+					// Project className
+					activeElement.baseClass = data.className;
 
-				searchInBlock( activeElement );
+					searchInBlock( activeElement );
 
-				// save !!!
-			})
+					saveBlockSettings( activeElement );
+				})
+
+			} else {
+				activeElement = {};
+
+				activeElement.node = node;
+				activeElement.specFileUrl = activeElement.node.getAttribute('data-url');
+
+				getHTMLpart(activeElement, function(data) {
+
+					var innerActiveElement = activeElement;
+					modifiers.cleanModificationData();
+					activeElement = innerActiveElement;
+
+					searchVariations(data);
+
+					// Project className
+					activeElement.baseClass = data.className;
+
+					searchInBlock( activeElement );
+
+					loadBlockSettings( activeElement );
+				})
+			}
+
 
 			return this;
 		},
@@ -216,10 +253,14 @@ var modifiers = (function() {
 			$('.js-modificators .lego_form-i').empty();
 
 			activeElement = false;
+
+			return this;
 		},
 
 		checkUsedAttributes: function() {
 			checkUsedAttributes( activeElement );
+
+			return this;
 		},
 
 		updateDOMElem: function() {
@@ -227,6 +268,14 @@ var modifiers = (function() {
 
 			activeElement.node = document.querySelector('[data-active="true"]');
 			activeElement.specFileUrl = activeElement.node.getAttribute('data-url');
+
+			return this;
+		},
+
+		saveCurrentBlockSettings: function() {
+			saveBlockSettings( activeElement );
+
+			return this;
 		}
 	}
 
@@ -245,8 +294,10 @@ $(function() {
 				activeUrl = $activeNode.attr('data-url');
 
             modifyElement(activeUrl, activeId, $(this).attr('data-mod'));
-            modifiers.updateDOMElem();
-            modifiers.checkUsedAttributes();
+            modifiers
+            	.updateDOMElem()
+            	.checkUsedAttributes()
+            	.saveCurrentBlockSettings();
 
 		} else {
 			var modClass = $(this).attr('data-mod');
