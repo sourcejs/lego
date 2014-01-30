@@ -207,11 +207,7 @@ var modifiers = (function() {
 				})
 
 			} else {
-				activeElement = {};
-
-				activeElement.node = node;
-				activeElement.specFileUrl = activeElement.node.getAttribute('data-url');
-
+            	modifiers.updateDOMElem();
 				getHTMLpart(activeElement, function(data) {
 
 					var innerActiveElement = activeElement;

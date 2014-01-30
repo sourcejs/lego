@@ -169,7 +169,7 @@ $("#current-elements").on("click", ".lego_lk", function(e) {
     ;
 
     switchActive(addedElements[origin][num]);
-//    modifiers.lookForHTMLMod(activeElement);
+    modifiers.lookForHTMLMod(activeElement);
 });
 
 $("#current-elements").on("click", ".lego_ic_close", function() {
