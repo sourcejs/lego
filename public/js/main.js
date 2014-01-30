@@ -136,6 +136,8 @@ var insertChosen = function(targetContainer){
         $(".lego_layer").addClass('__hide-bg');
     }
 
+    $("#current-elements .lego_lk").removeClass("__active");
+    $("#current-elements .lego_widget_ul-i:last-child .lego_lk").addClass('__active');
     clearChosen();
 };
 
@@ -152,7 +154,8 @@ $(".lego_search-result").on("click", ".lego_search-result_h", function(){
 
 $("#current-elements").on("click", ".lego_lk", function(e) {
     e.preventDefault();
-
+    $("#current-elements .lego_lk").removeClass("__active");
+    $(this).addClass('__active');
     var parent = $(this).parent()
         , origin = parent.data("origin")
         , num = parent.data("num")

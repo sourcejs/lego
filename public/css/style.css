@@ -11,10 +11,13 @@ body {
 	color: #ddd;
 	text-decoration: none;
 }
-
 .lego_lk:hover {
 	text-decoration: underline;
 }
+
+.lego_lk.__active {
+    color:#EB722E;
+    }
 
 .cf:before,
 .cf:after {
@@ -410,4 +413,8 @@ body {
 
 .editable {
     box-shadow: 0 0 10px rgba(255,0,0,.5);
+    }
+
+[data-active="true"] {
+    box-shadow:0 0 10px #EB722E;
     }
