@@ -1,7 +1,6 @@
 // GLOBALS
 var
     possibleTargets = ['other', 'navbar', 'tertiary', 'secondary', 'primary']
-//    , possibleTargets = ['other', 'navbar', 'toolbar', 'tertiary', 'secondary', 'narrow', 'wide', 'single']
     , activeTargets = []
     , tempHTML
     , chosenNavigation
@@ -37,25 +36,12 @@ $('#save-html').on('click', function(e){
     });
 });
 
-//  Расположение определяется степенью двойки:
-//  0 - overlay (исключение)
-//  1 - single (primary)
-//  2 - wide (primary)
-//  4 - narrow (primary)
-//  8 - secondary
-//  16 - tertiary
-//  32 - toolbar
-//  64 - navbar
-//  128 - other
-
-//  NEW:
 //  0 или пусто - overlay
 //  1 - primary
 //  2 - secondary
 //  4 - tertiary
 //  8 - navbar
 //  16 - other
-
 
 var parseTargets = function(targets) {
     var result = [];
@@ -64,6 +50,7 @@ var parseTargets = function(targets) {
             result.push(possibleTargets[i]);
         }
     }
+    result.push('overlay');
     return result;
 };
 
@@ -152,134 +139,110 @@ var insertChosen = function(targetContainer){
     clearChosen();
 };
 
-$(document).ready(function(){
-
-    $(".lego_toggler").on("click", ".lego_toggle_i", function(){
-        $(this).parent().children().each( function() {
-            $(this).toggleClass("__active")
-        });
-        $('.lego_search-result').toggleClass("__list");
+$(".lego_toggler").on("click", ".lego_toggle_i", function(){
+    $(this).parent().children().each( function() {
+        $(this).toggleClass("__active")
     });
+    $('.lego_search-result').toggleClass("__list");
+});
 
-    $(".lego_search-result").on("click", ".lego_search-result_h", function(){
-        $(this).parent().toggleClass("__closed");
-    });
+$(".lego_search-result").on("click", ".lego_search-result_h", function(){
+    $(this).parent().toggleClass("__closed");
+});
 
-    $("#current-elements").on("click", ".lego_lk", function(e) {
-        e.preventDefault();
+$("#current-elements").on("click", ".lego_lk", function(e) {
+    e.preventDefault();
 
-        var parent = $(this).parent()
-            , origin = parent.data("origin")
-            , num = parent.data("num")
+    var parent = $(this).parent()
+        , origin = parent.data("origin")
+        , num = parent.data("num")
+    ;
 
-        switchActive(addedElements[origin][num])
-    });
+    switchActive(addedElements[origin][num]);
+});
 
-    $("#current-elements").on("click", ".lego_ic_close", function() {
+$("#current-elements").on("click", ".lego_ic_close", function() {
 
-        var parent = $(this).parent()
-            , origin  = parent.data("origin")
-            , num = parent.data("num")
-        ;
+    var parent = $(this).parent()
+        , origin  = parent.data("origin")
+        , num = parent.data("num")
+    ;
 
-        modifyElement(origin, num);
-    });
+    modifyElement(origin, num);
+});
 
-//    $("#current-elements").on("mouseenter", ".lego_widget_ul-i", function() {
-//        console.log("hovered")
-//        var origin = $(this).data("origin");
-//        var parsedOrigin = origin.split("[");
-//        parsedOrigin[1] = parsedOrigin[1].split("]")[0];
-//        addedElements[parsedOrigin[0]][parsedOrigin[1]].addClass('__highlighted');
-//    });
-//
-//    $("#current-elements").on("mouseleave", ".lego_widget_ul-i", function() {
-//        var origin = $(this).data("origin");
-//        var parsedOrigin = origin.split("[");
-//        parsedOrigin[1] = parsedOrigin[1].split("]")[0];
-//        addedElements[parsedOrigin[0]][parsedOrigin[1]].removeClass('__highlighted');
-//    });
+$(".lego_layer").on("click", ".editable", function(){
+    insertChosen(this);
+});
 
-    $(".lego_layer").on("click", ".editable", function(){
-        insertChosen(this);
-    });
+$("#lego_search-result").on("click", ".lego_search-result_i", function(e){
+    chosenNavigation = $(this);
+    e.preventDefault();
 
-    $("#lego_search-result").on("click", ".lego_search-result_i", function(e){
-        chosenNavigation = $(this);
-        e.preventDefault();
+    var url = chosenNavigation.attr('href').substring(1);
+    var specsMaster = globalOptions.specsMaster.current;
+    $.ajax(specsMaster+'/api', {
+        data: {
+            specID: url
+        },
+        method: 'POST',
+        success: function (data) {
 
-        var url = chosenNavigation.attr('href').substring(1);
-        var specsMaster = globalOptions.specsMaster.current;
-        $.ajax(specsMaster+'/api', {
-            data: {
-                specID: url
-            },
-            method: 'POST',
-            success: function (data) {
+            if (data['sections'] !== undefined ) {
+                for (k in data['sections'][0]) {
+                    tempHTML = data['sections'][0][k];
+                }
+            } else {
+                $('.editable').removeClass('editable');
+                console.log('No html data there!');
+            }
 
-				if (data['sections'] !== undefined ) {
-					for (k in data['sections'][0]) {
-						tempHTML = data['sections'][0][k];
-                        console.log('tempHTML',tempHTML);
-					}
-				} else {
-					$('.editable').removeClass('editable');
-					console.log('No html data there!');
-				}
-
-                //element always have minimum of one target
-                if (activeTargets.length < 3) {
-                    for(var i=0; i < activeTargets.length; i++){
-                        if (activeTargets[i].is(':visible')) {
-                            insertChosen(activeTargets[i]);
-                        }
+            //element always have minimum of one target
+            if (activeTargets.length < 3) {
+                for(var i=0; i < activeTargets.length; i++){
+                    if (activeTargets[i].is(':visible')) {
+                        insertChosen(activeTargets[i]);
                     }
                 }
             }
-        });
-
-        if (activeTargets.length) {
-            for (var i = 0; i < activeTargets.length; i++) {
-                activeTargets[i].removeClass('editable');
-            }
-            activeTargets = [];
         }
-
-        var targets = $(this)[0].dataset.target
-            , results = (targets == 0) ? 0 : parseTargets(targets)
-            ;
-
-        for (var j = 0; j < results.length; j++) {
-            var elem = $('[data-target="' + results[j] + '"]');
-            activeTargets.push(elem);
-            elem.addClass('editable');
-        }
-
-        var overlay = $('[data-target="overlay"]');
-
-        overlay.addClass('editable');
-        activeTargets.push(overlay);
-
     });
 
-    $('.js-layouts-list').on('click', '.lego_search-result_i', function(e){
-        e.preventDefault();
+    if (activeTargets.length) {
+        for (var i = 0; i < activeTargets.length; i++) {
+            activeTargets[i].removeClass('editable');
+        }
+        activeTargets = [];
+    }
 
-        var layerMode = $(this).find('.lego_search-result_n').data('layout');
+    var targets = $(this)[0].dataset.target
+        , results = parseTargets(targets)
+    ;
 
-        $('.lego_layer')
-            .removeClass('__default __one-column __two-column __three-column __hide-bg')
-            .addClass('__' + layerMode);
+    for (var j = 0; j < results.length; j++) {
+        var elem = $('[data-target="' + results[j] + '"]');
+        activeTargets.push(elem);
+        elem.addClass('editable');
+    }
+});
 
-    });
+$('.js-layouts-list').on('click', '.lego_search-result_i', function(e){
+    e.preventDefault();
+
+    var layerMode = $(this).find('.lego_search-result_n').data('layout');
 
     $('.lego_layer')
-        .on('click', '[data-target]', function( e ) {
+        .removeClass('__default __one-column __two-column __three-column __hide-bg')
+        .addClass('__' + layerMode);
 
-            $('[contenteditable]').attr('contenteditable', 'false');
-
-            var clickedEl = getTextNodesIn( e.target).parent();
-            clickedEl.attr('contenteditable', 'true');
-        });
 });
+
+$('.lego_layer')
+    .on('click', '[data-target]', function( e ) {
+
+        $('[contenteditable]').attr('contenteditable', 'false');
+
+        var clickedEl = getTextNodesIn( e.target).parent();
+        clickedEl.attr('contenteditable', 'true');
+    });
 
