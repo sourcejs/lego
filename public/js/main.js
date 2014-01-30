@@ -19,7 +19,7 @@ $('#save-html').on('click', function(e){
         data: data,
         success:function( data ) {
             if (data.success) {
-                $('#save-html').after('<div><a class="lego_lk" href="/s/'+data.name+'">HTML saved:'+data.name+'</a></div>')
+                $('#save-html').after('<li><a class="lego_lk" href="/s/'+data.name+'">HTML saved:'+data.name+'</a></li>')
             }
         }
     });
@@ -129,7 +129,7 @@ $(document).ready(function(){
         addedElements[id][count] = currentHTML;
 
         console.log(addedElements);
-        $(this).append(currentHTML);        
+        $(this).append(currentHTML);
         $(".lego_layer").addClass('__hide-bg');
     });
 
