@@ -91,14 +91,18 @@ var switchActive = function(current) {
     if (activeElement != undefined) activeElement.attr('data-active', 'false');
     current.attr('data-active', 'true');
     activeElement = current;
-//    activeElement.data('editable', 'true');
 }
 
-var killElement = function (url, num) {
+// html - optional new html code
+var modifyElement = function (url, num, html) {
     addedElements[url][num].remove();
-    addedElements[url][num] = null;
 
-    $(".lego_widget_ul-i[data-origin='"+url+"'][data-num='"+num+"']").remove();
+    if (html === undefined) {
+        addedElements[url][num] = null;
+        $(".lego_widget_ul-i[data-origin='"+url+"'][data-num='"+num+"']").remove();
+    } else {
+        addedElements[url][num] = $(html);
+    }
 };
 
 var clearChosen = function(){
@@ -170,7 +174,7 @@ $(document).ready(function(){
             , num = parent.data("num")
         ;
 
-        killElement(origin, num);
+        modifyElement(origin, num);
     });
 
 //    $("#current-elements").on("mouseenter", ".lego_widget_ul-i", function() {
