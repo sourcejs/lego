@@ -2,11 +2,10 @@
 var parsedTree = {}
     , parsed = false
     , template = ''
+    , specsMaster = globalOptions.specsMaster.current
 ;
 /* /Globals */
 
-
-var specsMaster = globalOptions.specsMaster.current;
 $.ajax(specsMaster+'/api', {
     data: {
         task: 'getCats',
@@ -27,6 +26,12 @@ $.ajax(specsMaster+'/api', {
         });
     }
 });
+
+Handlebars.registerHelper("imageUrl", function(url) {
+    url = url.toString();
+    return specsMaster + "/" + url + "/thumbnail.png";
+});
+
 
 var fuzzySearch = function(q, allData) {
     var result = {}
