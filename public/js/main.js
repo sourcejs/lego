@@ -128,11 +128,11 @@ var insertChosen = function(targetContainer){
         addedElements[url][count] = currentHTML;
 
         switchActive(currentHTML);
+        $(target).append(currentHTML);
 
         // Parse inserted elem
         modifiers.lookForHTMLMod();
 
-        $(target).append(currentHTML);
         $(".lego_layer").addClass('__hide-bg');
     }
 
