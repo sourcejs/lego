@@ -1,53 +1,30 @@
-// GLOBAL
+/* Globals */
 var parsedTree = {}
     , parsed = false
-    , template = '';
-// /GLOBAL
+    , template = ''
+;
+/* /Globals */
 
-var filterValidSpecs = function(pagesTree) {
-
-    var cat
-        , base = pagesTree["base"]
-        , project = pagesTree["project"]
-    ;
-
-    for (spec in base) {
-
-        if ((base[spec]["specFile"] != undefined)
-            && (base[spec]["specFile"]["category"] != undefined)) {
-            cat = base[spec]["specFile"]["category"];
-            if (!parsedTree[cat]) parsedTree[cat] = {};
-            parsedTree[cat][spec] = base[spec]["specFile"];
-            delete parsedTree[cat][spec]["category"];
-        }
-    }
-
-    for (spec in project) {
-        if ((project[spec]["specFile"] != undefined)
-            && (project[spec]["specFile"]["category"] != undefined)) {
-            cat = project[spec]["specFile"]["category"];
-            if (!parsedTree[cat]) parsedTree[cat] = {};
-            parsedTree[cat][spec] = project[spec]["specFile"];
-            delete parsedTree[cat][spec]["category"];
-        }
-    }
-    parsed = true;
-
-    $.ajax({
-        url: '/views/search-result-list.html',
-        success: function(data) {
-            template = Handlebars.compile(data);
-            $("#lego_search-result").html(template(parsedTree));
-        }
-    });
-
-};
 
 var specsMaster = globalOptions.specsMaster.current;
-$.ajax({
-    url: specsMaster+'/data/pages_tree.json',
-    success: function(data) {
-        filterValidSpecs(data);
+$.ajax(specsMaster+'/api', {
+    data: {
+        task: 'getCats',
+        specID: '',
+        section: 2
+    },
+    method: 'POST',
+    success: function (data) {
+        parsedTree = data;
+        parsed = true;
+
+        $.ajax({
+            url: '/views/search-result-list.html',
+            success: function(d) {
+                template = Handlebars.compile(d);
+                $("#lego_search-result").html(template(parsedTree));
+            }
+        });
     }
 });
 

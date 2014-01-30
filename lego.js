@@ -3,6 +3,7 @@ var express = require('express')
     , fs = require('fs')
     , mustache = require('mustache')
     , gzippo = require('gzippo')
+    , sh = require('shorthash')
     , colors = require('colors');
 
 /* Globals */
@@ -20,6 +21,15 @@ global.opts.specsMaster.current = global.MODE === 'production' ? global.opts.spe
 
 
 /* Route for static files */
+
+//redirecting resource calls to master
+var staticDirs = ['/res/*','/data/res/*'];
+staticDirs.map(function(item) {
+    app.get(item, function(req, res) {
+       res.redirect(global.opts.specsMaster.current + req.url, 301);
+    });
+});
+
 app.set('route', __dirname + '/public');
 app
 	.use(gzippo.staticGzip(app.get('route')))
@@ -68,11 +78,71 @@ global.app.use(errorHandler);
 
 
 /* Save working html */
-app.get('/screenshot', function (req, res) {
+app.get('/save', function (req, res) {
+    var data = req.query.html;
 
+    var outputDir = './public/saved';
+
+    var name = sh.unique(data);
+
+    var go = function() {
+        fs.writeFile(outputDir+"/"+name+".html", data, function(err) {
+            if(err){
+                console.log(err);
+                res.send({
+                    success: false
+                });
+            }
+
+            res.send({
+                success: true,
+                name: name
+            });
+        });
+    };
+
+    fs.readdir(outputDir,function(e){
+        if(!e || (e && e.code === 'EEXIST')){
+            go();
+        } else if (e.code === 'ENOENT') {
+            fs.mkdir(outputDir);
+            go();
+        } else {
+            console.log(e);
+        }
+    });
 });
 
 
+/* Share link */
+app.get('/s/:page', function (req, res) {
+    var data = req.params.page;
+
+    var indexPage = fs.readFileSync(__dirname+'/public/views/index.html', "utf8");
+    var savedHTML = fs.readFileSync(__dirname+'/public/saved/'+data+'.html', "utf8");
+
+    var htmlToSend = mustache.to_html(indexPage, {
+        legoLayer: savedHTML,
+        globalOptions: JSON.stringify(global.opts)
+    });
+
+    res.send(htmlToSend);
+});
+
+/* Clean html link */
+app.get('/clean/:page', function (req, res) {
+    var data = req.params.page;
+
+    var indexPage = fs.readFileSync(__dirname+'/public/views/clean.html', "utf8");
+    var savedHTML = fs.readFileSync(__dirname+'/public/saved/'+data+'.html', "utf8");
+
+    var htmlToSend = mustache.to_html(indexPage, {
+        legoLayer: savedHTML,
+        globalOptions: JSON.stringify(global.opts)
+    });
+
+    res.send(htmlToSend);
+});
 
 if (!module.parent) {
     var port = global.opts.common.port;

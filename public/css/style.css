@@ -232,11 +232,11 @@ body {
 	}
 
 .lego_ic.lego_ic_close {
-	background: url(../i/close.png);
+	background: url(/i/close.png);
 	}
 
 	.lego_ic.lego_ic_close:hover {
-		background: url(../i/close_h.png);
+		background: url(/i/close_h.png);
 		}
 
 /* /right column
