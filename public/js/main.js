@@ -98,6 +98,7 @@ var modifyElement = function (url, num, html) {
 
         addedElements[url][num] = jHTML;
         activeElement = addedElements[url][num];
+//        modifiers.lookForHTMLMod(activeElement);
     }
 };
 
