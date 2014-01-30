@@ -215,9 +215,18 @@ $("#lego_search-result").on("click", ".lego_search-result_i", function(e){
             }
 
             //element always have minimum of one target
+
+            console.log(activeTargets);
+
             if (activeTargets.length < 3) {
                 for(var i=0; i < activeTargets.length; i++){
                     if (activeTargets[i].is(':visible')) {
+                        insertChosen(activeTargets[i]);
+                    }
+                }
+            } else if ($('[data-target="overlay"]:visible').length !== 0) {
+                for(var i=0; i < activeTargets.length; i++){
+                    if (activeTargets[i].selector === '[data-target="overlay"]') {
                         insertChosen(activeTargets[i]);
                     }
                 }
