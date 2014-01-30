@@ -56,33 +56,39 @@ var modifiers = (function() {
 
 		var allSelectors = activeElement.node.querySelectorAll('[class]');
 
+		// По всем селекторам, содержащим класс
 		for (var currentSelector = 0; currentSelector < allSelectors.length; currentSelector++) {
 			var currentSelectorClassList = allSelectors[ currentSelector ].classList;
 			usedModifiers = [];
 
+			// перебор классов в класслисте
 			for (var curClassList = 0; curClassList < currentSelectorClassList.length; curClassList++) {
 
+				// Выбираются только те, которые принадлежат подмножеству проектного класса
 				if ( currentSelectorClassList[curClassList].indexOf(activeElement.baseClass) !== -1) {
 
-					if (usedElements.indexOf(currentSelectorClassList[curClassList]) !== -1  ) continue;
+					var currElem = currentSelectorClassList[curClassList];
 
-					usedElements.push( currentSelectorClassList[curClassList] )
+					if ((allModifiers[ currElem ])) {
 
-					if ((allModifiers[currentSelectorClassList[curClassList]])) {
+						for (var currentModifier = 0; currentModifier < allModifiers[ currElem ].length; currentModifier++) {
 
-						for (var currentModifier = 0; currentModifier < allModifiers[currentSelectorClassList[curClassList]].length; currentModifier++) {
+							// если такой элемент уже использовался, выйти
+							if (usedElements.indexOf( currElem + allModifiers[currElem][currentModifier] ) !== -1  ) continue;
+							usedElements.push( currElem + allModifiers[currElem][currentModifier] )
+
+							if ( activeElement.node.querySelector('.' + currElem + '.' + allModifiers[currElem][currentModifier]) !== null ) {
+								usedModifiers.push( allModifiers[currElem][currentModifier] );
+							}
+
 							var $template = $(template);
 							$template.find('input')
-								.attr('data-elem', currentSelectorClassList[curClassList])
+								.attr('data-elem', currElem )
 								.attr('data-mod', allModifiers[currentSelectorClassList[curClassList]][currentModifier]);
 
-							$template.find('label').append(allModifiers[currentSelectorClassList[curClassList]][currentModifier]);
+							$template.find('label').append(currElem + ' ' + allModifiers[currElem][currentModifier]);
 							$wrap.append( $template )
 
-						}
-					} else {
-						if ( currentSelectorClassList[curClassList].indexOf('__') !== -1 ) {
-							usedModifiers.push( currentSelectorClassList[curClassList] );
 						}
 					}
 				}
@@ -90,6 +96,11 @@ var modifiers = (function() {
 
 			for (var currentModifier = 0; currentModifier < usedModifiers.length; currentModifier++) {
 				$('[data-mod=' + usedModifiers[currentModifier] + ']').first().prop('checked', true);
+			}
+
+			if (usedModifiers.length) {
+				var existModifiers = usedModifiers.join(' ');
+				allSelectors[ currentSelector ].setAttribute('data-old-mod', existModifiers);
 			}
 		}
 
@@ -109,7 +120,6 @@ var modifiers = (function() {
 		// Sections
 		for (var sectionIndex = 0; sectionIndex < data.sections.length; sectionIndex++) {
 			for (var sectionName in data.sections[sectionIndex]) {
-				//console.log('mod tpl ' + sectionName);
 
 				var $template = $(template);
 				$template.find('input')
@@ -154,20 +164,17 @@ var modifiers = (function() {
 
 			activeElement = {};
 
-			activeElement.node = document.querySelector('.active-editable');
-            if (activeElement.node) {
-                activeElement.specFileUrl = activeElement.node.getAttribute('data-url');
+			activeElement.node = document.querySelector('[data-active="true"]');
+			activeElement.specFileUrl = activeElement.node.getAttribute('data-url');
 
-                getHTMLpart(activeElement, function(data) {
-                    searchVariations(data);
+			getHTMLpart(activeElement, function(data) {
+				searchVariations(data);
 
-                    // Project className
-                    activeElement.baseClass = data.className;
+				// Project className
+				activeElement.baseClass = data.className;
 
-                    searchInBlock( activeElement );
-                })
-            }
-
+				searchInBlock( activeElement );
+			})
 
 			return this;
 		},
@@ -201,7 +208,7 @@ $(function() {
 
 	$('body').on('click', '.lego_checkbox', function() {
 
-		var $activeNode = $('.active-editable');
+		var $activeNode = $('[data-active="true"]');
 
 		if ( $(this).attr('name') == 'variations' ) {
 
@@ -210,23 +217,23 @@ $(function() {
 				activeId = $activeNode.attr('data-id'),
 				activeUrl = $activeNode.attr('data-url')
 
-			//$('.active-editable').remove();
-			killElement(activeUrl, activeId)
-
+			modifyElement(activeUrl, activeId, $(this).attr('data-mod'));
+/*
 			$parentSelector.append( $insertedElem );
-			$insertedElem.addClass('active-editable');
+			$insertedElem.addClass('[data-active="true"]');*/
 
 		} else {
 			var modClass = $(this).attr('data-mod');
+			var blockClass = $(this).attr('data-elem');
 
 			if ( $(this).is(':checked') ) {
-				$activeNode.find('[' + modClass + ']').each(function() {
-					$(this).prop('checked', false);
-				})
+				if ( $activeNode.find('[data-old-mod*=' + modClass + ']').length ) {
+					$activeNode.find('.' + blockClass + '[data-old-mod*=' + modClass + ']').addClass(modClass);
+				} else {
+					$activeNode.find('.' + blockClass).addClass(modClass)
+				}
 			} else {
-				$activeNode.find('[' + modClass + ']').each(function() {
-					$(this).prop('checked', true);
-				})
+				$activeNode.find('.' + blockClass).removeClass(modClass).attr('data-mod')
 			}
 		}
 	})
