@@ -334,13 +334,15 @@ body {
 /* default */
 
 .lego_layer.__default .lego_content{
-	text-align: center;
-	padding-top: 100px;
+	display: inline-block;
+	width: auto;
+
 	background: #fff;
 	}
-.lego_layer.__default .lego_content_dec {
-	display: inline-block;
 
+.lego_layer.__default .lego_content_dec {
+	text-align: center;
+	padding-top: 100px;
 	}
 
 /* two column layout */
