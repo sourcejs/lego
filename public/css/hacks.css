@@ -8,12 +8,15 @@
 .toolbar .layer_ovr,
 .toolbar + .layer_ovr {
 	display: none;
-}
+	}
 
 .lego_content .toolbar {
 	margin-left: -288px;
 	left: 16px;
-}
+	}
 
+.cardList_li {
+	margin-left: 22px;
+	}
 /* /Cosmetic styles just for demo
 ---------------------------------------------------------------------------------- */
