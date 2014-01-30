@@ -5,5 +5,10 @@
 	right: 5px;
 	}
 
+.toolbar .layer_ovr,
+.toolbar + .layer_ovr {
+	display: none;
+}
+
 /* /Cosmetic styles just for demo
 ---------------------------------------------------------------------------------- */
