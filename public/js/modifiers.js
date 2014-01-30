@@ -212,9 +212,9 @@ $(function() {
 
 		if ( $(this).attr('name') == 'variations' ) {
 
-			var $parentSelector = $activeNode.parent(),
-				$insertedElem = $($(this).attr('data-mod')),
-				activeId = $activeNode.attr('data-id'),
+			/*var $parentSelector = $activeNode.parent(),
+				$insertedElem = $($(this).attr('data-mod')), */
+			var activeId = $activeNode.attr('data-id'),
 				activeUrl = $activeNode.attr('data-url')
 
 			modifyElement(activeUrl, activeId, $(this).attr('data-mod'));
