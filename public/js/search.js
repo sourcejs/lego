@@ -5,7 +5,9 @@ var parsedTree = {}
 ;
 /* /Globals */
 
-$.ajax('http://localhost:8080/api', {
+
+var specsMaster = globalOptions.specsMaster.current;
+$.ajax(specsMaster+'/api', {
     data: {
         task: 'getCats',
         specID: '',
