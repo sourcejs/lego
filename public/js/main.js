@@ -88,9 +88,10 @@ $('#export-img').on('click', function(e){
 });
 
 var switchActive = function(current) {
-    if (activeElement != undefined) activeElement.removeClass('active-editable');
+    if (activeElement != undefined) activeElement.attr('data-active', 'false');
+    current.attr('data-active', 'true');
     activeElement = current;
-    activeElement.addClass('active-editable');
+//    activeElement.data('editable', 'true');
 }
 
 var killElement = function (url, num) {
@@ -167,12 +168,14 @@ $(document).ready(function(){
 
             addedElements[url][count] = currentHTML;
 
+            $(this).append(currentHTML);
+
             switchActive(currentHTML);
 
             // Parse inserted elem
             modifiers.lookForHTMLMod();
 
-            $(this).append(currentHTML);
+
             $(".lego_layer").addClass('__hide-bg');
         }
         //Clearing chosen
@@ -196,7 +199,6 @@ $(document).ready(function(){
 				if (data['sections'] !== undefined ) {
 					for (k in data['sections'][0]) {
 						tempHTML = data['sections'][0][k];
-                        console.log(tempHTML);
 					}
 				} else {
 					$('.editable').removeClass('editable');
