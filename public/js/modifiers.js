@@ -214,10 +214,10 @@ $(function() {
 
 			/*var $parentSelector = $activeNode.parent(),
 				$insertedElem = $($(this).attr('data-mod')), */
-			var activeId = $activeNode.attr('data-id'),
-				activeUrl = $activeNode.attr('data-url')
+			var activeId = $activeNode.attr('data-num'),
+				activeUrl = $activeNode.attr('data-url');
 
-			modifyElement(activeUrl, activeId, $(this).attr('data-mod'));
+            modifyElement(activeUrl, activeId, $(this).attr('data-mod'));
 /*
 			$parentSelector.append( $insertedElem );
 			$insertedElem.addClass('[data-active="true"]');*/

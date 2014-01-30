@@ -95,13 +95,20 @@ var switchActive = function(current) {
 
 // html - optional new html code
 var modifyElement = function (url, num, html) {
-    addedElements[url][num].remove();
 
     if (html === undefined) {
+        addedElements[url][num].remove();
         addedElements[url][num] = null;
         $(".lego_widget_ul-i[data-origin='"+url+"'][data-num='"+num+"']").remove();
     } else {
-        addedElements[url][num] = $(html).attr("data-url", url).attr("data-num", num);
+        var wrapper = addedElements[url][num].wrap("<div></div>").parent()
+            , jHTML = $(html).attr("data-url", url).attr("data-num", num)
+        ;
+
+        addedElements[url][num].remove();
+
+        wrapper.append(jHTML).contents().unwrap('<div></div>');
+        addedElements[url][num] = jHTML;
     }
 };
 
