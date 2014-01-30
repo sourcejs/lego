@@ -47,8 +47,7 @@ var modifiers = (function() {
 
 			var modValue = $(this).attr('data-mod'),
 				elemValue = $(this).attr('data-elem'),
-				affectedNodes = activeElement.node.querySelectorAll('.'+modValue+'.'+modValue),
-				usedModifiers = []
+				affectedNodes = activeElement.node.querySelectorAll('.'+elemValue+'.'+modValue);
 
 			$(this).prop('checked', false);
 
@@ -223,6 +222,13 @@ var modifiers = (function() {
 
 		checkUsedAttributes: function() {
 			checkUsedAttributes( activeElement );
+		},
+
+		updateDOMElem: function() {
+			activeElement = {};
+
+			activeElement.node = document.querySelector('[data-active="true"]');
+			activeElement.specFileUrl = activeElement.node.getAttribute('data-url');
 		}
 	}
 
@@ -241,6 +247,7 @@ $(function() {
 				activeUrl = $activeNode.attr('data-url');
 
             modifyElement(activeUrl, activeId, $(this).attr('data-mod'));
+            modifiers.updateDOMElem();
             modifiers.checkUsedAttributes();
 
 		} else {
