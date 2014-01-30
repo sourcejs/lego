@@ -82,18 +82,22 @@ $(document).ready(function(){
         $(this).parent().toggleClass("__closed");
     });
 
-    $("#current-elements").on("click", ".lego_widget_ul-i", function() {
-        var origin = $(this).data("origin")
+    $("#current-elements").on("click", ".lego_lk", function(e) {
+        e.preventDefault();
+    });
+
+    $("#current-elements").on("click", ".lego_ic_close", function(e) {
+        var parent = $(this).parent();
+            origin = parent.data("origin")
             , idArr = origin.split("/")[1]
             , id = idArr.split("[");
 
         id[1] = id[1].split("]")[0];
 
-        $(this).remove();
+        parent.remove();
 
         addedElements[id[0]][id[1]].remove();
         addedElements[id[0]][id[1]] = null;
-
     });
 
 //    $("#current-elements").on("mouseenter", ".lego_widget_ul-i", function() {
@@ -122,9 +126,9 @@ $(document).ready(function(){
         if (!addedElements[id]) addedElements[id] = [];
         count = addedElements[id].length;
 
-        $("#current-elements").append("<li class='lego_widget_ul-i' data-origin = '" + url + "[" + count + "]'>"+ id + "</li>");
+        $("#current-elements").append("<li class='lego_widget_ul-i' data-origin = '" + url + "[" + count + "]'><a class='lego_lk' href = '" + url + "'>" + id + "</a><span class='lego_ic lego_ic_close'></span></li>");
 
-        var currentHTML = $(tempHTML()).attr("id", id + "["+count+"]");
+        var currentHTML = $(tempHTML()).attr("data-url", url);
 
         addedElements[id][count] = currentHTML;
 
