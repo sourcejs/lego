@@ -2,7 +2,8 @@
 var possibleTargets = ['other', 'navbar', 'toolbar', 'tertiary', 'secondary', 'narrow', 'wide', 'single']
     , activeTargets = []
     , tempHTML
-    , currentElement
+    , chosenNavigation
+    , activeElement
     , addedElements = {}
     ;
 // /GLOBALS
@@ -84,6 +85,16 @@ $(document).ready(function(){
 
     $("#current-elements").on("click", ".lego_lk", function(e) {
         e.preventDefault();
+
+        var parent = $(this).parent();
+
+        origin = parent.data("origin")
+            , idArr = origin.split("/")[1]
+            , id = idArr.split("[");
+
+        id[1] = id[1].split("]")[0];
+
+        activeElement = addedElements[id[0]][id[1]];
     });
 
     $("#current-elements").on("click", ".lego_ic_close", function(e) {
@@ -117,7 +128,8 @@ $(document).ready(function(){
 
     $(".lego_layer").on("click", ".editable", function(){
 
-        var path = currentElement[0]["href"].split('/')
+        var path = chosenNavigation[0]["href"].split('/')
+            , name = chosenNavigation.text()
             , id = path[path.length-1]
             , url = path[path.length-2] + "/" + path[path.length-1]
             , count
@@ -126,7 +138,7 @@ $(document).ready(function(){
         if (!addedElements[id]) addedElements[id] = [];
         count = addedElements[id].length;
 
-        $("#current-elements").append("<li class='lego_widget_ul-i' data-origin = '" + url + "[" + count + "]'><a class='lego_lk' href = '" + url + "'>" + id + "</a><span class='lego_ic lego_ic_close'></span></li>");
+        $("#current-elements").append("<li class='lego_widget_ul-i' data-origin = '" + url + "[" + count + "]'><a class='lego_lk' href = '" + url + "'>" + name + "</a><span class='lego_ic lego_ic_close'></span></li>");
 
         var currentHTML = $(tempHTML).attr("data-url", url);
 
@@ -144,10 +156,10 @@ $(document).ready(function(){
     });
 
     $("#lego_search-result").on("click", ".lego_search-result_i", function(e){
-        currentElement = $(this);
+        chosenNavigation = $(this);
         e.preventDefault();
 
-        var url = currentElement.attr('href').substring(1);
+        var url = chosenNavigation.attr('href').substring(1);
         $.ajax('http://localhost:8080/api', {
             data: {
                 specID: url

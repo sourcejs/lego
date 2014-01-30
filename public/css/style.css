@@ -401,31 +401,31 @@ body {
     box-shadow: 0 0 10px rgba(255,0,0,.5);
     }
 
-.editor {
-    position:relative;
-    }
-    .editor.__highlighted > * {
-        opacity: .5;
-        }
-    .editor_x {
-        background: #000;
-        position: absolute;
-        top: 0; left: 0;
-        padding: 2px 5px;
-        font-size: 15px;
-        line-height: 1;
-        cursor: pointer;
-        color: #fff;
-        visibility:hidden;
-        opacity: .5;
-        z-index: 100;
-        }
-        .editor:hover .editor_x {
-            visibility:visible;
-            }
-            .editor .editor_x:hover {
-                opacity: 1;
-                }
+/*.editor {*/
+    /*position:relative;*/
+    /*}*/
+    /*.editor.__highlighted > * {*/
+        /*opacity: .5;*/
+        /*}*/
+    /*.editor_x {*/
+        /*background: #000;*/
+        /*position: absolute;*/
+        /*top: 0; left: 0;*/
+        /*padding: 2px 5px;*/
+        /*font-size: 15px;*/
+        /*line-height: 1;*/
+        /*cursor: pointer;*/
+        /*color: #fff;*/
+        /*visibility:hidden;*/
+        /*opacity: .5;*/
+        /*z-index: 100;*/
+        /*}*/
+        /*.editor:hover .editor_x {*/
+            /*visibility:visible;*/
+            /*}*/
+            /*.editor .editor_x:hover {*/
+                /*opacity: 1;*/
+                /*}*/
 
 
 /* /temp */
