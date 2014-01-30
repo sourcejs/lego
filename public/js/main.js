@@ -48,6 +48,7 @@ $('#save-html').on('click', function(e){
 //  64 - navbar
 //  128 - other
 
+//  NEW:
 //  0 или пусто - overlay
 //  1 - primary
 //  2 - secondary
@@ -87,11 +88,16 @@ $('#export-img').on('click', function(e){
 });
 
 var switchActive = function(current) {
-
     if (activeElement != undefined) activeElement.removeClass('active-editable');
     activeElement = current;
     activeElement.addClass('active-editable');
+}
 
+var killElement = function (url, num) {
+    addedElements[url][num].remove();
+    addedElements[url][num] = null;
+
+    $(".lego_widget_ul-i[data-origin='"+url+"'][data-num='"+num+"']").remove();
 }
 
 $(document).ready(function(){
@@ -110,29 +116,21 @@ $(document).ready(function(){
     $("#current-elements").on("click", ".lego_lk", function(e) {
         e.preventDefault();
 
-        var parent = $(this).parent();
+        var parent = $(this).parent()
+            , origin = parent.data("origin")
+            , num = parent.data("num")
 
-        origin = parent.data("origin")
-            , idArr = origin.split("/")[1]
-            , id = idArr.split("[");
-
-        id[1] = id[1].split("]")[0];
-
-        switchActive(addedElements[id[0]][id[1]])
+        switchActive(addedElements[origin][num])
     });
 
-    $("#current-elements").on("click", ".lego_ic_close", function(e) {
-        var parent = $(this).parent();
-            origin = parent.data("origin")
-            , idArr = origin.split("/")[1]
-            , id = idArr.split("[");
+    $("#current-elements").on("click", ".lego_ic_close", function() {
 
-        id[1] = id[1].split("]")[0];
+        var parent = $(this).parent()
+            , origin  = parent.data("origin")
+            , num = parent.data("num")
+        ;
 
-        parent.remove();
-
-        addedElements[id[0]][id[1]].remove();
-        addedElements[id[0]][id[1]] = null;
+        killElement(origin, num);
     });
 
 //    $("#current-elements").on("mouseenter", ".lego_widget_ul-i", function() {
@@ -152,36 +150,34 @@ $(document).ready(function(){
 
     $(".lego_layer").on("click", ".editable", function(){
 
-        var path = chosenNavigation[0]["href"].split('/')
-            , name = chosenNavigation.text()
-            , id = path[path.length-1]
-            , url = path[path.length-2] + "/" + path[path.length-1]
-            , count
-        ;
+        if (chosenNavigation) {
+            var path = chosenNavigation[0]["href"].split('/')
+                , name = chosenNavigation.text()
+    //            , id = path[path.length-1]
+                , url = path[path.length-2] + "/" + path[path.length-1]
+                , count
+            ;
 
-        if (!addedElements[id]) addedElements[id] = [];
-        count = addedElements[id].length;
+            if (!addedElements[url]) addedElements[url] = [];
+            count = addedElements[url].length;
 
-        $("#current-elements").append("<li class='lego_widget_ul-i' data-origin = '" + url + "[" + count + "]'><a class='lego_lk' href = '" + url + "'>" + name + "</a><span class='lego_ic lego_ic_close'></span></li>");
+            $("#current-elements").append("<li class='lego_widget_ul-i' data-origin = '" + url + "' data-num=" + count + "><a class='lego_lk' href = '" + url + "'>" + name + "</a><span class='lego_ic lego_ic_close'></span></li>");
 
-        var currentHTML = $(tempHTML).attr("data-url", url);
+            var currentHTML = $(tempHTML).attr("data-url", url).attr("data-num", count);
 
-        addedElements[id][count] = currentHTML;
+            addedElements[url][count] = currentHTML;
 
-        switchActive(currentHTML);
+            switchActive(currentHTML);
 
-        // Parse inserted elem
-        modifiers.lookForHTMLMod();
+            // Parse inserted elem
+            modifiers.lookForHTMLMod();
 
-        $(this).append(currentHTML);
-        $(".lego_layer").addClass('__hide-bg');
-    });
-
-    $(".lego_layer").on("click", ".editor_x", function(e){
-        e.stopImmediatePropagation();
-        $(this).parent().remove();
-
-        if ( !$('.editor').length ) $(".lego_layer").removeClass('__hide-bg');
+            $(this).append(currentHTML);
+            $(".lego_layer").addClass('__hide-bg');
+        }
+        //Clearing chosen
+        chosenNavigation = false;
+        $('.lego_layer *').removeClass('editable');
     });
 
     $("#lego_search-result").on("click", ".lego_search-result_i", function(e){
@@ -200,10 +196,9 @@ $(document).ready(function(){
 				if (data['sections'] !== undefined ) {
 					for (k in data['sections'][0]) {
 						tempHTML = data['sections'][0][k];
+                        console.log(tempHTML);
 					}
-
 				} else {
-
 					$('.editable').removeClass('editable');
 					console.log('No html data there!');
 				}
@@ -239,7 +234,7 @@ $(document).ready(function(){
         var layerMode = $(this).find('.lego_search-result_n').data('layout');
 
         $('.lego_layer')
-            .removeClass('__default __one-column __two-column __three-column')
+            .removeClass('__default __one-column __two-column __three-column __hide-bg')
             .addClass('__' + layerMode);
 
     });
