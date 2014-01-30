@@ -194,15 +194,11 @@ body {
 	}
 
 .lego_form-i_w .lego_form-i_txt {
-	vertical-align: -3px; /* vertical centering */
+
 	}
 
 .lego_form-i .lego_checkbox {
-	position: relative;
-	top: 5px;
-	float: left;
 
-	margin-right: 5px;
 	}
 
 .lego_label {
