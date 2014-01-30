@@ -151,35 +151,30 @@ $(document).ready(function(){
     $(".lego_layer").on("click", ".editable", function(){
 
         if (chosenNavigation) {
-        var path = chosenNavigation[0]["href"].split('/')
-            , name = chosenNavigation.text()
-//            , id = path[path.length-1]
-            , url = path[path.length-2] + "/" + path[path.length-1]
-            , count
-        ;
+            var path = chosenNavigation[0]["href"].split('/')
+                , name = chosenNavigation.text()
+    //            , id = path[path.length-1]
+                , url = path[path.length-2] + "/" + path[path.length-1]
+                , count
+            ;
 
-        if (!addedElements[id]) addedElements[id] = [];
-        count = addedElements[id].length;
+            if (!addedElements[url]) addedElements[url] = [];
+            count = addedElements[url].length;
 
-        $("#current-elements").append("<li class='lego_widget_ul-i' data-origin = '" + url + "[" + count + "]'><a class='lego_lk' href = '" + url + "'>" + name + "</a><span class='lego_ic lego_ic_close'></span></li>");
+            $("#current-elements").append("<li class='lego_widget_ul-i' data-origin = '" + url + "' data-num=" + count + "><a class='lego_lk' href = '" + url + "'>" + name + "</a><span class='lego_ic lego_ic_close'></span></li>");
 
-        var currentHTML = $(tempHTML).attr("data-url", url).attr("data-num", count);
+            var currentHTML = $(tempHTML).attr("data-url", url).attr("data-num", count);
 
-        addedElements[url][count] = currentHTML;
+            addedElements[url][count] = currentHTML;
 
-        switchActive(currentHTML);
+            switchActive(currentHTML);
 
-        // Parse inserted elem
-        modifiers.lookForHTMLMod();
-
-        $(this).append(currentHTML);
-        $(".lego_layer").addClass('__hide-bg');
-    });
+            // Parse inserted elem
+            modifiers.lookForHTMLMod();
 
             $(this).append(currentHTML);
             $(".lego_layer").addClass('__hide-bg');
         }
-
         //Clearing chosen
         chosenNavigation = false;
         $('.lego_layer *').removeClass('editable');
