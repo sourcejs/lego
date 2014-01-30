@@ -25,12 +25,18 @@ $('#save-html').on('click', function(e){
         html: html
     };
 
+    var hostUrl = window.location.host;
+
     $.ajax({
         url: '/save',
         data: data,
         success:function( data ) {
             if (data.success) {
-                $('#save-html').after('<li><a class="lego_lk" href="/s/'+data.name+'">HTML saved:'+data.name+'</a></li>')
+                $('#save-html')
+                    .hide()
+                    .after('<input type="text" id="save-html-lk" class="lego_lt" value="' + hostUrl+ '/s/'+data.name+'">');
+
+                $('#save-html-lk').trigger('select');
             }
         }
     });
