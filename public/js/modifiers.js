@@ -128,10 +128,6 @@ var modifiers = (function() {
 
 				if (sectionIndex == 0) {
 					$template.find('input').prop('checked', true);
-
-					activeElement.node.innerHTML = data.sections[sectionIndex][sectionName];
-
-					//activeElement.node.appendChild( data.sections[sectionIndex][sectionName] );
 				}
 
 				$template.find('label').append(sectionName);
@@ -203,6 +199,25 @@ var modifiers = (function() {
 	}
 
 })()
+
+function clarifyFallback( fileName, sectionId ) {
+
+	console.log(fileName);
+
+	$.ajax({
+		url: 'http://127.0.0.1:8080' + fileName ,
+		data: {
+			'id': sectionId,
+			'get': 'clr'
+		},
+		type: 'get',
+		cache: false,
+		dataType: 'html',
+		success: function( data ) {
+			console.log( data );
+		}
+	})
+}
 
 $(function() {
 
