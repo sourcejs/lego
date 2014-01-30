@@ -168,8 +168,9 @@ $("#current-elements").on("click", ".lego_ic_close", function() {
         , num = parent.data("num")
     ;
 
-    modifyElement(origin, num);
-});
+	modifyElement(origin, num);
+	modifiers.cleanModificationData();
+})
 
 $(".lego_layer").on("click", ".editable", function(){
     insertChosen(this);

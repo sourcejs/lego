@@ -46,14 +46,23 @@ var modifiers = (function() {
 		$('input[name="modificators"]').each(function() {
 
 			var modValue = $(this).attr('data-mod'),
-				elemValue = $(this).attr('data-elem');
+				elemValue = $(this).attr('data-elem'),
+				affectedNodes = activeElement.node.querySelectorAll('.'+modValue+'.'+modValue),
+				usedModifiers = []
 
 			$(this).prop('checked', false);
 
-			if ( activeElement.node.querySelector('.' + elemValue + '.' + modValue) !== null ) {
+			if ( affectedNodes.length ) {
 				$(this).prop('checked', true);
+
+				for (var i = 0; i < affectedNodes.length; i++) {
+					var oldData = affectedNodes[i].getAttribute('data-old-mod') || '';
+
+					affectedNodes[i].setAttribute('data-old-mod', oldData += ' ' + modValue);
+				}
 			}
 		})
+
 	}
 
 	function searchInBlock( activeElement ) {
@@ -109,14 +118,14 @@ var modifiers = (function() {
 				}
 			}
 
-			for (var currentModifier = 0; currentModifier < usedModifiers.length; currentModifier++) {
+			/*for (var currentModifier = 0; currentModifier < usedModifiers.length; currentModifier++) {
 				$('[data-mod=' + usedModifiers[currentModifier] + ']').first().prop('checked', true);
-			}
+			}*/
 
-			if (usedModifiers.length) {
+			/*if (usedModifiers.length) {
 				var existModifiers = usedModifiers.join(' ');
 				allSelectors[ currentSelector ].setAttribute('data-old-mod', existModifiers);
-			}
+			}*/
 		}
 
 		checkUsedAttributes(activeElement);
@@ -207,7 +216,7 @@ var modifiers = (function() {
 
 		cleanModificationData: function() {
 			$('.js-variations .lego_form-i').empty();
-			$('.js-modifications .lego_form-i').empty();
+			$('.js-modificators .lego_form-i').empty();
 
 			activeElement = false;
 		},
