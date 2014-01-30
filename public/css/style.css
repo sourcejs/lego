@@ -313,6 +313,7 @@ body {
 	width: 100%;
 	margin-top: 45px;
 	background: #fff;
+	padding-bottom: 50px;
 	}
 
 .lego_content[data-target="primary"],
@@ -418,3 +419,13 @@ body {
 [data-active="true"] {
     box-shadow:0 0 10px #EB722E;
     }
+
+[data-url]:before,
+[data-url]:after {
+    content: " ";
+    display: table;
+}
+
+[data-url]:after {
+    clear: both;
+}
