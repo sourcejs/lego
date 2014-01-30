@@ -3,6 +3,7 @@
 
 body {
 	background: #444;
+	min-width: 1400px;
 }
 
 .lego_lk:link,

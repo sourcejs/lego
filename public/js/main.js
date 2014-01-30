@@ -148,7 +148,7 @@ $(document).ready(function(){
         e.preventDefault();
 
         var url = currentElement.attr('href').substring(1);
-        $.ajax('http://localhost:8080/api', {
+        $.ajax('http://127.0.0.1:8080/api', {
             data: {
                 specID: url
             },

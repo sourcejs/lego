@@ -26,7 +26,7 @@ var modifiers = (function() {
 		$.ajax({
 			url: 'http://127.0.0.1:8080/api',
 			data: {
-				specID: activeElement.specFileUrl.substr(1)
+				specID: activeElement.specFileUrl
 			},
 			type: 'POST',
 			dataType: 'json',
@@ -38,8 +38,10 @@ var modifiers = (function() {
 	}
 
 	function searchInBlock( activeElement ) {
-console.log('search');
+
 		var $wrap = $('.js-modificators .lego_form-i'),
+			usedElements = [],
+			usedModifiers = [],
 			template = '<div class="lego_form-i_w"> \
 						<label class="lego_form-i_txt"> \
 							<input class="lego_checkbox" type="checkbox" name="modificators"/> \
@@ -49,15 +51,20 @@ console.log('search');
 		$wrap.empty;
 
 		var allSelectors = activeElement.node.querySelectorAll('[class]');
-		for (var currentSelector = 0; currentSelector < allSelectors; currentSelector++) {
+
+		for (var currentSelector = 0; currentSelector < allSelectors.length; currentSelector++) {
 			var currentSelectorClassList = allSelectors[ currentSelector ].classList;
+			usedModifiers = [];
 
 			for (var curClassList = 0; curClassList < currentSelectorClassList.length; curClassList++) {
 
-				if ( currentSelectorClassList[curClassList].indexOf(activeElement.baseClass) ) {
-					//console.log('mod css ' + activeElement.baseClass + ' ' + currentSelectorClassList[curClassList]);
+				if ( currentSelectorClassList[curClassList].indexOf(activeElement.baseClass) !== -1) {
 
-					if ((allModifiers[currentSelectorClassList[curClassList]]) && (allModifiers[currentSelectorClassList[curClassList]].length)) {
+					if (usedElements.indexOf(currentSelectorClassList[curClassList]) !== -1  ) continue;
+
+					usedElements.push( currentSelectorClassList[curClassList] )
+
+					if ((allModifiers[currentSelectorClassList[curClassList]])) {
 
 						for (var currentModifier = 0; currentModifier < allModifiers[currentSelectorClassList[curClassList]].length; currentModifier++) {
 							var $template = $(template);
@@ -66,14 +73,23 @@ console.log('search');
 								.attr('data-mod', allModifiers[currentSelectorClassList[curClassList]][currentModifier]);
 
 							$template.find('label').append(allModifiers[currentSelectorClassList[curClassList]][currentModifier]);
+							$wrap.append( $template )
 
 						}
+					} else {
+						if ( currentSelectorClassList[curClassList].indexOf('__') !== -1 ) {
+							usedModifiers.push( currentSelectorClassList[curClassList] );
+						}
 					}
-
-
 				}
 			}
+
+			for (var currentModifier = 0; currentModifier < usedModifiers.length; currentModifier++) {
+				$('[data-mod=' + usedModifiers[currentModifier] + ']').first().prop('checked', true);
+			}
 		}
+
+
 	}
 
 	function searchVariations( data ) {
@@ -98,12 +114,20 @@ console.log('search');
 
 				if (sectionIndex == 0) {
 					$template.find('input').prop('checked', true);
+
+					activeElement.node.innerHTML = data.sections[sectionIndex][sectionName];
+
+					//activeElement.node.appendChild( data.sections[sectionIndex][sectionName] );
 				}
 
 				$template.find('label').append(sectionName);
 				$wrap.append($template);
 			}
+
+
 		}
+
+
 	}
 
 	return {
@@ -121,14 +145,15 @@ console.log('search');
 			activeElement.node = selector;
 			activeElement.specFileUrl = activeElement.node.getAttribute('data-url');
 
-			getHTMLpart(activeElement, function(data) {
 
+
+			getHTMLpart(activeElement, function(data) {
 				searchVariations(data);
 
 				// Project className
 				activeElement.baseClass = data.className;
 
-				//searchInBlock( activeElement );
+				searchInBlock( activeElement );
 			})
 
 			return this;
@@ -152,9 +177,14 @@ console.log('search');
 
 })()
 
-var r = document.createElement('div');
-r.setAttribute('data-current', 'true');
-r.setAttribute('data-url', '/base/footer');
-document.body.appendChild(r);
+modifiers.init(function() {
 
-modifiers.lookForHTMLMod(  document.querySelector('[data-url]') );
+	var r = document.createElement('div');
+	r.className="active-editable";
+	r.setAttribute('data-url', 'base/nav-vertical');
+	document.body.appendChild(r);
+
+	modifiers.lookForHTMLMod(  document.querySelector('.active-editable') );
+
+})
+
