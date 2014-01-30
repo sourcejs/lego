@@ -75,7 +75,7 @@ $('#export-img').on('click', function(e){
 });
 
 var switchActive = function(current) {
-    if (activeElement != undefined) activeElement.attr('data-active', 'false');
+    if (activeElement != undefined) activeElement.removeAttr('data-active');
     current.attr('data-active', 'true');
     activeElement = current;
 }
