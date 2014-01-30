@@ -35,6 +35,8 @@ var fuzzySearch = function(q, allData) {
         , lowerCat
     ;
 
+    console.log(allData);
+
     for (cat in allData) {
         lowerCat = cat.toLowerCase();
 
@@ -47,9 +49,9 @@ var fuzzySearch = function(q, allData) {
         // otherwise, continue parsing
         for (spec in allData[cat]) {
 
-            var info = (allData[cat][spec]["info"] != undefined) ? allData[cat][spec]["info"].toLocaleLowerCase() : '';
-            var keywords = (allData[cat][spec]["keywords"] != undefined) ? allData[cat][spec]["keywords"].toLocaleLowerCase() : '';
-            var title = (allData[cat][spec]["title"] != undefined) ? allData[cat][spec]["title"].toLocaleLowerCase() : '';
+            var info = (allData[cat][spec]["info"] != undefined) ? allData[cat][spec]["info"].toLowerCase() : '';
+            var keywords = (allData[cat][spec]["keywords"] != undefined) ? allData[cat][spec]["keywords"].toLowerCase() : '';
+            var title = spec.toLowerCase();
 
             if (qRegExp.test(info.match(query)) ||
                 qRegExp.test(keywords.match(query)) ||
