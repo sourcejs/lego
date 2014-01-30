@@ -116,15 +116,6 @@ var modifiers = (function() {
 					}
 				}
 			}
-
-			/*for (var currentModifier = 0; currentModifier < usedModifiers.length; currentModifier++) {
-				$('[data-mod=' + usedModifiers[currentModifier] + ']').first().prop('checked', true);
-			}*/
-
-			/*if (usedModifiers.length) {
-				var existModifiers = usedModifiers.join(' ');
-				allSelectors[ currentSelector ].setAttribute('data-old-mod', existModifiers);
-			}*/
 		}
 
 		checkUsedAttributes(activeElement);
@@ -187,12 +178,19 @@ var modifiers = (function() {
 			activeElement.specFileUrl = activeElement.node.getAttribute('data-url');
 
 			getHTMLpart(activeElement, function(data) {
+
+				var innerActiveElement = activeElement;
+				modifiers.cleanModificationData();
+				activeElement = innerActiveElement;
+
 				searchVariations(data);
 
 				// Project className
 				activeElement.baseClass = data.className;
 
 				searchInBlock( activeElement );
+
+				// save !!!
 			})
 
 			return this;
