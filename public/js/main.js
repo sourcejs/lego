@@ -152,36 +152,36 @@ $(document).ready(function(){
 
     $(".lego_layer").on("click", ".editable", function(){
 
-        var path = chosenNavigation[0]["href"].split('/')
-            , name = chosenNavigation.text()
-            , id = path[path.length-1]
-            , url = path[path.length-2] + "/" + path[path.length-1]
-            , count
-        ;
+        if (chosenNavigation) {
 
-        if (!addedElements[id]) addedElements[id] = [];
-        count = addedElements[id].length;
+            var path = chosenNavigation[0]["href"].split('/')
+                , name = chosenNavigation.text()
+                , id = path[path.length-1]
+                , url = path[path.length-2] + "/" + path[path.length-1]
+                , count
+            ;
 
-        $("#current-elements").append("<li class='lego_widget_ul-i' data-origin = '" + url + "[" + count + "]'><a class='lego_lk' href = '" + url + "'>" + name + "</a><span class='lego_ic lego_ic_close'></span></li>");
+            if (!addedElements[id]) addedElements[id] = [];
+            count = addedElements[id].length;
 
-        var currentHTML = $(tempHTML).attr("data-url", url);
+            $("#current-elements").append("<li class='lego_widget_ul-i' data-origin = '" + url + "[" + count + "]'><a class='lego_lk' href = '" + url + "'>" + name + "</a><span class='lego_ic lego_ic_close'></span></li>");
 
-        addedElements[id][count] = currentHTML;
+            var currentHTML = $(tempHTML).attr("data-url", url);
 
-        switchActive(currentHTML);
+            addedElements[id][count] = currentHTML;
 
-        // Parse inserted elem
-        modifiers.lookForHTMLMod();
+            switchActive(currentHTML);
 
-        $(this).append(currentHTML);
-        $(".lego_layer").addClass('__hide-bg');
-    });
+            // Parse inserted elem
+            modifiers.lookForHTMLMod();
 
-    $(".lego_layer").on("click", ".editor_x", function(e){
-        e.stopImmediatePropagation();
-        $(this).parent().remove();
+            $(this).append(currentHTML);
+            $(".lego_layer").addClass('__hide-bg');
+        }
 
-        if ( !$('.editor').length ) $(".lego_layer").removeClass('__hide-bg');
+        //Clearing chosen
+        chosenNavigation = false;
+        $('.lego_layer *').removeClass('editable');
     });
 
     $("#lego_search-result").on("click", ".lego_search-result_i", function(e){
@@ -239,7 +239,7 @@ $(document).ready(function(){
         var layerMode = $(this).find('.lego_search-result_n').data('layout');
 
         $('.lego_layer')
-            .removeClass('__default __one-column __two-column __three-column')
+            .removeClass('__default __one-column __two-column __three-column __hide-bg')
             .addClass('__' + layerMode);
 
     });
