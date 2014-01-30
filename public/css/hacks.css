@@ -10,5 +10,10 @@
 	display: none;
 }
 
+.lego_content .toolbar {
+	margin-left: -288px;
+	left: 16px;
+}
+
 /* /Cosmetic styles just for demo
 ---------------------------------------------------------------------------------- */

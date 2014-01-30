@@ -41,6 +41,21 @@ var modifiers = (function() {
 
 	}
 
+	function checkUsedAttributes( activeElement ) {
+
+		$('input[name="modificators"]').each(function() {
+
+			var modValue = $(this).attr('data-mod'),
+				elemValue = $(this).attr('data-elem');
+
+			$(this).prop('checked', false);
+
+			if ( activeElement.node.querySelector('.' + elemValue + '.' + modValue) !== null ) {
+				$(this).prop('checked', true);
+			}
+		})
+	}
+
 	function searchInBlock( activeElement ) {
 
 		var $wrap = $('.js-modificators .lego_form-i'),
@@ -77,9 +92,9 @@ var modifiers = (function() {
 							if (usedElements.indexOf( currElem + allModifiers[currElem][currentModifier] ) !== -1  ) continue;
 							usedElements.push( currElem + allModifiers[currElem][currentModifier] )
 
-							if ( activeElement.node.querySelector('.' + currElem + '.' + allModifiers[currElem][currentModifier]) !== null ) {
+							/*if ( activeElement.node.querySelector('.' + currElem + '.' + allModifiers[currElem][currentModifier]) !== null ) {
 								usedModifiers.push( allModifiers[currElem][currentModifier] );
-							}
+							}*/
 
 							var $template = $(template);
 							$template.find('input')
@@ -104,7 +119,7 @@ var modifiers = (function() {
 			}
 		}
 
-
+		checkUsedAttributes(activeElement);
 	}
 
 	function searchVariations( data ) {
@@ -195,29 +210,15 @@ var modifiers = (function() {
 			$('.js-modifications .lego_form-i').empty();
 
 			activeElement = false;
+		},
+
+		checkUsedAttributes: function() {
+			checkUsedAttributes( activeElement );
 		}
 	}
 
 })()
 
-function clarifyFallback( fileName, sectionId ) {
-
-	console.log(fileName);
-
-	$.ajax({
-		url: 'http://127.0.0.1:8080' + fileName ,
-		data: {
-			'id': sectionId,
-			'get': 'clr'
-		},
-		type: 'get',
-		cache: false,
-		dataType: 'html',
-		success: function( data ) {
-			console.log( data );
-		}
-	})
-}
 
 $(function() {
 
@@ -227,15 +228,11 @@ $(function() {
 
 		if ( $(this).attr('name') == 'variations' ) {
 
-			/*var $parentSelector = $activeNode.parent(),
-				$insertedElem = $($(this).attr('data-mod')), */
 			var activeId = $activeNode.attr('data-num'),
 				activeUrl = $activeNode.attr('data-url');
 
             modifyElement(activeUrl, activeId, $(this).attr('data-mod'));
-/*
-			$parentSelector.append( $insertedElem );
-			$insertedElem.addClass('[data-active="true"]');*/
+            modifiers.checkUsedAttributes();
 
 		} else {
 			var modClass = $(this).attr('data-mod');
