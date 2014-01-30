@@ -4,7 +4,7 @@ var modifiers = (function() {
 	var activeElement = false;
 
 	function getCSSMod( callback ) {
-		if (!allModifiers) return this;
+		if (allModifiers) return this;
 
 		var callback = callback || function() {};
 
@@ -157,8 +157,6 @@ var modifiers = (function() {
 			activeElement.node = document.querySelector('.active-editable');
 			activeElement.specFileUrl = activeElement.node.getAttribute('data-url');
 
-
-
 			getHTMLpart(activeElement, function(data) {
 				searchVariations(data);
 
@@ -184,20 +182,49 @@ var modifiers = (function() {
 			console.log(allModifiers);
 
 			return this;
+		},
+
+		cleanModificationData: function() {
+			$('.js-variations .lego_form-i').empty();
+			$('.js-modifications .lego_form-i').empty();
+
+			activeElement = false;
 		}
 	}
 
 })()
 
+$(function() {
 
-/*modifiers.init(function() {
+	$('body').on('click', '.lego_checkbox', function() {
 
-	var r = document.createElement('div');
-	r.className="active-editable";
-	r.setAttribute('data-url', 'base/nav-vertical');
-	document.body.appendChild(r);
+		var $activeNode = $('.active-editable');
 
-	modifiers.lookForHTMLMod();
+		if ( $(this).attr('name') == 'variations' ) {
 
-})*/
+			var $parentSelector = $activeNode.parent(),
+				$insertedElem = $($(this).attr('data-mod')),
+				activeId = $activeNode.attr('data-id'),
+				activeUrl = $activeNode.attr('data-url')
 
+			//$('.active-editable').remove();
+			killElement(activeUrl, activeId)
+
+			$parentSelector.append( $insertedElem );
+			$insertedElem.addClass('active-editable');
+
+		} else {
+			var modClass = $(this).attr('data-mod');
+
+			if ( $(this).is(':checked') ) {
+				$activeNode.find('[' + modClass + ']').each(function() {
+					$(this).prop('checked', false);
+				})
+			} else {
+				$activeNode.find('[' + modClass + ']').each(function() {
+					$(this).prop('checked', true);
+				})
+			}
+		}
+	})
+})
