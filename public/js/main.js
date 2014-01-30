@@ -101,7 +101,7 @@ var modifyElement = function (url, num, html) {
         addedElements[url][num] = null;
         $(".lego_widget_ul-i[data-origin='"+url+"'][data-num='"+num+"']").remove();
     } else {
-        addedElements[url][num] = $(html);
+        addedElements[url][num] = $(html).attr("data-url", url).attr("data-num", num);
     }
 };
 
