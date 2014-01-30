@@ -58,12 +58,18 @@ $('#save-html').on('click', function(e){
 
 var parseTargets = function(targets) {
     var result = [];
-    for (var mask = 128, i = 0; mask > 0; mask >>= 1, i++) {
+    for (var mask = 16, i = 0; mask > 0; mask >>= 1, i++) {
         if (mask & targets) {
             result.push(possibleTargets[i]);
         }
     }
     return result;
+};
+
+var getTextNodesIn = function(el) {
+    return $(el).find(":not(iframe)").addBack().contents().filter(function() {
+        return this.nodeType == 3;
+    });
 };
 
 $('#export-img').on('click', function(e){
@@ -215,17 +221,16 @@ $(document).ready(function(){
             , results = (targets == 0) ? 0 : parseTargets(targets)
             ;
 
-        if (!results) {
-            var overlay = $('.lego_layer');
-            overlay.addClass('editable');
-            activeTargets.push(overlay);
-        } else {
-            for (var j = 0; j < results.length; j++) {
-                var elem = $('[data-target="' + results[j] + '"]');
-                activeTargets.push(elem);
-                elem.addClass('editable');
-            }
+        for (var j = 0; j < results.length; j++) {
+            var elem = $('[data-target="' + results[j] + '"]');
+            activeTargets.push(elem);
+            elem.addClass('editable');
         }
+
+        var overlay = $('[data-target="overlay"]');
+
+        overlay.addClass('editable');
+        activeTargets.push(overlay);
     });
 
     $('.js-layouts-list').on('click', '.lego_search-result_i', function(e){
@@ -239,5 +244,13 @@ $(document).ready(function(){
 
     });
 
+    $('.lego_layer')
+        .on('click', '[data-target]', function( e ) {
+
+            $('[contenteditable]').attr('contenteditable', 'false');
+
+            var clickedEl = getTextNodesIn( e.target).parent();
+            clickedEl.attr('contenteditable', 'true');
+        });
 });
 
