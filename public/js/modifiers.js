@@ -4,10 +4,13 @@ var modifiers = (function() {
 	var activeElement = false;
 
 	function getCSSMod( callback ) {
+		if (!allModifiers) return this;
+
 		var callback = callback || function() {};
 
+        var specsMaster = globalOptions.specsMaster.current;
 		$.ajax({
-			url: "http://127.0.0.1:8080/api",
+			url: specsMaster+"/api",
 			type: 'POST',
 			data: {
 				task: 'parseModifiers'
@@ -23,8 +26,9 @@ var modifiers = (function() {
 	function getHTMLpart( activeElement, callback ) {
 		var callback = callback || function() {};
 
+		var specsMaster = globalOptions.specsMaster.current;
 		$.ajax({
-			url: 'http://127.0.0.1:8080/api',
+			url: specsMaster+"/api",
 			data: {
 				specID: activeElement.specFileUrl
 			},
@@ -133,16 +137,24 @@ var modifiers = (function() {
 	return {
 
 		init: function( callback ) {
-
 			getCSSMod( callback );
 
 			return this;
 		},
 
-		lookForHTMLMod: function( selector ) {
+		lookForHTMLMod: function() {
+			if ( !allModifiers ) {
+				setTimeout(function() {
+					getCSSMod( function() {
+						modifiers.lookForHTMLMod();
+					} )
+				}, 1000)
+				return this;
+			}
+
 			activeElement = {};
 
-			activeElement.node = selector;
+			activeElement.node = document.querySelector('.active-editable');
 			activeElement.specFileUrl = activeElement.node.getAttribute('data-url');
 
 
@@ -177,14 +189,15 @@ var modifiers = (function() {
 
 })()
 
-modifiers.init(function() {
+
+/*modifiers.init(function() {
 
 	var r = document.createElement('div');
 	r.className="active-editable";
 	r.setAttribute('data-url', 'base/nav-vertical');
 	document.body.appendChild(r);
 
-	modifiers.lookForHTMLMod(  document.querySelector('.active-editable') );
+	modifiers.lookForHTMLMod();
 
-})
+})*/
 

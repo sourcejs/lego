@@ -1,8 +1,11 @@
 // GLOBALS
-var possibleTargets = ['other', 'navbar', 'toolbar', 'tertiary', 'secondary', 'narrow', 'wide', 'single']
+var
+    possibleTargets = ['other', 'navbar', 'tertiary', 'secondary', 'primary']
+//    , possibleTargets = ['other', 'navbar', 'toolbar', 'tertiary', 'secondary', 'narrow', 'wide', 'single']
     , activeTargets = []
     , tempHTML
-    , currentElement
+    , chosenNavigation
+    , activeElement
     , addedElements = {}
     ;
 // /GLOBALS
@@ -45,6 +48,14 @@ $('#save-html').on('click', function(e){
 //  64 - navbar
 //  128 - other
 
+//  0 или пусто - overlay
+//  1 - primary
+//  2 - secondary
+//  4 - tertiary
+//  8 - navbar
+//  16 - other
+
+
 var parseTargets = function(targets) {
     var result = [];
     for (var mask = 128, i = 0; mask > 0; mask >>= 1, i++) {
@@ -69,6 +80,14 @@ $('#export-img').on('click', function(e){
     });
 });
 
+var switchActive = function(current) {
+
+    if (activeElement != undefined) activeElement.removeClass('active-editable');
+    activeElement = current;
+    activeElement.addClass('active-editable');
+
+}
+
 $(document).ready(function(){
 
     $(".lego_toggler").on("click", ".lego_toggle_i", function(){
@@ -84,6 +103,16 @@ $(document).ready(function(){
 
     $("#current-elements").on("click", ".lego_lk", function(e) {
         e.preventDefault();
+
+        var parent = $(this).parent();
+
+        origin = parent.data("origin")
+            , idArr = origin.split("/")[1]
+            , id = idArr.split("[");
+
+        id[1] = id[1].split("]")[0];
+
+        switchActive(addedElements[id[0]][id[1]])
     });
 
     $("#current-elements").on("click", ".lego_ic_close", function(e) {
@@ -117,7 +146,8 @@ $(document).ready(function(){
 
     $(".lego_layer").on("click", ".editable", function(){
 
-        var path = currentElement[0]["href"].split('/')
+        var path = chosenNavigation[0]["href"].split('/')
+            , name = chosenNavigation.text()
             , id = path[path.length-1]
             , url = path[path.length-2] + "/" + path[path.length-1]
             , count
@@ -126,11 +156,16 @@ $(document).ready(function(){
         if (!addedElements[id]) addedElements[id] = [];
         count = addedElements[id].length;
 
-        $("#current-elements").append("<li class='lego_widget_ul-i' data-origin = '" + url + "[" + count + "]'><a class='lego_lk' href = '" + url + "'>" + id + "</a><span class='lego_ic lego_ic_close'></span></li>");
+        $("#current-elements").append("<li class='lego_widget_ul-i' data-origin = '" + url + "[" + count + "]'><a class='lego_lk' href = '" + url + "'>" + name + "</a><span class='lego_ic lego_ic_close'></span></li>");
 
         var currentHTML = $(tempHTML).attr("data-url", url);
 
         addedElements[id][count] = currentHTML;
+
+        switchActive(currentHTML);
+
+        // Parse inserted elem
+        modifiers.lookForHTMLMod();
 
         $(this).append(currentHTML);
         $(".lego_layer").addClass('__hide-bg');
@@ -144,20 +179,28 @@ $(document).ready(function(){
     });
 
     $("#lego_search-result").on("click", ".lego_search-result_i", function(e){
-        currentElement = $(this);
+        chosenNavigation = $(this);
         e.preventDefault();
 
-        var url = currentElement.attr('href').substring(1);
-        $.ajax('http://127.0.0.1:8080/api', {
+        var url = chosenNavigation.attr('href').substring(1);
+        var specsMaster = globalOptions.specsMaster.current;
+        $.ajax(specsMaster+'/api', {
             data: {
                 specID: url
             },
             method: 'POST',
             success: function (data) {
 
-                for (k in data['sections'][0]) {
-                    tempHTML = data['sections'][0][k];
-                }
+				if (data['sections'] !== undefined ) {
+					for (k in data['sections'][0]) {
+						tempHTML = data['sections'][0][k];
+					}
+
+				} else {
+
+					$('.editable').removeClass('editable');
+					console.log('No html data there!');
+				}
             }
         });
 

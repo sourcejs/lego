@@ -264,6 +264,7 @@ body {
 .lego_layer {
 	position: relative;
 	width: 1000px;
+    overflow: hidden;
 	}
 
 /* without background of grid */
@@ -280,7 +281,9 @@ body {
 .lego_right-column,
 .lego_sidebar,
 .lego_toolbar,
-.lego_navbar {
+.lego_navbar,
+.lego_content[data-target="overlay"],
+.lego_content[data-target="primary"] {
 	display: none;
 	background: #FFF4F8;
 	}
@@ -304,7 +307,8 @@ body {
 	background: #fff;
 	}
 
-.lego_content {
+.lego_content[data-target="primary"],
+.lego_content[data-target="overlay"]{
 	min-height: 600px;
 	width: 1000px;
 	background: #FFF4F8;
@@ -327,7 +331,7 @@ body {
 
 /* default */
 
-.lego_layer.__default .lego_content{
+.lego_layer.__default .lego_content[data-target="overlay"] {
 	display: inline-block;
 	width: auto;
 	text-align: left;
@@ -351,7 +355,7 @@ body {
 /* two column layout */
 .lego_layer.__two-column .lego_navbar,
 .lego_layer.__two-column .lego_sidebar,
-.lego_layer.__two-column .lego_content,
+.lego_layer.__two-column .lego_content[data-target="primary"],
 .lego_layer.__two-column .lego_toolbar { display: block; }
 
 .lego_layer.__two-column .lego_sidebar {
@@ -362,7 +366,7 @@ body {
 	width: 715px;
 	}
 
-.lego_layer.__two-column .lego_content {
+.lego_layer.__two-column .lego_content[data-target="primary"] {
 	float: right;
 	width: 715px;
 	margin-right: 15px;
@@ -372,11 +376,11 @@ body {
 
 /* one column */
 .lego_layer.__one-column .lego_toolbar,
-.lego_layer.__one-column .lego_content {
+.lego_layer.__one-column .lego_content[data-target="primary"] {
 	display: block;
 	}
 
-.lego_layer.__one-column .lego_content {
+.lego_layer.__one-column .lego_content[data-target="primary"] {
 	width: 970px;
 	margin: 15px;
 	}
@@ -384,11 +388,11 @@ body {
 /* three column */
 .lego_layer.__three-column .lego_navbar,
 .lego_layer.__three-column .lego_sidebar,
-.lego_layer.__three-column .lego_content,
+.lego_layer.__three-column .lego_content[data-target="primary"],
 .lego_layer.__three-column .lego_toolbar,
 .lego_layer.__three-column .lego_right-column { display: block; }
 
-.lego_layer.__three-column .lego_content {
+.lego_layer.__three-column .lego_content[data-target="primary"] {
 	float: right;
 	width: 500px;
 	}
@@ -402,31 +406,31 @@ body {
     box-shadow: 0 0 10px rgba(255,0,0,.5);
     }
 
-.editor {
-    position:relative;
-    }
-    .editor.__highlighted > * {
-        opacity: .5;
-        }
-    .editor_x {
-        background: #000;
-        position: absolute;
-        top: 0; left: 0;
-        padding: 2px 5px;
-        font-size: 15px;
-        line-height: 1;
-        cursor: pointer;
-        color: #fff;
-        visibility:hidden;
-        opacity: .5;
-        z-index: 100;
-        }
-        .editor:hover .editor_x {
-            visibility:visible;
-            }
-            .editor .editor_x:hover {
-                opacity: 1;
-                }
+/*.editor {*/
+    /*position:relative;*/
+    /*}*/
+    /*.editor.__highlighted > * {*/
+        /*opacity: .5;*/
+        /*}*/
+    /*.editor_x {*/
+        /*background: #000;*/
+        /*position: absolute;*/
+        /*top: 0; left: 0;*/
+        /*padding: 2px 5px;*/
+        /*font-size: 15px;*/
+        /*line-height: 1;*/
+        /*cursor: pointer;*/
+        /*color: #fff;*/
+        /*visibility:hidden;*/
+        /*opacity: .5;*/
+        /*z-index: 100;*/
+        /*}*/
+        /*.editor:hover .editor_x {*/
+            /*visibility:visible;*/
+            /*}*/
+            /*.editor .editor_x:hover {*/
+                /*opacity: 1;*/
+                /*}*/
 
 
 /* /temp */
