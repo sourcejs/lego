@@ -155,16 +155,19 @@ var modifiers = (function() {
 			activeElement = {};
 
 			activeElement.node = document.querySelector('.active-editable');
-			activeElement.specFileUrl = activeElement.node.getAttribute('data-url');
+            if (activeElement.node) {
+                activeElement.specFileUrl = activeElement.node.getAttribute('data-url');
 
-			getHTMLpart(activeElement, function(data) {
-				searchVariations(data);
+                getHTMLpart(activeElement, function(data) {
+                    searchVariations(data);
 
-				// Project className
-				activeElement.baseClass = data.className;
+                    // Project className
+                    activeElement.baseClass = data.className;
 
-				searchInBlock( activeElement );
-			})
+                    searchInBlock( activeElement );
+                })
+            }
+
 
 			return this;
 		},
