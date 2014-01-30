@@ -1,19 +1,15 @@
 /* base
 ---------------------------------------------------------------------------------- */
 
-body {
-	background: #444;
-	min-width: 1400px;
-}
-
 .lego_lk:link,
 .lego_lk:visited {
 	color: #ddd;
 	text-decoration: none;
-}
+	}
+
 .lego_lk:hover {
 	text-decoration: underline;
-}
+	}
 
 .lego_lk.__active {
     color:#EB722E;
@@ -23,33 +19,54 @@ body {
 .cf:after {
 	content: " ";
 	display: table;
-}
+	}
 
 .cf:after {
 	clear: both;
-}
+	}
 
 
 /* /base
 ---------------------------------------------------------------------------------- */
 
 .lego_container {
-	display: table;
-	min-width: 1400px;
+	position: relative;
+	width: 1420px;
 	margin: 0 auto;
 	}
 
 .lego_aside,
 .lego_main {
-	display: table-cell;
-	vertical-align: top;
+
 	}
 
 .lego_aside {
-	padding: 20px 0;
-	min-width: 200px;
-	max-width: 300px;
+	position: fixed;
+	left: 50%;
+	top: 0;
+	height: 100%;
+	overflow-y: auto;
+	overflow-x: hidden;
+	width: 215px;
+	margin-left: -710px;
+
+	background: #444;
 	}
+
+	.lego_aside.__right {
+		width: 200px;
+		margin-left: 505px;
+		}
+
+.lego_main {
+	top: 0;
+	left: 50%;
+	width: 1000px;
+	margin-left: 215px;
+	background: #999; /* color of cover  */
+	height: 600px;
+}
+
 
 /* left column
 ---------------------------------------------------------------------------------- */
@@ -69,6 +86,7 @@ body {
 
 .lego_aside_search {
 	width: 85%;
+	margin-top: 20px;
 	margin-left: 10px;
 	padding: 5px;
 
@@ -144,6 +162,10 @@ body {
 .lego_export-select {
 	display: block;
 	margin: 0 auto;
+	}
+
+.lego_widget:nth-of-type(1) {
+	margin-top: 20px;
 	}
 
 .lego_widget {
@@ -256,19 +278,6 @@ body {
 ---------------------------------------------------------------------------------- */
 
 
-/* center column
----------------------------------------------------------------------------------- */
-
-.lego_main {
-	width: 1000px;
-	border-top: 20px solid #444;
-	background: #999; /* color of cover  */
-	}
-
-/* /center column
----------------------------------------------------------------------------------- */
-
-
 /* layers
 ---------------------------------------------------------------------------------- */
 
@@ -317,7 +326,6 @@ body {
 	width: 100%;
 	margin-top: 45px;
 	background: #fff;
-	padding-bottom: 50px;
 	}
 
 .lego_content[data-target="primary"],
