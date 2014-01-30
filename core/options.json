@@ -6,7 +6,7 @@
 
     "specsMaster": {
         "current": "",
-        "dev": "http://127.0.0.1",
+        "dev": "http://127.0.0.1:8080",
         "prod": "http://okp.me:8080"
     }
 }
