@@ -1,3 +1,12 @@
+// GLOBALS
+var possibleTargets = ['other', 'navbar', 'toolbar', 'tertiary', 'secondary', 'narrow', 'wide', 'single']
+    , activeTargets = []
+    , tempHTML
+    , currentElement
+    , addedElements = {}
+    ;
+// /GLOBALS
+
 $('#export-img').on('click', function(e){
     e.preventDefault();
 
@@ -24,15 +33,6 @@ $('#save-html').on('click', function(e){
         }
     });
 });
-
-var possibleTargets = ['other', 'navbar', 'toolbar', 'tertiary', 'secondary', 'narrow', 'wide', 'single']
-    , activeTargets = []
-    , tempHTML = Handlebars.compile($("#dummy-html").html())
-    , currentElement
-    , addedElements = {}
-;
-
-// /GLOBALS
 
 //  Расположение определяется степенью двойки:
 //  0 - overlay (исключение)
@@ -128,11 +128,10 @@ $(document).ready(function(){
 
         $("#current-elements").append("<li class='lego_widget_ul-i' data-origin = '" + url + "[" + count + "]'><a class='lego_lk' href = '" + url + "'>" + id + "</a><span class='lego_ic lego_ic_close'></span></li>");
 
-        var currentHTML = $(tempHTML()).attr("data-url", url);
+        var currentHTML = $(tempHTML).attr("data-url", url);
 
         addedElements[id][count] = currentHTML;
 
-        console.log(addedElements);
         $(this).append(currentHTML);
         $(".lego_layer").addClass('__hide-bg');
     });
@@ -147,6 +146,21 @@ $(document).ready(function(){
     $("#lego_search-result").on("click", ".lego_search-result_i", function(e){
         currentElement = $(this);
         e.preventDefault();
+
+        var url = currentElement.attr('href').substring(1);
+        $.ajax('http://localhost:8080/api', {
+            data: {
+                specID: url
+            },
+            method: 'POST',
+            success: function (data) {
+
+                for (k in data['sections'][0]) {
+                    tempHTML = data['sections'][0][k];
+                }
+            }
+        });
+
         if (activeTargets.length) {
             for (var i = 0; i < activeTargets.length; i++) {
                 activeTargets[i].removeClass('editable');

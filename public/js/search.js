@@ -15,7 +15,7 @@ $.ajax('http://localhost:8080/api', {
     success: function (data) {
         parsedTree = data;
         parsed = true;
-console.log(parsedTree);
+
         $.ajax({
             url: '/views/search-result-list.html',
             success: function(d) {
