@@ -1,5 +1,7 @@
 // GLOBALS
-var possibleTargets = ['other', 'navbar', 'toolbar', 'tertiary', 'secondary', 'narrow', 'wide', 'single']
+var
+    possibleTargets = ['other', 'navbar', 'tertiary', 'secondary', 'primary']
+//    , possibleTargets = ['other', 'navbar', 'toolbar', 'tertiary', 'secondary', 'narrow', 'wide', 'single']
     , activeTargets = []
     , tempHTML
     , chosenNavigation
@@ -45,6 +47,14 @@ $('#save-html').on('click', function(e){
 //  32 - toolbar
 //  64 - navbar
 //  128 - other
+
+//  0 или пусто - overlay
+//  1 - primary
+//  2 - secondary
+//  4 - tertiary
+//  8 - navbar
+//  16 - other
+
 
 var parseTargets = function(targets) {
     var result = [];
