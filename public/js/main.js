@@ -97,6 +97,7 @@ var modifyElement = function (url, num, html) {
         wrapper.append(jHTML).contents().unwrap('<div></div>');
 
         addedElements[url][num] = jHTML;
+        activeElement = addedElements[url][num];
     }
 };
 
