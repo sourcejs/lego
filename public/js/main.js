@@ -9,7 +9,10 @@ var possibleTargets = ['other', 'navbar', 'toolbar', 'tertiary', 'secondary', 'n
     , activeTargets = []
     , tempHTML = Handlebars.compile($("#dummy-html").html())
     , currentElement
-    ;
+    , addedElements = {}
+;
+
+// /GLOBALS
 
 //  Расположение определяется степенью двойки:
 //  0 - overlay (исключение)
@@ -32,14 +35,18 @@ var parseTargets = function(targets) {
     return result;
 };
 
-Handlebars.registerHelper('editor', function(context, options) {
-    var wrap = '';
+$('#export-img').on('click', function(e){
+    e.preventDefault();
 
-    for(var i=0, j=context.length; i<j; i++) {
-        wrap += "<span>" + options.fn(context[i]) + "</span>";
-    }
+    html2canvas($('.lego_main'), {
+        onrendered: function(canvas) {
+            var dataURL= canvas.toDataURL();
 
-    return wrap;
+            var data = encodeURIComponent(dataURL);
+
+            $("body").append("<iframe src='/screenshot?base64=" + data + "' style='display: none;' ></iframe>");
+        }
+    });
 });
 
 $(document).ready(function(){
@@ -55,13 +62,55 @@ $(document).ready(function(){
         $(this).parent().toggleClass("__closed");
     });
 
+    $("#current-elements").on("click", ".lego_widget_ul-i", function() {
+        var origin = $(this).data("origin")
+            , idArr = origin.split("/")[1]
+            , id = idArr.split("[");
+
+        id[1] = id[1].split("]")[0];
+
+        $(this).remove();
+
+        addedElements[id[0]][id[1]].remove();
+        addedElements[id[0]][id[1]] = null;
+
+    });
+
+//    $("#current-elements").on("mouseenter", ".lego_widget_ul-i", function() {
+//        console.log("hovered")
+//        var origin = $(this).data("origin");
+//        var parsedOrigin = origin.split("[");
+//        parsedOrigin[1] = parsedOrigin[1].split("]")[0];
+//        addedElements[parsedOrigin[0]][parsedOrigin[1]].addClass('__highlighted');
+//    });
+//
+//    $("#current-elements").on("mouseleave", ".lego_widget_ul-i", function() {
+//        var origin = $(this).data("origin");
+//        var parsedOrigin = origin.split("[");
+//        parsedOrigin[1] = parsedOrigin[1].split("]")[0];
+//        addedElements[parsedOrigin[0]][parsedOrigin[1]].removeClass('__highlighted');
+//    });
+
     $(".lego_layer").on("click", ".editable", function(){
-        $(this).append(tempHTML());
+
+        var path = currentElement[0]["href"].split('/')
+            , id = path[path.length-1]
+            , url = path[path.length-2] + "/" + path[path.length-1]
+            , count
+        ;
+
+        if (!addedElements[id]) addedElements[id] = [];
+        count = addedElements[id].length;
+
+        $("#current-elements").append("<li class='lego_widget_ul-i' data-origin = '" + url + "[" + count + "]'>"+ id + "</li>");
+
+        var currentHTML = $(tempHTML()).attr("id", id + "["+count+"]");
+
+        addedElements[id][count] = currentHTML;
+
+        console.log(addedElements);
+        $(this).append(currentHTML);        
         $(".lego_layer").addClass('__hide-bg');
-//        console.log(currentElement[0]["href"]);
-        // TODO: add data-origin to point to layout element: data-origin = id
-        // TODO: Create object and store current elements
-//        $("#current-elements").append(currentElement);
     });
 
     $(".lego_layer").on("click", ".editor_x", function(e){

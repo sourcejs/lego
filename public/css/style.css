@@ -408,6 +408,9 @@ body {
 .editor {
     position:relative;
     }
+    .editor.__highlighted > * {
+        opacity: .5;
+        }
     .editor_x {
         background: #000;
         position: absolute;
