@@ -15,6 +15,7 @@ $('#export-img').on('click', function(e){
 var possibleTargets = ['other', 'navbar', 'toolbar', 'tertiary', 'secondary', 'narrow', 'wide', 'single']
     , activeTargets = []
     , tempHTML = Handlebars.compile($("#dummy-html").html())
+    , currentElement
     ;
 
 //  Расположение определяется степенью двойки:
@@ -63,6 +64,10 @@ $(document).ready(function(){
 
     $(".lego_layer").on("click", ".editable", function(){
         $(this).append(tempHTML());
+//        console.log(currentElement[0]["href"]);
+        // TODO: add data-origin to point to layout element: data-origin = id
+        // TODO: Create object and store current elements
+//        $("#current-elements").append(currentElement);
     });
 
     $(".lego_layer").on("click", ".editor_x", function(e){
@@ -70,7 +75,8 @@ $(document).ready(function(){
         $(this).parent().remove();
     });
 
-    $(".lego_search-result").on("click", ".lego_search-result_i", function(e){
+    $("#lego_search-result").on("click", ".lego_search-result_i", function(e){
+        currentElement = $(this);
         e.preventDefault();
         if (activeTargets.length) {
             for (var i = 0; i < activeTargets.length; i++) {
