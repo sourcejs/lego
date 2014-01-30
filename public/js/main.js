@@ -1,15 +1,8 @@
 $('#export-img').on('click', function(e){
     e.preventDefault();
 
-    html2canvas($('.lego_main'), {
-      onrendered: function(canvas) {
-          var dataURL= canvas.toDataURL();
+    console.log('In development...');
 
-          var data = encodeURIComponent(dataURL);
-
-          $("body").append("<iframe src='/screenshot?base64=" + data + "' style='display: none;' ></iframe>");
-      }
-    });
 });
 
 var possibleTargets = ['other', 'navbar', 'toolbar', 'tertiary', 'secondary', 'narrow', 'wide', 'single']
