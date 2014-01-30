@@ -66,6 +66,12 @@ var parseTargets = function(targets) {
     return result;
 };
 
+var getTextNodesIn = function(el) {
+    return $(el).find(":not(iframe)").addBack().contents().filter(function() {
+        return this.nodeType == 3;
+    });
+};
+
 $('#export-img').on('click', function(e){
     e.preventDefault();
 
@@ -228,5 +234,13 @@ $(document).ready(function(){
 
     });
 
+    $('.lego_layer')
+        .on('click', '[data-target]', function( e ) {
+
+            $('[contenteditable]').attr('contenteditable', 'false');
+
+            var clickedEl = getTextNodesIn( e.target).parent();
+            clickedEl.attr('contenteditable', 'true');
+        });
 });
 
