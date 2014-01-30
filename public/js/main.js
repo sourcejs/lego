@@ -5,6 +5,26 @@ $('#export-img').on('click', function(e){
 
 });
 
+$('#save-html').on('click', function(e){
+    e.preventDefault();
+
+    var html = $('#working-space')[0].outerHTML;
+
+    var data = {
+        html: html
+    };
+
+    $.ajax({
+        url: '/save',
+        data: data,
+        success:function( data ) {
+            if (data.success) {
+                $('#save-html').after('<div><a class="lego_lk" href="/s/'+data.name+'">HTML saved:'+data.name+'</a></div>')
+            }
+        }
+    });
+});
+
 var possibleTargets = ['other', 'navbar', 'toolbar', 'tertiary', 'secondary', 'narrow', 'wide', 'single']
     , activeTargets = []
     , tempHTML = Handlebars.compile($("#dummy-html").html())
