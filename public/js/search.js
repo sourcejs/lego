@@ -29,7 +29,8 @@ $.ajax(specsMaster+'/api', {
 
 Handlebars.registerHelper("imageUrl", function(url) {
     url = url.toString();
-    return specsMaster + "/" + url + "/thumbnail.png";
+
+    return specsMaster + url + "/thumbnail.png";
 });
 
 
