@@ -441,3 +441,9 @@
 [data-url]:after {
     clear: both;
 }
+
+[data-target="overlay"] > *:not([data-active="true"]) {
+	position: absolute;
+	top: -9999px;
+	left: -9999px;
+}
