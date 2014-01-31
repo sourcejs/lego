@@ -109,7 +109,13 @@
 		}
 
 .lego_search-result_img {
-    width: 50px;
+	display: inline-block;
+	width: 85px;
+	height: 85px;
+	background-color: #fff !important;
+	background-position: 50% !important;
+	background-repeat: no-repeat !important;
+	background-size: contain !important;
     }
 
 .lego_search-result_w {

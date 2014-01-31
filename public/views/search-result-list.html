@@ -7,7 +7,7 @@
             {{else}}
                 <a href="{{url}}" class="lego_lk lego_search-result_i" data-target="{{target}}">
             {{/if}}
-                <img class="lego_search-result_img" src="{{imageUrl url}}" alt=""/>
+                <div class="lego_search-result_img" style="background: url({{imageUrl url}})"></div>
                 <div class="lego_search-result_n">{{@key}}</div>
             </a>
         {{/each}}
