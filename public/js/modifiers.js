@@ -134,18 +134,20 @@ var modifiers = (function() {
 		// Sections
 		for (var sectionIndex = 0; sectionIndex < data.sections.length; sectionIndex++) {
 			for (var sectionName in data.sections[sectionIndex]) {
+				if ( data.sections[sectionIndex][sectionName].indexOf('NullPointerException') === -1 ) {
+					var $template = $(template);
+					$template.find('input')
+						.attr('data-elem', data.url)
+						.attr('data-mod', data.sections[sectionIndex][sectionName]);
 
-				var $template = $(template);
-				$template.find('input')
-					.attr('data-elem', data.url)
-					.attr('data-mod', data.sections[sectionIndex][sectionName]);
+					if (sectionIndex == 0) {
+						$template.find('input').prop('checked', true);
+					}
 
-				if (sectionIndex == 0) {
-					$template.find('input').prop('checked', true);
+					$template.find('label').append(sectionName);
+					$wrap.append($template);
+
 				}
-
-				$template.find('label').append(sectionName);
-				$wrap.append($template);
 			}
 
 
@@ -188,6 +190,13 @@ var modifiers = (function() {
 				activeElement = {};
 
 				activeElement.node = document.querySelector('[data-active="true"]');
+
+				if (activeElement.node === null) {
+					console.log('There\'s no html here');
+					activeElement = false;
+					return;
+				}
+
 				activeElement.specFileUrl = activeElement.node.getAttribute('data-url');
 
 				getHTMLpart(activeElement, function(data) {
