@@ -2,7 +2,11 @@
     <div class="lego_search-result_w">
         <div class="lego_search-result_h">{{@key}}</div>
         {{#each this}}
-            <a href="{{url}}" class="lego_lk lego_search-result_i" data-target="{{target}}">
+            {{#if single}}
+                <a href="{{url}}" class="lego_lk lego_search-result_i" data-target="{{target}}" data-single="true">
+            {{else}}
+                <a href="{{url}}" class="lego_lk lego_search-result_i" data-target="{{target}}">
+            {{/if}}
                 <img class="lego_search-result_img" src="{{imageUrl url}}" alt=""/>
                 <div class="lego_search-result_n">{{@key}}</div>
             </a>
