@@ -3,6 +3,7 @@ var modifiers = (function() {
 	var allModifiers = false;
 	var activeElement = false;
 
+    // Получает все доступные модификаторы для всех блоков и эдементов
 	function getCSSMod( callback ) {
 		if (allModifiers) return this;
 
@@ -10,12 +11,18 @@ var modifiers = (function() {
 
         var specsMaster = globalOptions.specsMaster.current;
 		$.ajax({
-			url: specsMaster+"/api",
+			url: "/cssmod",
 			type: 'POST',
-			data: {
-				task: 'parseModifiers'
-			},
+			data: JSON.stringify({
+				files: [
+					'http://127.0.0.1:8080/res/css/prod/core/ncore.css',
+					'http://127.0.0.1:8080/res/css/prod/core/ncore_postponed.css',
+					'http://127.0.0.1:8080/res/css/prod/main/nmain_postponed.css',
+					'http://127.0.0.1:8080/res/css/prod/main/nmain.css'
+				]
+			}),
 			dataType: 'json',
+			contentType: "application/json",
 			success: function(data) {
 				allModifiers = $.extend({}, data, true);
 				callback();
@@ -23,6 +30,7 @@ var modifiers = (function() {
 		})
 	}
 
+    // Получает HTML-шаблон блока
 	function getHTMLpart( activeElement, callback ) {
 		var callback = callback || function() {};
 

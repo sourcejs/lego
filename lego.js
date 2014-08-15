@@ -4,7 +4,10 @@ var express = require('express')
     , mustache = require('mustache')
     , gzippo = require('gzippo')
     , sh = require('shorthash')
-    , colors = require('colors');
+    , colors = require('colors')
+    , cssMods = require('./core/css-mod')
+	, q = require('q')
+	, bodyParser = require('body-parser');
 
 /* Globals */
 global.app = express();
@@ -15,6 +18,10 @@ global.app.set('public', __dirname + '/' + global.opts.common.pathToSpecs);
 global.MODE = process.env.NODE_ENV || 'development';
 /* /Globals */
 
+global.app.use(bodyParser.json());
+global.app.use(logErrors);
+global.app.use(clientErrorHandler);
+global.app.use(errorHandler);
 
 /* Preparing enviroment */
 global.opts.specsMaster.current = global.MODE === 'production' ? global.opts.specsMaster.prod : global.opts.specsMaster.dev;
@@ -71,10 +78,13 @@ function errorHandler(err, req, res, next) {
     res.render('error', { error: err });
 }
 
-global.app.use(logErrors);
-global.app.use(clientErrorHandler);
-global.app.use(errorHandler);
 
+/* Get Css modifiers */
+app.post('/cssmod', function (req, res) {
+	q.when(cssMods.getCssMod(req.body.files), function(parsedCss) {
+		res.send(parsedCss)
+	});
+})
 
 
 /* Save working html */
