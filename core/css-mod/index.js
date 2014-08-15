@@ -1,3 +1,7 @@
+/**
+* Модуль анализа css для извлечения модификаторов
+*/
+
 var fs = require('fs'),
 	css = require('css'),
 	request = require('request'),
@@ -5,12 +9,13 @@ var fs = require('fs'),
 
 module.exports = function cssMod() {
 
-	var modifierRegExpDetect = /__/,
-		modifierClean = /\..*/;
+	var modifierDetect = /__/,
+		startModifierDetect = /^__/;
 
-	var cssFiles = [];
-	var outputTree = {};
+	var cssFiles = []; // Будет содержать список css-файлов для анализа (передается в параметрах вызова)
+	var outputTree = {}; // Будет содержать структуру «блок(элемент) -> модификаторы»
 
+	// Импорт стилей, склейка и построение дерева
 	function prepareCssList() {
 
 		var deferred = q.defer();
@@ -32,8 +37,8 @@ module.exports = function cssMod() {
 		return deferred.promise;
 	}
 
-	function addToList(block, modifier, selector) {
-
+	// Добавление селектора в итоговый список
+	function addToList(block, modifier) {
 		if ( outputTree[block] === undefined ) {
 			outputTree[block] = [];
 		}
@@ -43,11 +48,27 @@ module.exports = function cssMod() {
 		}
 	}
 
-	function dropException(selector, cause) {
-		//console.log('Ignored: ' + selector + '; caused ' + cause);
+	// Диагностика селекторов
+	function dropException(context, selector, cause) {
+		if (global.MODE !== 'production') {
+			console.log('Ignored selector: ' + selector);
+			console.log('Context: ' + context);
+			console.log('Cause: ' + cause)
+			console.log('');
+		}
 	}
 
+	// Разбор правил
 	function processCssList(parsedCss) {
+
+		function parseOldModifier(rule) {
+			var separatorPos = stringList[sel].indexOf('__');
+
+			return {
+				block: rule.substring(0, separatorPos),
+				modifier: rule
+			}
+		}
 
 		for (var rule = 0; rule < parsedCss.length; rule++) {
 			var selectors = parsedCss[rule].selectors;
@@ -55,51 +76,86 @@ module.exports = function cssMod() {
 			if (selectors !== undefined) {
 				for (var selector = 0; selector < selectors.length; selectors++) {
 
-					if (modifierRegExpDetect.test( selectors[selector] )) {
+					if (modifierDetect.test( selectors[selector] )) {
 
 						var words = selectors[selector]
-							.replace('::before', '')
-							.replace('::after', '')
-							.replace(':before', '')
-							.replace(':after', '')
-							.replace(':hover', '')
-							.replace(':focus', '')
-							.replace(':target', '')
-							.replace(':active', '')
-							.replace('+', '')
-							.replace('~', '')
-							.replace('*', '')
+
+							// зачищаем псевдоэлементы и псевдоклассы
+							.replace(/::before/g, '')
+							.replace(/::after/g, '')
+							.replace(/:before/g, '')
+							.replace(/:after/g, '')
+							.replace(/:hover/g, '')
+							.replace(/:focus/g, '')
+							.replace(/:target/g, '')
+							.replace(/:active/g, '')
+							.replace(/:first-child/g, '')
+							.replace(/:last-child/g, '')
+							.replace(/:empty/g, '')
+
+							// из :not(.__class) можно извлечь пользу
+							.replace(/:not\(/g, '')
+							.replace(/\)/g, '')
+
+							// удаляем атрибуты
+							.replace(/\[.*?\]/ig, '')
+
+							// сложные правила конвертируем в каскад
+							.replace(/\+/g, ' ')
+							.replace(/~/g, ' ')
+							.replace(/>/g, ' ')
+							.replace(/\*/, ' ')
 							.split(' ');
 
 						for (var word = 0; word < words.length; word++) {
-							if ( (modifierRegExpDetect.test( words[word] )) && (words[word].indexOf(':not(') === -1) ) {
+							if ( modifierDetect.test(words[word]) ) {
 
-								var delimPos = words[word].indexOf('__');
-								if (words[word].charAt( delimPos - 1 ) == '.') {
-									var block = words[word].substring(0, delimPos-1),
-										modifier = words[word].substring(delimPos).replace(modifierClean, '');
+								// Разбиваем селектор, содержащий class и id, и удаляем первый пустой элемент
+								var stringList = words[word].split(/\.|#/g);
+								stringList.shift();
 
-									if (block && modifier && (block.indexOf('.', 1) === -1)) {
-										addToList(block.substring(1), modifier, words[word]);
-									} else {
-										dropException(words[word], 'not full, dirty block');
-									}
+								var block = 0, // флаг неопределенности блока
+									modifier = []; // массив для модификаторов в новом стиле
 
-								} else {
-									var stringList = words[word].split('.');
+								for (var sel = 0; sel < stringList.length; sel++) {
+									var currentClass = stringList[sel];
 
-									for (var sel = 0; sel < stringList.length; sel++) {
-										var block = stringList[sel].substring(0, stringList[sel].indexOf('__') );
-
-										if (block) {
-											addToList(block, stringList[sel], stringList[sel]);
-										} else {
-											dropException(stringList[sel], 'not full');
+									if (!modifierDetect.test(currentClass)) {
+										// Это блок (элемент)
+										if (block !== false && block !== currentClass) {
+											if (block === 0) {
+												block = currentClass
+											} else {
+												block = false;
+											}
 										}
+									} else if (startModifierDetect.test(currentClass)) {
+										// Это модификатор в новом стиле
+										modifier.push(currentClass);
+									} else {
+										// Это модификатор в старом стиле
+										var result = parseOldModifier(currentClass);
+
+										if (block !== false && block !== result.block) {
+											if (block === 0) {
+												block = result.block
+											} else {
+												block = false;
+											}
+										}
+
+										addToList(result.block, result.modifier);
 									}
 								}
-							} else {
-								dropException(words[word], '__, :not');
+
+								// Если строго один блок (элемент) и модификаторы в новом стиле, нет неопределенности
+								if (block && modifier.length) {
+									for (var i = 0; i < modifier.length; i++) {
+										addToList(block, modifier[i]);
+									}
+								} else if (!block && modifier.length) {
+									//dropException(selectors[selector], words[word], 'Принадлежность модификатора неопределена');
+								}
 							}
 						}
 					}
@@ -113,7 +169,7 @@ module.exports = function cssMod() {
 
 	return {
 		getCssMod: function (cssFilesPath) {
-			//cssFiles = cssFilesPath;
+			cssFiles = cssFilesPath;
 			return q.fcall(prepareCssList).then(processCssList);
 		}
 	}

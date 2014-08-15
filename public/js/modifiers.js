@@ -9,20 +9,16 @@ var modifiers = (function() {
 
 		var callback = callback || function() {};
 
-        var specsMaster = globalOptions.specsMaster.current;
 		$.ajax({
 			url: "/cssmod",
 			type: 'POST',
 			data: JSON.stringify({
-				files: [
-					'http://127.0.0.1:8080/res/css/prod/core/ncore.css',
-					'http://127.0.0.1:8080/res/css/prod/core/ncore_postponed.css',
-					'http://127.0.0.1:8080/res/css/prod/main/nmain_postponed.css',
-					'http://127.0.0.1:8080/res/css/prod/main/nmain.css'
-				]
+				// Массив в перечислением css-файлов для анализа
+				// Может быть импортирован из глобальных настроек или задан вручную
+				files: globalOptions.cssModFiles
 			}),
 			dataType: 'json',
-			contentType: "application/json",
+			contentType: "application/json", // нужен для обработки параметров POST-запроса в express
 			success: function(data) {
 				allModifiers = $.extend({}, data, true);
 				callback();
