@@ -6,15 +6,13 @@ var parsedTree = {}
 ;
 /* /Globals */
 
-$.ajax(specsMaster+'/api', {
-    data: {
-        task: 'getCats',
-        specID: '',
-        section: 2
-    },
+//$.ajax('/bootstrap/bootstrap-tree.json', {
+$.ajax(specsMaster+'/api/specs', {
+    contentType: "application/json",
     method: 'POST',
     success: function (data) {
-        parsedTree = data;
+
+        parsedTree = data['base'] || data;
         parsed = true;
 
         $.ajax({
@@ -40,8 +38,6 @@ var fuzzySearch = function(q, allData) {
         , qRegExp = new RegExp(query)
         , lowerCat
     ;
-
-    console.log(allData);
 
     for (cat in allData) {
         lowerCat = cat.toLowerCase();

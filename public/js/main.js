@@ -199,22 +199,21 @@ $("#lego_search-result").on("click", ".lego_search-result_i", function(e){
     chosenNavigation = _this;
     e.preventDefault();
 
-    var url = chosenNavigation.attr('href').substring(1),
+    var rawUrl = chosenNavigation.attr('href'),
+        url = rawUrl.substring(1),
         single = $(this).data('single'),
         exists = false;
 
     var specsMaster = globalOptions.specsMaster.current;
-    $.ajax(specsMaster+'/api', {
-        data: {
-            specID: url
-        },
+
+    $.ajax(specsMaster+'/api/specs/html', {
+        contentType: "application/json",
+        data: JSON.stringify({id: rawUrl}),
+        dataType: "json",
         method: 'POST',
         success: function (data) {
-
-            if (data['sections'] !== undefined && data['sections'].length) {
-                for (k in data['sections'][0]) {
-                    tempHTML = data['sections'][0][k];
-                }
+            if (data['id'].length) {
+                tempHTML = data['contents'][0]['html'][0];
             } else {
                 $('.editable').removeClass('editable');
                 console.log('No html data there!');
