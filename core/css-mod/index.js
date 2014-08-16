@@ -83,16 +83,19 @@ module.exports = function cssMod() {
 							// зачищаем псевдоэлементы и псевдоклассы
 							.replace(/::before/g, '')
 							.replace(/::after/g, '')
+							.replace(/::disabled/g, '')
+
 							.replace(/:before/g, '')
 							.replace(/:after/g, '')
 							.replace(/:hover/g, '')
 							.replace(/:focus/g, '')
 							.replace(/:target/g, '')
 							.replace(/:active/g, '')
-							.replace(/::disabled/g, '')
+							.replace(/:disabled/g, '')
 							.replace(/:first-child/g, '')
 							.replace(/:last-child/g, '')
 							.replace(/:empty/g, '')
+
 							.replace(/::-moz-placeholder/g, '')
 							.replace(/:-ms-input-placeholder/g, '')
 							.replace(/::-webkit-input-placeholder/g, '')

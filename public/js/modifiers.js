@@ -42,13 +42,15 @@ var modifiers = (function() {
 
 	}
 
+	// Проверяет на наличие включенных и выключенных модификаторов
+	// и отражение этого факта в сайдбаре
 	function checkUsedAttributes( activeElement ) {
 
 		$('input[name="modificators"]').each(function() {
 
 			var modValue = $(this).attr('data-mod'),
 				elemValue = $(this).attr('data-elem'),
-				affectedNodes = activeElement.node.querySelectorAll('.'+elemValue+'.'+modValue);
+				affectedNodes = activeElement.node.parentNode.querySelectorAll('.'+elemValue+'.'+modValue);
 
 			$(this).prop('checked', false);
 
@@ -64,6 +66,30 @@ var modifiers = (function() {
 		})
 	}
 
+	// Определение проектного класса на основе сопоставления иерархии разметки и присутствия
+	// классов в дереве модификаторов (рассматриваются все классы в блоке)
+	function detectBlockClassName( allSelectors ) {
+		var blockDetect = new RegExp(globalOptions.cssModRules.blockRule);
+
+		// По всем селекторам, содержащим класс
+		for (var currentSelector = 0; currentSelector < allSelectors.length; currentSelector++) {
+			var currentSelectorClassList = allSelectors[ currentSelector ].classList;
+
+			// По всем классам в полученных селекторах
+			for (var curClassList = 0; curClassList < currentSelectorClassList.length; curClassList++) {
+				var currElem = currentSelectorClassList[curClassList];
+
+				if (blockDetect.test(currElem)) {
+					return currElem;
+				}
+			}
+		}
+
+		// Если блок не найден, возвратим пустоту
+		return '';
+	}
+
+	// Поиск доступных для блока+элементов модификаторов и рендер правого сайдбара
 	function searchInBlock( activeElement ) {
 
 		var $wrap = $('.js-modificators .lego_form-i'),
@@ -77,7 +103,10 @@ var modifiers = (function() {
 
 		$wrap.empty;
 
-		var allSelectors = activeElement.node.querySelectorAll('[class]');
+		var allSelectors = activeElement.node.parentNode.querySelectorAll('[class]');
+
+		// Попробуем определить проектный класс
+		activeElement.baseClass = detectBlockClassName(allSelectors);
 
 		// По всем селекторам, содержащим класс
 		for (var currentSelector = 0; currentSelector < allSelectors.length; currentSelector++) {
@@ -216,12 +245,7 @@ var modifiers = (function() {
 					data.url = activeElement.specFileUrl;
 
 					searchVariations(data);
-
-					// Project className -- что это??
-					activeElement.baseClass = data.className;
-
 					searchInBlock( activeElement );
-
 					saveBlockSettings( activeElement );
 				})
 
@@ -234,12 +258,7 @@ var modifiers = (function() {
 					activeElement = innerActiveElement;
 
 					searchVariations(data);
-
-					// Project className
-					activeElement.baseClass = data.className;
-
 					searchInBlock( activeElement );
-
 					loadBlockSettings( activeElement );
 				})
 			}
@@ -298,7 +317,10 @@ var modifiers = (function() {
 
 
 $(function() {
+	// Инициализация загрузки модификаторов
+	modifiers.init();
 
+	// Обработка кликов по вариациям и модификаторам в сайдбаре
 	$('body').on('click', '.lego_checkbox', function() {
 
 		var $activeNode = $('[data-active="true"]');
@@ -319,13 +341,13 @@ $(function() {
 			var blockClass = $(this).attr('data-elem');
 
 			if ( $(this).is(':checked') ) {
-				if ( $activeNode.find('[data-old-mod*=' + modClass + ']').length ) {
-					$activeNode.find('.' + blockClass + '[data-old-mod*=' + modClass + ']').addClass(modClass);
+				if ( $activeNode.parent().find('[data-old-mod*=' + modClass + ']').length ) {
+					$activeNode.parent().find('.' + blockClass + '[data-old-mod*=' + modClass + ']').addClass(modClass);
 				} else {
-					$activeNode.find('.' + blockClass).addClass(modClass)
+					$activeNode.parent().find('.' + blockClass).addClass(modClass)
 				}
 			} else {
-				$activeNode.find('.' + blockClass).removeClass(modClass).attr('data-mod')
+				$activeNode.parent().find('.' + blockClass).removeClass(modClass).attr('data-mod')
 			}
 		}
 	})

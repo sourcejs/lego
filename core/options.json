@@ -16,6 +16,7 @@
 	],
 
 	"cssModRules": {
+		"blockRule": "^[a-zA-Z0-9]+$",
 		"modifierRule": "-",
 		"startModifierRule": "^-"
 	}
