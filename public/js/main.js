@@ -6,7 +6,8 @@ var
     , chosenNavigation
     , activeElement
     , addedElements = {}
-    ;
+    , acceptsHTML = false
+;
 // /GLOBALS
 
 $('#export-img').on('click', function(e){
@@ -94,10 +95,24 @@ var switchActive = function(current) {
 // html - optional new html code
 var modifyElement = function (url, num, html) {
 
-    if (html === undefined) {
+    var removeWithChildren = function(url, num) {
+        var arr = addedElements[url][num].find('[data-num][data-url]');
+        arr.each(function() {
+            var chUrl = this.dataset['url'],
+                chNum = this.dataset['num'];
+
+            addedElements[chUrl][chNum].remove();
+            addedElements[chUrl][chNum] = null;
+
+            $(".lego_widget_ul-i[data-origin='"+chUrl+"'][data-num='"+chNum+"']").remove();
+        })
         addedElements[url][num].remove();
         addedElements[url][num] = null;
         $(".lego_widget_ul-i[data-origin='"+url+"'][data-num='"+num+"']").remove();
+    };
+
+    if (html === undefined) {
+        removeWithChildren(url, num);
     } else {
         var wrapper = addedElements[url][num].wrap("<div></div>").parent()
             , jHTML = $(html).attr("data-url", url).attr("data-num", num).attr("data-active", "true")
@@ -135,7 +150,7 @@ var insertChosen = function(targetContainer){
 
         $("#current-elements").append("<li class='lego_widget_ul-i' data-origin = '" + url + "' data-num=" + count + "><a class='lego_lk' href = '" + url + "'>" + name + "</a><span class='lego_ic lego_ic_close'></span></li>");
 
-        var currentHTML = $(tempHTML).attr("data-url", url).attr("data-num", count);
+        var currentHTML = $(tempHTML).attr("data-url", url).attr("data-num", count).attr('data-container', acceptsHTML);
 
         addedElements[url][count] = currentHTML;
 
@@ -186,7 +201,7 @@ $("#current-elements").on("click", ".lego_ic_close", function() {
 
 	modifyElement(origin, num);
 	modifiers.cleanModificationData();
-})
+});
 
 $(".lego_layer").on("click", ".editable", function(){
     insertChosen(this);
@@ -196,7 +211,7 @@ $("#lego_search-result").on("click", ".lego_search-result_i", function(e){
     e.preventDefault();
 
     var _this = $(this);
-    var acceptsHTML = _this.data('container');
+    acceptsHTML = _this.data('accepts');
 
     chosenNavigation = _this;
     e.preventDefault();
@@ -240,7 +255,7 @@ $("#lego_search-result").on("click", ".lego_search-result_i", function(e){
                         insertChosen(activeTargets[i]);
                     }
                 }
-            } else if ($('[data-target="overlay"]:visible').length !== 0) {
+            } else if ($('[data-target="overlay"]:visible').length !== 0 || $('[data-target="container"]:visible').length !== 0) {
                 for(var i=0; i < activeTargets.length; i++){
                     if (activeTargets[i].selector === '[data-target="overlay"]') {
                         insertChosen(activeTargets[i]);
@@ -267,6 +282,15 @@ $("#lego_search-result").on("click", ".lego_search-result_i", function(e){
             activeTargets.push(elem);
             elem.addClass('editable');
         }
+
+        $('[data-container="true"]').each(function() {
+            activeTargets.push($(this));
+            $(this).addClass('editable');
+            $(this).find('div, span').each(function() {
+                activeTargets.push($(this));
+                $(this).addClass('editable');
+            })
+        })
     }
 });
 
