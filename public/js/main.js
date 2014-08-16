@@ -210,7 +210,7 @@ $("#lego_search-result").on("click", ".lego_search-result_i", function(e){
 
     $.ajax(specsMaster+'/api/specs/html', {
         contentType: "application/json",
-        data: JSON.stringify({id: rawUrl}),
+        data: JSON.stringify({id: url}),
         dataType: "json",
         method: 'POST',
         success: function (data) {

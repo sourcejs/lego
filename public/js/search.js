@@ -12,7 +12,7 @@ $.ajax(specsMaster+'/api/specs', {
     method: 'POST',
     success: function (data) {
 
-        parsedTree = data['base'] || data;
+        parsedTree = data;
         parsed = true;
 
         $.ajax({
