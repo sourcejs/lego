@@ -1,8 +1,7 @@
 {{#each this}}
 <div class="lego_search-result_w">
-    <a href="{{this.specFile.url}}" class="lego_lk lego_search-result_i" data-target="{{this.specFile.target}}">
+    <a href="{{@key}}" class="lego_lk lego_search-result_i" data-target="{{this.specFile.target}}" data-container="{{this.specFile.isContainer}}">
         <div class="lego_search-result_n">{{@key}}</div>
     </a>
 </div>
 {{/each}}
-

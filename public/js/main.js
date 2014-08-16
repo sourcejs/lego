@@ -193,8 +193,10 @@ $(".lego_layer").on("click", ".editable", function(){
 });
 
 $("#lego_search-result").on("click", ".lego_search-result_i", function(e){
+    e.preventDefault();
 
     var _this = $(this);
+    var acceptsHTML = _this.data('container');
 
     chosenNavigation = _this;
     e.preventDefault();
@@ -212,7 +214,7 @@ $("#lego_search-result").on("click", ".lego_search-result_i", function(e){
         dataType: "json",
         method: 'POST',
         success: function (data) {
-            if (data['id'].length) {
+            if (data['contents'][0]['html'][0].length) {
                 tempHTML = data['contents'][0]['html'][0];
             } else {
                 $('.editable').removeClass('editable');
@@ -230,7 +232,7 @@ $("#lego_search-result").on("click", ".lego_search-result_i", function(e){
                 }
             }
 
-            //element always have minimum of one target
+            //element always has at least one target
 
             if (activeTargets.length < 3 && !exists) {
                 for(var i=0; i < activeTargets.length; i++){
