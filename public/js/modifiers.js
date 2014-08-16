@@ -30,14 +30,11 @@ var modifiers = (function() {
 	function getHTMLpart( activeElement, callback ) {
 		var callback = callback || function() {};
 
-		var specsMaster = globalOptions.specsMaster.current;
-		$.ajax({
-			url: specsMaster+"/api",
-			data: {
-				specID: activeElement.specFileUrl
-			},
-			type: 'POST',
-			dataType: 'json',
+		$.ajax(specsMaster+'/api/specs/html', {
+			contentType: "application/json",
+			data: JSON.stringify({id: activeElement.specFileUrl}),
+			dataType: "json",
+			method: 'POST',
 			success: function(data) {
 				callback(data);
 			}
@@ -65,7 +62,6 @@ var modifiers = (function() {
 				}
 			}
 		})
-
 	}
 
 	function searchInBlock( activeElement ) {
@@ -125,8 +121,11 @@ var modifiers = (function() {
 		checkUsedAttributes(activeElement);
 	}
 
+	// Просматриваем структуру на предмет вариаций, и на основе полученного
+	// генерируем список вариаций в правом сайдбаре
 	function searchVariations( data ) {
-		var $wrap = $('.js-variations .lego_form-i'),
+		var flatSections = [],
+			$wrap = $('.js-variations .lego_form-i'),
 			template = '<div class="lego_form-i_w"> \
 						<label class="lego_form-i_txt"> \
 							<input class="lego_checkbox" type="radio" name="variations"/> \
@@ -135,29 +134,36 @@ var modifiers = (function() {
 
 		$wrap.empty;
 
-		// Sections
-		for (var sectionIndex = 0; sectionIndex < data.sections.length; sectionIndex++) {
-			for (var sectionName in data.sections[sectionIndex]) {
-				if ( data.sections[sectionIndex][sectionName].indexOf('NullPointerException') === -1 ) {
-					var $template = $(template);
-					$template.find('input')
-						.attr('data-elem', data.url)
-						.attr('data-mod', data.sections[sectionIndex][sectionName]);
+		// Нам нужно развернуть древовидную структуру «секция[]»-«подсекция[]»—...—«примеры[]» в плоский массив
+		(function flatten(target) {
 
-					if (sectionIndex == 0) {
-						$template.find('input').prop('checked', true);
-					}
+			for (var i=0; i<target.length; i++) {
+				flatSections.push(target[i]);
 
-					$template.find('label').append(sectionName);
-					$wrap.append($template);
-
+				if (target[i].nested && target[i].nested.length) {
+					flatten(target[i].nested);
 				}
 			}
+		})(data.contents);
 
+		// Проходим по плоскому массиву и забиваем пункты меню данными
+		for (var sectionIndex = 0; sectionIndex < flatSections.length; sectionIndex++) {
+
+			var $template = $(template);
+			$template.find('input')
+				.attr('data-elem', data.url)
+				.attr('data-mod', flatSections[sectionIndex].html[0]); // Названиями обладают только секции и подсекции, так что берем только первый экземпляр примеров
+
+			// Первый пункт автоматически выбирается
+			if (sectionIndex == 0) {
+				$template.find('input').prop('checked', true);
+			}
+
+			// Сендер секции в сайдбаре
+			$template.find('label').append(flatSections[sectionIndex].title);
+			$wrap.append($template);
 
 		}
-
-
 	}
 
 	function saveBlockSettings( activeElement ) {
@@ -176,7 +182,6 @@ var modifiers = (function() {
 
 		init: function( callback ) {
 			getCSSMod( callback );
-
 			return this;
 		},
 
@@ -208,10 +213,11 @@ var modifiers = (function() {
 					var innerActiveElement = activeElement;
 					modifiers.cleanModificationData();
 					activeElement = innerActiveElement;
+					data.url = activeElement.specFileUrl;
 
 					searchVariations(data);
 
-					// Project className
+					// Project className -- что это??
 					activeElement.baseClass = data.className;
 
 					searchInBlock( activeElement );

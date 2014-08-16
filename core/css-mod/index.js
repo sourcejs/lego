@@ -89,9 +89,13 @@ module.exports = function cssMod() {
 							.replace(/:focus/g, '')
 							.replace(/:target/g, '')
 							.replace(/:active/g, '')
+							.replace(/::disabled/g, '')
 							.replace(/:first-child/g, '')
 							.replace(/:last-child/g, '')
 							.replace(/:empty/g, '')
+							.replace(/::-moz-placeholder/g, '')
+							.replace(/:-ms-input-placeholder/g, '')
+							.replace(/::-webkit-input-placeholder/g, '')
 
 							// из :not(.__class) можно извлечь пользу
 							.replace(/:not\(/g, '')
