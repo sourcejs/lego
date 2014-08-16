@@ -9,8 +9,8 @@ var fs = require('fs'),
 
 module.exports = function cssMod() {
 
-	var modifierDetect = /__/,
-		startModifierDetect = /^__/;
+	var modifierDetect = /__/;
+	var startModifierDetect = /^__/;
 
 	var cssFiles = []; // Будет содержать список css-файлов для анализа (передается в параметрах вызова)
 	var outputTree = {}; // Будет содержать структуру «блок(элемент) -> модификаторы»
@@ -62,7 +62,7 @@ module.exports = function cssMod() {
 	function processCssList(parsedCss) {
 
 		function parseOldModifier(rule) {
-			var separatorPos = stringList[sel].indexOf('__');
+			var separatorPos = stringList[sel].search(modifierDetect);
 
 			return {
 				block: rule.substring(0, separatorPos),
@@ -168,8 +168,11 @@ module.exports = function cssMod() {
 	}
 
 	return {
-		getCssMod: function (cssFilesPath) {
+		getCssMod: function (cssFilesPath, modifierRule, startModifierRule) {
 			cssFiles = cssFilesPath;
+			modifierDetect = new RegExp(modifierRule) || modifierDetect;
+			startModifierDetect = new RegExp(startModifierRule) || startModifierDetect;
+
 			return q.fcall(prepareCssList).then(processCssList);
 		}
 	}

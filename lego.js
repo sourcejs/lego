@@ -81,7 +81,10 @@ function errorHandler(err, req, res, next) {
 
 /* Get Css modifiers */
 app.post('/cssmod', function (req, res) {
-	q.when(cssMods.getCssMod(req.body.files), function(parsedCss) {
+	var modifierRule = global.opts.cssModRules.modifierRule;
+	var startModifierRule = global.opts.cssModRules.startModifierRule;
+
+	q.when(cssMods.getCssMod(req.body.files, modifierRule, startModifierRule), function(parsedCss) {
 		res.send(parsedCss)
 	});
 })
