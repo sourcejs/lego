@@ -175,10 +175,6 @@ $(".lego_toggler").on("click", ".lego_toggle_i", function(){
     $('.lego_search-result').toggleClass("__list");
 });
 
-$(".lego_search-result").on("click", ".lego_search-result_h", function(){
-    $(this).parent().toggleClass("__closed");
-});
-
 $("#current-elements").on("click", ".lego_lk", function(e) {
     e.preventDefault();
     $("#current-elements .lego_lk").removeClass("__active");

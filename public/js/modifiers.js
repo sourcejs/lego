@@ -15,7 +15,7 @@ var modifiers = (function() {
 			data: JSON.stringify({
 				// Массив в перечислением css-файлов для анализа
 				// Может быть импортирован из глобальных настроек или задан вручную
-				files: globalOptions.cssModFiles
+				files: globalOptions.cssMod.files
 			}),
 			dataType: 'json',
 			contentType: "application/json", // нужен для обработки параметров POST-запроса в express
@@ -46,6 +46,22 @@ var modifiers = (function() {
 	// и отражение этого факта в сайдбаре
 	function checkUsedAttributes( activeElement ) {
 
+        function hasDataAttr(ele,cls) {
+            if (ele.getAttribute('data-old-mod')) {
+                return ele.getAttribute('data-old-mod').match(new RegExp('(\\s|^)'+cls+'(\\s|$)'));
+            } else {
+                return false;
+            }
+
+        }
+
+        function updateDataAttr(ele,cls) {
+            var oldData = ele.getAttribute('data-old-mod') || '';
+            if (!hasDataAttr(ele,cls)) {
+                ele.setAttribute('data-old-mod', $.trim(oldData +=' ' + cls));
+            }
+        }
+
 		$('input[name="modificators"]').each(function() {
 
 			var modValue = $(this).attr('data-mod'),
@@ -58,9 +74,11 @@ var modifiers = (function() {
 				$(this).prop('checked', true);
 
 				for (var i = 0; i < affectedNodes.length; i++) {
-					var oldData = affectedNodes[i].getAttribute('data-old-mod') || '';
+					//var oldData = affectedNodes[i].getAttribute('data-old-mod') || '';
 
-					affectedNodes[i].setAttribute('data-old-mod', oldData += ' ' + modValue);
+					//affectedNodes[i].setAttribute('data-old-mod', $.trim(oldData += ' ' + modValue));
+
+                    updateDataAttr(affectedNodes[i], modValue);
 				}
 			}
 		})
@@ -69,7 +87,7 @@ var modifiers = (function() {
 	// Определение проектного класса на основе сопоставления иерархии разметки и присутствия
 	// классов в дереве модификаторов (рассматриваются все классы в блоке)
 	function detectBlockClassName( allSelectors ) {
-		var blockDetect = new RegExp(globalOptions.cssModRules.blockRule);
+		var blockDetect = new RegExp(globalOptions.cssMod.rules.blockRule);
 
 		// По всем селекторам, содержащим класс
 		for (var currentSelector = 0; currentSelector < allSelectors.length; currentSelector++) {
@@ -101,17 +119,21 @@ var modifiers = (function() {
 						</label> \
 					</div>';
 
+		var linksBlockToExpand = {};
+
 		$wrap.empty;
 
 		var allSelectors = activeElement.node.parentNode.querySelectorAll('[class]');
 
 		// Попробуем определить проектный класс
-		activeElement.baseClass = detectBlockClassName(allSelectors);
+		activeElement.baseClass = globalOptions.lookInsideBlock
+			? ''
+			: detectBlockClassName(allSelectors);
 
 		// По всем селекторам, содержащим класс
 		for (var currentSelector = 0; currentSelector < allSelectors.length; currentSelector++) {
 			var currentSelectorClassList = allSelectors[ currentSelector ].classList;
-			usedModifiers = [];
+			//usedModifiers = [];
 
 			// перебор классов в класслисте
 			for (var curClassList = 0; curClassList < currentSelectorClassList.length; curClassList++) {
@@ -121,13 +143,26 @@ var modifiers = (function() {
 
 					var currElem = currentSelectorClassList[curClassList];
 
+					// Если блок обладает модификаторами
 					if ((allModifiers[ currElem ])) {
 
 						for (var currentModifier = 0; currentModifier < allModifiers[ currElem ].length; currentModifier++) {
 
-							// если такой элемент уже использовался, выйти
-							if (usedElements.indexOf( currElem + allModifiers[currElem][currentModifier] ) !== -1  ) continue;
-							usedElements.push( currElem + allModifiers[currElem][currentModifier] )
+							// если такой блок+модификатор уже использовался, выйти
+							if (usedModifiers.indexOf( currElem + allModifiers[currElem][currentModifier] ) !== -1  ) continue;
+							usedModifiers.push( currElem + allModifiers[currElem][currentModifier] );
+
+							if (!linksBlockToExpand[ currElem ]) {
+
+								var isClosed = false;
+								if (Object.keys(linksBlockToExpand).length) {
+									isClosed = true;
+								}
+
+								linksBlockToExpand[ currElem ] = component.expand.create($wrap, currElem, isClosed);
+							}
+
+
 
 							/*if ( activeElement.node.querySelector('.' + currElem + '.' + allModifiers[currElem][currentModifier]) !== null ) {
 								usedModifiers.push( allModifiers[currElem][currentModifier] );
@@ -139,7 +174,9 @@ var modifiers = (function() {
 								.attr('data-mod', allModifiers[currentSelectorClassList[curClassList]][currentModifier]);
 
 							$template.find('label').append(currElem + ' ' + allModifiers[currElem][currentModifier]);
-							$wrap.append( $template )
+							//$wrap.append( $template )
+
+							component.expand.append(linksBlockToExpand[currElem], $template);
 
 						}
 					}

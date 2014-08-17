@@ -10,14 +10,18 @@
         "prod": "http://okp.me:8080"
     },
 
-    "cssModFiles": [
-		"http://127.0.0.1:7777/demo/css/bootstrap.css",
-		"http://127.0.0.1:7777/demo/css/bootstrap-theme.css"
-	],
+    "cssMod": {
+    	"files": [
+			"http://127.0.0.1:7777/demo/css/bootstrap.css",
+			"http://127.0.0.1:7777/demo/css/bootstrap-theme.css"
+		],
+		"rules": {
+			"blockRule": "^[a-zA-Z0-9]+$",
+			"modifierRule": "-",
+			"startModifierRule": "^-"
+		},
+		"debug": false
+    },
 
-	"cssModRules": {
-		"blockRule": "^[a-zA-Z0-9]+$",
-		"modifierRule": "-",
-		"startModifierRule": "^-"
-	}
+    "lookInsideBlock": false
 }

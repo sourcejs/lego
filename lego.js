@@ -5,7 +5,7 @@ var express = require('express')
     , gzippo = require('gzippo')
     , sh = require('shorthash')
     , colors = require('colors')
-    , cssMods = require('./core/css-mod')
+    , cssMod = require('./core/css-mod')
 	, q = require('q')
 	, bodyParser = require('body-parser');
 
@@ -81,10 +81,11 @@ function errorHandler(err, req, res, next) {
 
 /* Get Css modifiers */
 app.post('/cssmod', function (req, res) {
-	var modifierRule = global.opts.cssModRules.modifierRule;
-	var startModifierRule = global.opts.cssModRules.startModifierRule;
+	// Переопределим конфигурацию с учетом пришедших с клиента настроек
+	var config = JSON.parse(JSON.stringify(global.opts.cssMod));
+	config.files = req.body.files;
 
-	q.when(cssMods.getCssMod(req.body.files, modifierRule, startModifierRule), function(parsedCss) {
+	q.when(cssMod.getCssMod(config), function(parsedCss) {
 		res.send(parsedCss)
 	});
 })

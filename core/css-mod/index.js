@@ -9,6 +9,7 @@ var fs = require('fs'),
 
 module.exports = function cssMod() {
 
+	var debug = false;
 	var modifierDetect = /__/;
 	var startModifierDetect = /^__/;
 
@@ -50,7 +51,7 @@ module.exports = function cssMod() {
 
 	// Диагностика селекторов
 	function dropException(context, selector, cause) {
-		if (global.MODE !== 'production') {
+		if (debug) {
 			console.log('Ignored selector: ' + selector);
 			console.log('Context: ' + context);
 			console.log('Cause: ' + cause)
@@ -161,7 +162,7 @@ module.exports = function cssMod() {
 										addToList(block, modifier[i]);
 									}
 								} else if (!block && modifier.length) {
-									//dropException(selectors[selector], words[word], 'Принадлежность модификатора неопределена');
+									dropException(selectors[selector], words[word], 'Принадлежность модификатора не определена');
 								}
 							}
 						}
@@ -175,10 +176,11 @@ module.exports = function cssMod() {
 	}
 
 	return {
-		getCssMod: function (cssFilesPath, modifierRule, startModifierRule) {
-			cssFiles = cssFilesPath;
-			modifierDetect = new RegExp(modifierRule) || modifierDetect;
-			startModifierDetect = new RegExp(startModifierRule) || startModifierDetect;
+		getCssMod: function (config) {
+			cssFiles = config.files;
+			modifierDetect = new RegExp(config.rules.modifierRule) || modifierDetect;
+			startModifierDetect = new RegExp(config.rules.startModifierRule) || startModifierDetect;
+			debug = config.debug || debug;
 
 			return q.fcall(prepareCssList).then(processCssList);
 		}
