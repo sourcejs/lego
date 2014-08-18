@@ -111,24 +111,23 @@ var modifiers = (function() {
 	function searchInBlock( activeElement ) {
 
 		var $wrap = $('.js-modificators .lego_form-i'),
-			usedElements = [],
 			usedModifiers = [],
+			linksBlockToExpand = {},
 			template = '<div class="lego_form-i_w"> \
 						<label class="lego_form-i_txt"> \
 							<input class="lego_checkbox" type="checkbox" name="modificators"/> \
 						</label> \
 					</div>';
 
-		var linksBlockToExpand = {};
-
 		$wrap.empty;
 
 		var allSelectors = activeElement.node.parentNode.querySelectorAll('[class]');
 
-		// Попробуем определить проектный класс
-		activeElement.baseClass = globalOptions.lookInsideBlock
-			? ''
-			: detectBlockClassName(allSelectors);
+		// Если работа со вложенными блоками выключена,
+		// попробуем определить проектный класс
+		activeElement.baseClass = !globalOptions.modifyInnerBlocks
+			? detectBlockClassName(allSelectors)
+			: '';
 
 		// По всем селекторам, содержащим класс
 		for (var currentSelector = 0; currentSelector < allSelectors.length; currentSelector++) {
@@ -153,16 +152,12 @@ var modifiers = (function() {
 							usedModifiers.push( currElem + allModifiers[currElem][currentModifier] );
 
 							if (!linksBlockToExpand[ currElem ]) {
-
 								var isClosed = false;
 								if (Object.keys(linksBlockToExpand).length) {
 									isClosed = true;
 								}
-
 								linksBlockToExpand[ currElem ] = component.expand.create($wrap, currElem, isClosed);
 							}
-
-
 
 							/*if ( activeElement.node.querySelector('.' + currElem + '.' + allModifiers[currElem][currentModifier]) !== null ) {
 								usedModifiers.push( allModifiers[currElem][currentModifier] );
@@ -174,10 +169,8 @@ var modifiers = (function() {
 								.attr('data-mod', allModifiers[currentSelectorClassList[curClassList]][currentModifier]);
 
 							$template.find('label').append(currElem + ' ' + allModifiers[currElem][currentModifier]);
-							//$wrap.append( $template )
 
 							component.expand.append(linksBlockToExpand[currElem], $template);
-
 						}
 					}
 				}

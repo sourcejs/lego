@@ -23,5 +23,5 @@
 		"debug": false
     },
 
-    "lookInsideBlock": false
+    "modifyInnerBlocks": true
 }
