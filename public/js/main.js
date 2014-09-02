@@ -168,11 +168,20 @@ var insertChosen = function(targetContainer){
     clearChosen();
 };
 
-$(".lego_toggler").on("click", ".lego_toggle_i", function(){
-    $(this).parent().children().each( function() {
-        $(this).toggleClass("__active")
-    });
-    $('.lego_search-result').toggleClass("__list");
+$(".lego_toggler").on("click", ".lego_toggle_i", function () {
+    var targetNode = $('.lego_search-result.__layout');
+
+    $(this)
+        .addClass("__active")
+        .siblings()
+        .removeClass('__active');
+
+    if ($(this).attr('data-target') === 'list') {
+        targetNode.addClass("__list");
+    } else {
+        targetNode.removeClass("__list");
+    }
+
 });
 
 $("#current-elements").on("click", ".lego_lk", function(e) {
