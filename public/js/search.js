@@ -1,84 +1,127 @@
 /* Globals */
-var parsedTree = {}
-    , parsed = false
-    , template = ''
-    , specsMaster = globalOptions.specsMaster.current
-;
+var parsedTree = {},
+    parsed = false,
+    template = '',
+    specsMaster = globalOptions.specsMaster.current;
+
 /* /Globals */
 
-//$.ajax('/bootstrap/bootstrap-tree.json', {
-$.ajax(specsMaster+'/api/specs', {
-    contentType: "application/json",
-    method: 'POST',
-    success: function (data) {
+var prepareSpecsData = function () {
 
-        parsedTree = data;
-        parsed = true;
+    //$.ajax('/bootstrap/bootstrap-tree.json', {
+    $.ajax(specsMaster+'/api/specs', {
+        contentType: "application/json",
+        method: 'POST',
+        success: function (data) {
 
-        $.ajax({
-            url: '/views/search-result-list.html',
-            success: function(d) {
-                template = Handlebars.compile(d);
-                $("#lego_search-result").html(template(parsedTree));
-            }
-        });
+            parsedTree = data;
+            parsed = true;
+
+            $.ajax({
+                url: '/views/search-result-list.html',
+                success: function(d) {
+                    template = Handlebars.compile(d);
+                    //$("#lego_search-result").html(template(parsedTree));
+                    processSpecsData(parsedTree);
+                }
+            });
+        }
+    });
+
+    Handlebars.registerHelper("imageUrl", function(url) {       console.log(url);
+        url = url.toString();
+
+        return specsMaster + url + "/thumbnail.png";
+    });
+}
+
+var processSpecsData = function (specsTree) {
+    console.log(specsTree);
+
+    var resultTree = {};
+    var closedSection = false;
+
+    for (var specsPath in specsTree) {
+        var specPathParts =  specsPath.split('/');
+
+        if (!resultTree[specPathParts[0]]) {
+            resultTree[specPathParts[0]] = [];
+        }
+        resultTree[specPathParts[0]].push(specsTree[specsPath]);
     }
-});
 
-Handlebars.registerHelper("imageUrl", function(url) {
-    url = url.toString();
+    for (var specsSection in resultTree) {
 
-    return specsMaster + url + "/thumbnail.png";
-});
+        resultTree[specsSection].sort(function (a, b) {
+            if (a.title > b.title)
+                return 1;
+            if (a.title < b.title)
+                return -1;
+            return 0;
+        });
+        var newNode = component.expand.create( $('#lego_search-result'), specsSection, closedSection );
+        component.expand.append(newNode, template(resultTree[specsSection]));
 
+        closedSection = true;
+    }
+}
 
-var fuzzySearch = function(q, allData) {
-    var result = {}
-        , query = q.toLowerCase().trim()
-        , qRegExp = new RegExp(query)
-        , lowerCat
-    ;
+var fuzzySearch = function (q, allData) {
+    var result = {};
+    var query = q.toLowerCase().trim();
+    var qRegExp = new RegExp(query);
 
-    for (cat in allData) {
-        lowerCat = cat.toLowerCase();
+    for (var cat in allData) {
+        var lowerCat = cat.toLowerCase();
+        var title = allData[cat].title || '';
+        var info = allData[cat].info || '';
+        var keywords = allData[cat].keywords || '';
+
+        title = title.toLowerCase();
+        info = info.toLowerCase();
+        keywords = keywords.toLowerCase();
 
          // if query matches current category, all category's articles are considered a match
-        if (qRegExp.test(lowerCat.match(query))) {
-            result[cat] = allData[cat];
-            continue;
-        }
 
-        // otherwise, continue parsing
-        for (spec in allData[cat]) {
+        if (qRegExp.test(lowerCat.match(query)) ||
+            qRegExp.test(info.match(query)) ||
+            qRegExp.test(keywords.match(query)) ||
+            qRegExp.test(title.match(query))) {
 
-            var info = (allData[cat][spec]["info"] != undefined) ? allData[cat][spec]["info"].toLowerCase() : '';
-            var keywords = (allData[cat][spec]["keywords"] != undefined) ? allData[cat][spec]["keywords"].toLowerCase() : '';
-            var title = spec.toLowerCase();
-
-            if (qRegExp.test(info.match(query)) ||
-                qRegExp.test(keywords.match(query)) ||
-                qRegExp.test(title.match(query))) {
-
-                if (!result[cat]) result[cat] = {};
-                result[cat][spec] = allData[cat][spec];
+            if (!result[cat]) {
+                result[cat] = {};
             }
+            result[cat] = allData[cat];
         }
     }
     return result;
 };
 
-$('#search').on("keyup", function(){
-
-    var value = $(this).val();
+var renderLiveSearchResults = function (value) {
+    $("#lego_search-result").empty();
 
     if (parsed) {
         var result = fuzzySearch(value, parsedTree);
         if ($.isEmptyObject(result)) {
             $("#lego_search-result").html("Ничего не найдено");
         } else {
-            $("#lego_search-result").html(template(result));
+            processSpecsData(result);
         }
     } else {
         $("#lego_search-result").html("Байты не готовы!!!");
+
+        setTimeout(function () {
+            renderLiveSearchResults(value);
+        }, 500);
     }
-});
+}
+
+$(function () {
+    // Загрузить дерево спецификаций и шаблон поисковой выдачи
+    prepareSpecsData();
+
+    $('#search').on("keyup", function(){
+        var value = $(this).val();
+        renderLiveSearchResults(value);
+    });
+})

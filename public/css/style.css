@@ -437,17 +437,23 @@
     display: block;
 	}
 	.lego_expand_h:before{
+        display: inline-block;
 		content: '▼';
 		margin-right: 5px;
 		font-size: 12px;
+        transform: rotate(0deg);
+        transition: transform 0.2s;
 		}
 	.lego_expand.__closed .lego_expand_h:before {
-		content: '►';
+		transform: rotate(-90deg);
 		}
 
 .lego_expand_cnt {
-
+    padding-left: 0;
 	}
+    .lego_search-result.__list .lego_expand_cnt {
+        padding-left: 17px;
+        }
 	.lego_expand.__closed .lego_expand_cnt {
 		display: none;
 		}
