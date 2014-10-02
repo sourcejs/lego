@@ -1,0 +1,6 @@
+{
+    "description": "Overrides /options.json",
+    "common": {
+        "port": 7777
+    }
+}
