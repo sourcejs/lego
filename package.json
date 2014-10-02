@@ -10,10 +10,11 @@
     "body-parser": "^1.6.4",
     "colors": "0.6.x",
     "css": "^2.1.0",
-    "express": "3.x",
-    "gzippo": "0.2.0",
+    "express": "~4.8.3",
+    "gzippo": "~0.2.0",
     "mustache": "~0.7.3",
     "q": "^1.0.1",
-    "shorthash": "0.0.2"
+    "shorthash": "0.0.2",
+    "request": "~2.44.0"
   }
 }

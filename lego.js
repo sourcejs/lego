@@ -1,48 +1,51 @@
-/* Module dependencies */
-var express = require('express')
-    , fs = require('fs')
-    , mustache = require('mustache')
-    , gzippo = require('gzippo')
-    , sh = require('shorthash')
-    , colors = require('colors')
-    , cssMod = require('./core/css-mod')
-	, q = require('q')
-	, bodyParser = require('body-parser');
+var express = require('express');
+var fs = require('fs');
+var path = require('path');
+var mustache = require('mustache');
+var gzippo = require('gzippo');
+var sh = require('shorthash');
+var colors = require('colors');
+var cssMod = require('./core/css-mod');
+var q = require('q');
+var bodyParser = require('body-parser');
+
+
 
 /* Globals */
-global.app = express();
-global.opts = require('./core/options.json');
+var app = global.app = express();
+var opts = global.opts = require('./options.json');
 
-global.app.set('public', __dirname + '/' + global.opts.common.pathToSpecs);
+var MODE = global.MODE = process.env.NODE_ENV || 'development';
 
-global.MODE = process.env.NODE_ENV || 'development';
+// Preparing environment
+opts.specsMaster.current = global.MODE === 'production' ? global.opts.specsMaster.prod : global.opts.specsMaster.dev;
 /* /Globals */
 
-global.app.use(bodyParser.json());
-global.app.use(logErrors);
-global.app.use(clientErrorHandler);
-global.app.use(errorHandler);
 
-/* Preparing enviroment */
-global.opts.specsMaster.current = global.MODE === 'production' ? global.opts.specsMaster.prod : global.opts.specsMaster.dev;
+
+/* Express settings */
+app.set('public', path.join(__dirname, opts.common.pathToSpecs));
+
+app.use(gzippo.staticGzip(app.get('public')));
+app.use(gzippo.compress());
+app.use(bodyParser.json());
+app.use(logErrors);
+app.use(clientErrorHandler);
+app.use(errorHandler);
+/* /Express settings */
+
 
 
 /* Route for static files */
-
 //redirecting resource calls to master
 var staticDirs = ['/res/*','/data/res/*'];
 staticDirs.map(function(item) {
     app.get(item, function(req, res) {
-       res.redirect(global.opts.specsMaster.current + req.url, 301);
+       res.redirect(301, opts.specsMaster.current + req.url);
     });
 });
 
-app.set('route', __dirname + '/public');
-app
-	.use(gzippo.staticGzip(app.get('route')))
-	.use(gzippo.compress());
-
-/* Main page */
+// Main page
 var arr = ['/','/index','/index.html','/home'];
 arr.map(function(item) {
     app.get(item, function(req, res) {
@@ -51,12 +54,14 @@ arr.map(function(item) {
 
         var htmlToSend = mustache.to_html(indexPage, {
             legoLayer: legoLayer,
-            globalOptions: JSON.stringify(global.opts)
+            globalOptions: JSON.stringify(opts)
         });
 
         res.send(htmlToSend);
     });
 });
+/* /Route for static files */
+
 
 
 /* Error handling */
@@ -77,21 +82,22 @@ function errorHandler(err, req, res, next) {
     res.status(500);
     res.render('error', { error: err });
 }
+/* /Error handling */
 
 
-/* Get Css modifiers */
+/* API */
+// Get Css modifiers
 app.post('/cssmod', function (req, res) {
 	// Переопределим конфигурацию с учетом пришедших с клиента настроек
-	var config = JSON.parse(JSON.stringify(global.opts.cssMod));
+	var config = JSON.parse(JSON.stringify(opts.cssMod));
 	config.files = req.body.files;
 
 	q.when(cssMod.getCssMod(config), function(parsedCss) {
 		res.send(parsedCss)
 	});
-})
+});
 
-
-/* Save working html */
+// Save working html
 app.get('/save', function (req, res) {
     var data = req.query.html;
 
@@ -127,8 +133,7 @@ app.get('/save', function (req, res) {
     });
 });
 
-
-/* Share link */
+// Share link
 app.get('/s/:page', function (req, res) {
     var data = req.params.page;
 
@@ -137,13 +142,13 @@ app.get('/s/:page', function (req, res) {
 
     var htmlToSend = mustache.to_html(indexPage, {
         legoLayer: savedHTML,
-        globalOptions: JSON.stringify(global.opts)
+        globalOptions: JSON.stringify(opts)
     });
 
     res.send(htmlToSend);
 });
 
-/* Clean html link */
+// Clean html link
 app.get('/clean/:page', function (req, res) {
     var data = req.params.page;
 
@@ -152,23 +157,28 @@ app.get('/clean/:page', function (req, res) {
 
     var htmlToSend = mustache.to_html(indexPage, {
         legoLayer: savedHTML,
-        globalOptions: JSON.stringify(global.opts)
+        globalOptions: JSON.stringify(opts)
     });
 
     res.send(htmlToSend);
 });
+/* /API */
 
+
+
+// Starting server
 if (!module.parent) {
-    var port = global.opts.common.port;
+    var port = opts.common.port;
 
-    global.app.listen(port);
+    app.listen(port);
 
-    var portString = global.opts.common.port.toString();
+    var portString = opts.common.port.toString();
 
-    var d = new Date(),
-        dateArr = [d.getHours(), d.getMinutes(), d.getSeconds()],
-        dateArr = dateArr.map(function (el) { return (el > 9)? el : '0'+ el; }),
-        dateString = (MODE == 'development')? ' startup in '.blue + dateArr.join(':').red : '';
+    var d = new Date();
+    var dateArr = [d.getHours(), d.getMinutes(), d.getSeconds()];
+    dateArr = dateArr.map(function (el) { return (el > 9)? el : '0'+ el; });
 
-    console.log('[LEGO]'.blue + dateString +' and working on '.blue + portString.red + ' port in '.blue + MODE.blue + ' mode...'.blue);
+    var dateString = dateArr.join(':').red;
+
+    console.log('[LEGO] '.blue + dateString +' Server started on http://localhost:'.blue + portString.red + ' in '.blue + MODE.blue + ' mode...'.blue);
 }

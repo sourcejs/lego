@@ -1,30 +1,26 @@
-/* Globals */
-var parsedTree = {},
-    parsed = false,
-    template = '',
-    specsMaster = globalOptions.specsMaster.current;
-
-/* /Globals */
+var parsedTree = {};
+var parsed = false;
+var template = '';
+var specsMaster = globalOptions.specsMaster.current;
 
 var prepareSpecsData = function () {
 
     //$.ajax('/bootstrap/bootstrap-tree.json', {
     $.ajax(specsMaster+'/api/specs', {
-        contentType: "application/json",
         method: 'GET',
-
+        crossDomain: true,
         data: {
             filter: {
                 cats: ['base'],
                 forceTags: ['lego']
             },
             filterOut: {
-                tags: ['html', 'lego-hide']
+                tags: ['html', 'lego-hide', 'hidden', 'deprecated']
             }
         },
+        contentType: 'application/json',
 
         success: function (data) {     console.log(data);
-
             parsedTree = data;
             parsed = true;
 
@@ -123,7 +119,7 @@ var renderLiveSearchResults = function (value) {
             renderLiveSearchResults(value);
         }, 500);
     }
-}
+};
 
 $(function () {
     // Загрузить дерево спецификаций и шаблон поисковой выдачи
@@ -133,4 +129,4 @@ $(function () {
         var value = $(this).val();
         renderLiveSearchResults(value);
     });
-})
+});

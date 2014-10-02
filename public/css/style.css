@@ -355,6 +355,7 @@
 .lego_layer.__default .lego_content[data-target="overlay"] {
 	display: inline-block;
 	width: auto;
+    min-width: 150px;
 	text-align: left;
 	background: #fff;
 	}
