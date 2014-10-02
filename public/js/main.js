@@ -86,44 +86,43 @@ $('#export-img').on('click', function(e){
     });
 });
 
-var switchActive = function(current) {
+var switchActive = function(current) {   console.log(current);
     if (activeElement != undefined) activeElement.removeAttr('data-active');
     current.attr('data-active', 'true');
     activeElement = current;
 }
 
 // html - optional new html code
-var modifyElement = function (url, num, html) {
+var modifyElement = function (url, dataId, html) {
 
-    var removeWithChildren = function(url, num) {
-        var arr = addedElements[url][num].find('[data-num][data-url]');
+    var removeWithChildren = function(url, id) {
+        var arr = addedElements[url][id].find('[data-id][data-url]');
         arr.each(function() {
             var chUrl = this.dataset['url'],
-                chNum = this.dataset['num'];
+                chId = this.dataset['id'];
 
-            addedElements[chUrl][chNum].remove();
-            addedElements[chUrl][chNum] = null;
+            addedElements[chUrl][chId].remove();
+            addedElements[chUrl][chId] = null;
 
-            $(".lego_widget_ul-i[data-origin='"+chUrl+"'][data-num='"+chNum+"']").remove();
-        })
-        addedElements[url][num].remove();
-        addedElements[url][num] = null;
-        $(".lego_widget_ul-i[data-origin='"+url+"'][data-num='"+num+"']").remove();
+            $(".lego_widget_ul-i[data-origin='"+chUrl+"'][data-id='"+chId+"']").remove();
+        });
+        addedElements[url][id].remove();
+        addedElements[url][id] = null;
+        $(".lego_widget_ul-i[data-origin='"+url+"'][data-id='"+id+"']").remove();
     };
 
     if (html === undefined) {
-        removeWithChildren(url, num);
+        removeWithChildren(url, dataId);
     } else {
-        var wrapper = addedElements[url][num].wrap("<div></div>").parent()
-            , jHTML = $(html).attr("data-url", url).attr("data-num", num).attr("data-active", "true")
-        ;
+        var wrapper = addedElements[url][dataId].wrap("<div></div>").parent();
+        var jHTML = $(html).attr("data-url", url).attr("data-active", "true").attr("data-id", dataId);
 
-        addedElements[url][num].remove();
+        addedElements[url][dataId].remove();
 
         wrapper.append(jHTML).contents().unwrap('<div></div>');
 
-        addedElements[url][num] = jHTML;
-        activeElement = addedElements[url][num];
+        addedElements[url][dataId] = jHTML;
+        activeElement = addedElements[url][dataId];
     }
 };
 
@@ -138,27 +137,33 @@ var insertChosen = function(targetContainer){
     var target = targetContainer;
 
     if (chosenNavigation) {
-        var path = chosenNavigation[0]["href"].split('/')
-            , name = chosenNavigation.text()
-//            , id = path[path.length-1]
-            , url = path[path.length-2] + "/" + path[path.length-1]
-            , count
-        ;
+        var path = chosenNavigation[0]["href"].split('/');
+        var name = chosenNavigation.text();
+        var url = path[path.length-2] + "/" + path[path.length-1];
+        var currentHTML = $(tempHTML).attr("data-url", url).attr('data-container', acceptsHTML);
+        var dataId, menuItem;
 
-        if (!addedElements[url]) addedElements[url] = [];
-        count = addedElements[url].length;
-
-        $("#current-elements").append("<li class='lego_widget_ul-i' data-origin = '" + url + "' data-num=" + count + "><a class='lego_lk' href = '" + url + "'>" + name + "</a><span class='lego_ic lego_ic_close'></span></li>");
-
-        var currentHTML = $(tempHTML).attr("data-url", url).attr("data-num", count).attr('data-container', acceptsHTML);
-
-        addedElements[url][count] = currentHTML;
+        if (!addedElements[url]) {
+            addedElements[url] = [];
+        }
 
         switchActive(currentHTML);
         $(target).append(currentHTML);
 
-        // Parse inserted elem
-        modifiers.lookForHTMLMod();
+        // Parse inserted elem и сохранить блок в общей базе
+        modifiers
+            .lookForHTMLMod()
+            .saveCurrentBlockSettings();
+
+        // Добавить ссылку на элемент в правое меню
+        dataId = $('[data-active]').attr('data-id');
+        menuItem = "<li class='lego_widget_ul-i' data-origin = '" + url + "' data-id=" + dataId + ">" +
+                "<a class='lego_lk' href = '" + url + "'>" + name + "</a>" +
+                "<span class='lego_ic lego_ic_close'></span>" +
+            "</li>";
+        $("#current-elements").append(menuItem);
+        addedElements[url][dataId] = currentHTML;
+
 
         $(".lego_layer").addClass('__hide-bg');
     }
@@ -166,6 +171,7 @@ var insertChosen = function(targetContainer){
     $("#current-elements .lego_lk").removeClass("__active");
     $("#current-elements .lego_widget_ul-i:last-child .lego_lk").addClass('__active');
     clearChosen();
+
 };
 
 $(".lego_toggler").on("click", ".lego_toggle_i", function () {
@@ -188,23 +194,21 @@ $("#current-elements").on("click", ".lego_lk", function(e) {
     e.preventDefault();
     $("#current-elements .lego_lk").removeClass("__active");
     $(this).addClass('__active');
-    var parent = $(this).parent()
-        , origin = parent.data("origin")
-        , num = parent.data("num")
-    ;
+    var parent = $(this).parent();
+    var origin = parent.data("origin");
+    var dataId = parent.data("id") ;
 
-    switchActive(addedElements[origin][num]);
+    switchActive(addedElements[origin][dataId]);
     modifiers.lookForHTMLMod(activeElement);
 });
 
 $("#current-elements").on("click", ".lego_ic_close", function() {
 
-    var parent = $(this).parent()
-        , origin  = parent.data("origin")
-        , num = parent.data("num")
-    ;
+    var parent = $(this).parent();
+    var origin  = parent.data("origin");
+    var dataId = parent.data("id");
 
-	modifyElement(origin, num);
+	modifyElement(origin, dataId);
 	modifiers.cleanModificationData();
 });
 
@@ -230,9 +234,11 @@ $("#lego_search-result").on("click", ".lego_search-result_i", function(e){
 
     $.ajax(specsMaster+'/api/specs/html', {
         contentType: "application/json",
-        data: JSON.stringify({id: url}),
+        data: {
+            id: url
+        },
         dataType: "json",
-        method: 'POST',
+        type: 'GET',
         success: function (data) {
             if (data['contents'][0]['html'][0].length) {
                 tempHTML = data['contents'][0]['html'][0];

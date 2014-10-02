@@ -11,8 +11,19 @@ var prepareSpecsData = function () {
     //$.ajax('/bootstrap/bootstrap-tree.json', {
     $.ajax(specsMaster+'/api/specs', {
         contentType: "application/json",
-        method: 'POST',
-        success: function (data) {
+        method: 'GET',
+
+        data: {
+            filter: {
+                cats: ['base'],
+                forceTags: ['lego']
+            },
+            filterOut: {
+                tags: ['html', 'lego-hide']
+            }
+        },
+
+        success: function (data) {     console.log(data);
 
             parsedTree = data;
             parsed = true;
@@ -28,7 +39,7 @@ var prepareSpecsData = function () {
         }
     });
 
-    Handlebars.registerHelper("imageUrl", function(url) {       console.log(url);
+    Handlebars.registerHelper("imageUrl", function(url) {
         url = url.toString();
 
         return specsMaster + url + "/thumbnail.png";
@@ -36,8 +47,6 @@ var prepareSpecsData = function () {
 }
 
 var processSpecsData = function (specsTree) {
-    console.log(specsTree);
-
     var resultTree = {};
     var closedSection = false;
 
@@ -77,9 +86,9 @@ var fuzzySearch = function (q, allData) {
         var info = allData[cat].info || '';
         var keywords = allData[cat].keywords || '';
 
-        title = title.toLowerCase();
-        info = info.toLowerCase();
-        keywords = keywords.toLowerCase();
+        title = title.toString().toLowerCase(); // Защита от массивов
+        info = info.toString().toLowerCase();
+        keywords = keywords.toString().toLowerCase();
 
          // if query matches current category, all category's articles are considered a match
 

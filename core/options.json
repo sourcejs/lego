@@ -12,13 +12,15 @@
 
     "cssMod": {
     	"files": [
-			"http://127.0.0.1:7777/demo/css/bootstrap.css",
-			"http://127.0.0.1:7777/demo/css/bootstrap-theme.css"
+			"http://127.0.0.1:8080/res/css/prod/core/ncore.css",
+			"http://127.0.0.1:8080/res/css/prod/core/ncore_postponed.css",
+			"http://127.0.0.1:8080/res/css/prod/main/nmain_postponed.css",
+			"http://127.0.0.1:8080/res/css/prod/main/nmain.css"
 		],
 		"rules": {
 			"blockRule": "^[a-zA-Z0-9]+$",
-			"modifierRule": "-",
-			"startModifierRule": "^-"
+			"modifierRule": "__",
+			"startModifierRule": "^__"
 		},
 		"debug": false
     },

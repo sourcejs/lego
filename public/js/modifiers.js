@@ -2,9 +2,10 @@ var modifiers = (function() {
 
 	var allModifiers = false;
 	var activeElement = false;
+    var elementList = {};
 
     // Получает все доступные модификаторы для всех блоков и эдементов
-	function getCSSMod( callback ) {
+	function getCSSMod(callback) {
 		if (allModifiers) return this;
 
 		var callback = callback || function() {};
@@ -20,21 +21,23 @@ var modifiers = (function() {
 			dataType: 'json',
 			contentType: "application/json", // нужен для обработки параметров POST-запроса в express
 			success: function(data) {
-				allModifiers = $.extend({}, data, true);
+				allModifiers = $.extend({}, data, true);         console.log(allModifiers);
 				callback();
 			}
 		})
 	}
 
     // Получает HTML-шаблон блока
-	function getHTMLpart( activeElement, callback ) {
+	function getHTMLpart(activeElement, callback) {
 		var callback = callback || function() {};
 
 		$.ajax(specsMaster+'/api/specs/html', {
 			contentType: "application/json",
-			data: JSON.stringify({id: activeElement.specFileUrl}),
+			data: {
+                id: activeElement.specFileUrl
+            },
 			dataType: "json",
-			method: 'POST',
+			type: 'GET',
 			success: function(data) {
 				callback(data);
 			}
@@ -42,51 +45,45 @@ var modifiers = (function() {
 
 	}
 
+    function applyAttributes(activeElement) {       console.log('apply');
+        var dataId = activeElement.node.getAttribute('data-id');
+        var blockModifiers = elementList[dataId].modifiers;
+
+        for (var currentBlock in blockModifiers) {
+            var allMatchBlocks = document.querySelectorAll('.' + currentBlock);
+            var allBlocksModifiers =  allModifiers[currentBlock]
+            var usedModifiers =  blockModifiers[currentBlock];
+            for (var matchBlockNodeId = 0; matchBlockNodeId < allMatchBlocks.length; matchBlockNodeId++) {
+                for (var currentModifier = 0; currentModifier < allBlocksModifiers.length; currentModifier++) {
+                    allMatchBlocks[matchBlockNodeId].classList.remove(allBlocksModifiers[currentModifier]);
+                }
+                for (var currentModifier = 0; currentModifier < usedModifiers.length; currentModifier++) {
+                    allMatchBlocks[matchBlockNodeId].classList.add(usedModifiers[currentModifier]);
+                }
+            }
+        }
+    }
+
 	// Проверяет на наличие включенных и выключенных модификаторов
 	// и отражение этого факта в сайдбаре
-	function checkUsedAttributes( activeElement ) {
-
-        function hasDataAttr(ele,cls) {
-            if (ele.getAttribute('data-old-mod')) {
-                return ele.getAttribute('data-old-mod').match(new RegExp('(\\s|^)'+cls+'(\\s|$)'));
-            } else {
-                return false;
-            }
-
-        }
-
-        function updateDataAttr(ele,cls) {
-            var oldData = ele.getAttribute('data-old-mod') || '';
-            if (!hasDataAttr(ele,cls)) {
-                ele.setAttribute('data-old-mod', $.trim(oldData +=' ' + cls));
-            }
-        }
-
+	function checkUsedAttributes(activeElement) {
 		$('input[name="modificators"]').each(function() {
 
-			var modValue = $(this).attr('data-mod'),
-				elemValue = $(this).attr('data-elem'),
-				affectedNodes = activeElement.node.parentNode.querySelectorAll('.'+elemValue+'.'+modValue);
+			var modValue = $(this).attr('data-mod');
+			var elemValue = $(this).attr('data-elem');
+			var affectedNodes = activeElement.node.parentNode.querySelectorAll('[data-active].' + elemValue + '.'+modValue + ', [data-active] .' + elemValue + '.' + modValue);
 
 			$(this).prop('checked', false);
 
 			if ( affectedNodes.length ) {
 				$(this).prop('checked', true);
-
-				for (var i = 0; i < affectedNodes.length; i++) {
-					//var oldData = affectedNodes[i].getAttribute('data-old-mod') || '';
-
-					//affectedNodes[i].setAttribute('data-old-mod', $.trim(oldData += ' ' + modValue));
-
-                    updateDataAttr(affectedNodes[i], modValue);
-				}
 			}
 		})
 	}
 
 	// Определение проектного класса на основе сопоставления иерархии разметки и присутствия
 	// классов в дереве модификаторов (рассматриваются все классы в блоке)
-	function detectBlockClassName( allSelectors ) {
+	function detectBlockClassName(allSelectors) {
 		var blockDetect = new RegExp(globalOptions.cssMod.rules.blockRule);
 
 		// По всем селекторам, содержащим класс
@@ -108,7 +105,7 @@ var modifiers = (function() {
 	}
 
 	// Поиск доступных для блока+элементов модификаторов и рендер правого сайдбара
-	function searchInBlock( activeElement ) {
+	function searchInBlock(activeElement) {
 
 		var $wrap = $('.js-modificators .lego_form-i'),
 			usedModifiers = [],
@@ -128,7 +125,7 @@ var modifiers = (function() {
 		activeElement.baseClass = !globalOptions.modifyInnerBlocks
 			? detectBlockClassName(allSelectors)
 			: '';
-
+        console.log(allModifiers);
 		// По всем селекторам, содержащим класс
 		for (var currentSelector = 0; currentSelector < allSelectors.length; currentSelector++) {
 			var currentSelectorClassList = allSelectors[ currentSelector ].classList;
@@ -177,12 +174,14 @@ var modifiers = (function() {
 			}
 		}
 
+        applyAttributes(activeElement);
 		checkUsedAttributes(activeElement);
+        saveBlockSettings(activeElement);
 	}
 
 	// Просматриваем структуру на предмет вариаций, и на основе полученного
 	// генерируем список вариаций в правом сайдбаре
-	function searchVariations( data ) {
+	function searchVariations(data) {
 		var flatSections = [],
 			$wrap = $('.js-variations .lego_form-i'),
 			template = '<div class="lego_form-i_w"> \
@@ -204,7 +203,7 @@ var modifiers = (function() {
 				}
 			}
 		})(data.contents);
-
+console.log('var', flatSections);
 		// Проходим по плоскому массиву и забиваем пункты меню данными
 		for (var sectionIndex = 0; sectionIndex < flatSections.length; sectionIndex++) {
 
@@ -219,19 +218,39 @@ var modifiers = (function() {
 			}
 
 			// Сендер секции в сайдбаре
-			$template.find('label').append(flatSections[sectionIndex].title);
+			$template.find('label').append(flatSections[sectionIndex].header);
 			$wrap.append($template);
 
 		}
 	}
 
-	function saveBlockSettings( activeElement ) {
-		var userSection = $('input[name="variations"]:checked').closest('.lego_form-i_w').index();
+	function saveBlockSettings(activeElement) {
+		var variation = $('input[name="variations"]:checked').closest('.lego_form-i_w').index();
+console.log('Block added');
 
-		activeElement.node.setAttribute('data-section', userSection);
+        /* ----- */
+        var modifiers = {};
+        $('input[name="modificators"]:checked').each(function () {
+            var blockClassName = $(this).attr('data-elem');
+            if (!modifiers[blockClassName]) {
+                modifiers[blockClassName] = [];
+            }
+            modifiers[blockClassName].push($(this).attr('data-mod'));
+        });
+
+        var nodeId = activeElement.node.getAttribute('data-id');
+        if (!nodeId) {
+            nodeId = 'block-' + Math.round(Math.random()*10000);
+            activeElement.node.setAttribute('data-id', nodeId);
+            elementList[nodeId] = {};
+        }
+
+        elementList[nodeId].element = activeElement;
+        elementList[nodeId].modifiers = modifiers;
+        elementList[nodeId].variation = variation;
 	}
 
-	function loadBlockSettings( activeElement ) {
+	function loadBlockSettings(activeElement) {    console.log('LOAD SETTING');
 		var getSectionIndex = activeElement.node.getAttribute('data-section') || 0;
 
 		$('.js-variations .lego_form-i_w').eq(getSectionIndex).find('input').prop('checked', true);
@@ -239,12 +258,12 @@ var modifiers = (function() {
 
 	return {
 
-		init: function( callback ) {
+		init: function (callback) {
 			getCSSMod( callback );
 			return this;
 		},
 
-		lookForHTMLMod: function( node ) {
+		lookForHTMLMod: function (node) {
 			if ( !allModifiers ) {
 				setTimeout(function() {
 					getCSSMod( function() {
@@ -275,8 +294,8 @@ var modifiers = (function() {
 					data.url = activeElement.specFileUrl;
 
 					searchVariations(data);
-					searchInBlock( activeElement );
-					saveBlockSettings( activeElement );
+					searchInBlock(activeElement);
+					saveBlockSettings(activeElement);
 				})
 
 			} else {
@@ -287,9 +306,10 @@ var modifiers = (function() {
 					modifiers.cleanModificationData();
 					activeElement = innerActiveElement;
 
-					searchVariations(data);
-					searchInBlock( activeElement );
-					loadBlockSettings( activeElement );
+
+					searchVariations(data);         console.log('1');
+					searchInBlock(activeElement);    console.log('2');
+					loadBlockSettings(activeElement); console.log('3');
 				})
 			}
 
@@ -297,7 +317,7 @@ var modifiers = (function() {
 			return this;
 		},
 
-		lookForCSSMod: function() {
+		lookForCSSMod: function () {
 			if ( !allModifiers ) {
 				setTimeout(function() {
 					getCSSMod( function() {
@@ -312,7 +332,7 @@ var modifiers = (function() {
 			return this;
 		},
 
-		cleanModificationData: function() {
+		cleanModificationData: function () {
 			$('.js-variations .lego_form-i').empty();
 			$('.js-modificators .lego_form-i').empty();
 
@@ -321,13 +341,13 @@ var modifiers = (function() {
 			return this;
 		},
 
-		checkUsedAttributes: function() {
+		checkUsedAttributes: function () {
 			checkUsedAttributes( activeElement );
 
 			return this;
 		},
 
-		updateDOMElem: function() {
+		updateDOMElem: function () {
 			activeElement = {};
 
 			activeElement.node = document.querySelector('[data-active="true"]');
@@ -336,11 +356,15 @@ var modifiers = (function() {
 			return this;
 		},
 
-		saveCurrentBlockSettings: function() {
+		saveCurrentBlockSettings: function () {
 			saveBlockSettings( activeElement );
 
 			return this;
-		}
+		},
+
+        getElements: function () {
+            return elementList;
+        }
 	}
 
 })()
@@ -357,7 +381,7 @@ $(function() {
 
 		if ( $(this).attr('name') == 'variations' ) {
 
-			var activeId = $activeNode.attr('data-num'),
+			var activeId = $activeNode.attr('data-id'),
 				activeUrl = $activeNode.attr('data-url');
 
             modifyElement(activeUrl, activeId, $(this).attr('data-mod'));
@@ -371,14 +395,12 @@ $(function() {
 			var blockClass = $(this).attr('data-elem');
 
 			if ( $(this).is(':checked') ) {
-				if ( $activeNode.parent().find('[data-old-mod*=' + modClass + ']').length ) {
-					$activeNode.parent().find('.' + blockClass + '[data-old-mod*=' + modClass + ']').addClass(modClass);
-				} else {
-					$activeNode.parent().find('.' + blockClass).addClass(modClass)
-				}
+				$activeNode.parent().find('[data-active].' + blockClass).addClass(modClass);
 			} else {
-				$activeNode.parent().find('.' + blockClass).removeClass(modClass).attr('data-mod')
+				$activeNode.parent().find('[data-active].' + blockClass).removeClass(modClass);
 			}
+
+            modifiers.saveCurrentBlockSettings();
 		}
 	})
 })
