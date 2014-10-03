@@ -25,7 +25,7 @@ var prepareSpecsData = function () {
             parsed = true;
 
             $.ajax({
-                url: '/views/search-result-list.html',
+                url: '/lego/views/search-result-list.html',
                 success: function(d) {
                     template = Handlebars.compile(d);
                     //$("#lego_search-result").html(template(parsedTree));

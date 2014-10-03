@@ -8,12 +8,12 @@ var colors = require('colors');
 var cssMod = require('./core/css-mod');
 var q = require('q');
 var bodyParser = require('body-parser');
-
+var getView = require('./core/getView');
 
 
 /* Globals */
 var app = global.app = express();
-var opts = global.opts = require('./options.json');
+var opts = global.opts = require('./core/loadOptions')();
 
 var MODE = global.MODE = process.env.NODE_ENV || 'development';
 
@@ -24,10 +24,8 @@ opts.specsMaster.current = global.MODE === 'production' ? global.opts.specsMaste
 
 
 /* Express settings */
-app.set('public', path.join(__dirname, opts.common.pathToSpecs));
+app.set('user', path.join(__dirname, opts.common.pathToUser));
 
-app.use(gzippo.staticGzip(app.get('public')));
-app.use(gzippo.compress());
 app.use(bodyParser.json());
 app.use(logErrors);
 app.use(clientErrorHandler);
@@ -36,53 +34,70 @@ app.use(errorHandler);
 
 
 
+/* Includes */
+
+// Routes
+require('./core/routes');
+
+/* /Includes */
+
+
+
 /* Route for static files */
-//redirecting resource calls to master
-var staticDirs = ['/res/*','/data/res/*'];
-staticDirs.map(function(item) {
-    app.get(item, function(req, res) {
-       res.redirect(301, opts.specsMaster.current + req.url);
-    });
-});
+app.use(gzippo.staticGzip(app.get('user')));
+app.use(gzippo.compress());
 
 // Main page
 var arr = ['/','/index','/index.html','/home'];
 arr.map(function(item) {
     app.get(item, function(req, res) {
-        var indexPage = fs.readFileSync(__dirname+'/public/views/index.html', "utf8");
-        var legoLayer = fs.readFileSync(__dirname+'/public/views/lego-layer.html', "utf8");
-
-        var htmlToSend = mustache.to_html(indexPage, {
-            legoLayer: legoLayer,
+        var legoContainer = mustache.to_html(getView('lego-сontainer.html'), {
+            legoLayer: getView('lego-layer.html'),
+            legoLayouts: getView('lego-layouts.html'),
             globalOptions: JSON.stringify(opts)
+        });
+
+        var htmlToSend = mustache.to_html(getView('index.html'), {
+            legoContainer: legoContainer
         });
 
         res.send(htmlToSend);
     });
 });
+
+// Share link
+app.get('/s/:page', function (req, res) {
+    var data = req.params.page;
+
+    var legoContainer = mustache.to_html(getView('lego-сontainer.html'), {
+        legoLayer: fs.readFileSync(__dirname+'/data/saved/'+data+'.html', "utf8"),
+        legoLayouts: getView('lego-layouts.html'),
+        globalOptions: JSON.stringify(opts)
+    });
+
+    var htmlToSend = mustache.to_html(getView('index.html'), {
+        legoContainer: legoContainer
+    });
+
+    res.send(htmlToSend);
+});
+
+// Clean html link
+app.get('/clean/:page', function (req, res) {
+    var data = req.params.page;
+
+    var indexPage = getView('clean.html');
+    var savedHTML = fs.readFileSync(__dirname+'/data/saved/'+data+'.html', "utf8");
+
+    var htmlToSend = mustache.to_html(indexPage, {
+        legoLayer: savedHTML,
+        globalOptions: JSON.stringify(opts)
+    });
+
+    res.send(htmlToSend);
+});
 /* /Route for static files */
 
-
-
-/* Error handling */
-function logErrors(err, req, res, next) {
-    console.error(("Error: " + err.stack).red);
-    next(err);
-}
-
-function clientErrorHandler(err, req, res, next) {
-    if (req.xhr) {
-        res.send(500, { error: 'Something blew up!' });
-    } else {
-        next(err);
-    }
-}
-
-function errorHandler(err, req, res, next) {
-    res.status(500);
-    res.render('error', { error: err });
-}
-/* /Error handling */
 
 
 /* API */
@@ -101,7 +116,7 @@ app.post('/cssmod', function (req, res) {
 app.get('/save', function (req, res) {
     var data = req.query.html;
 
-    var outputDir = './public/saved';
+    var outputDir = './data/saved';
 
     var name = sh.unique(data);
 
@@ -132,47 +147,37 @@ app.get('/save', function (req, res) {
         }
     });
 });
-
-// Share link
-app.get('/s/:page', function (req, res) {
-    var data = req.params.page;
-
-    var indexPage = fs.readFileSync(__dirname+'/public/views/index.html', "utf8");
-    var savedHTML = fs.readFileSync(__dirname+'/public/saved/'+data+'.html', "utf8");
-
-    var htmlToSend = mustache.to_html(indexPage, {
-        legoLayer: savedHTML,
-        globalOptions: JSON.stringify(opts)
-    });
-
-    res.send(htmlToSend);
-});
-
-// Clean html link
-app.get('/clean/:page', function (req, res) {
-    var data = req.params.page;
-
-    var indexPage = fs.readFileSync(__dirname+'/public/views/clean.html', "utf8");
-    var savedHTML = fs.readFileSync(__dirname+'/public/saved/'+data+'.html', "utf8");
-
-    var htmlToSend = mustache.to_html(indexPage, {
-        legoLayer: savedHTML,
-        globalOptions: JSON.stringify(opts)
-    });
-
-    res.send(htmlToSend);
-});
 /* /API */
 
+
+
+/* Error handling */
+function logErrors(err, req, res, next) {
+    console.error(("Error: " + err.stack).red);
+    next(err);
+}
+
+function clientErrorHandler(err, req, res, next) {
+    if (req.xhr) {
+        res.send(500, { error: 'Something blew up!' });
+    } else {
+        next(err);
+    }
+}
+
+function errorHandler(err, req, res, next) {
+    res.status(500);
+    res.render('error', { error: err });
+}
+/* /Error handling */
 
 
 // Starting server
 if (!module.parent) {
     var port = opts.common.port;
+    var portString = port.toString();
 
     app.listen(port);
-
-    var portString = opts.common.port.toString();
 
     var d = new Date();
     var dateArr = [d.getHours(), d.getMinutes(), d.getSeconds()];

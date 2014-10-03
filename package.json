@@ -15,6 +15,7 @@
     "mustache": "~0.7.3",
     "q": "^1.0.1",
     "shorthash": "0.0.2",
-    "request": "~2.44.0"
+    "request": "~2.44.0",
+    "deep-extend": "~0.2.11"
   }
 }
