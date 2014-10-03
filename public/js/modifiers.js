@@ -1,406 +1,462 @@
-var modifiers = (function() {
+// Переменные глобальные только для отладки
+// Впоследствии убрать в scope
 
-	var allModifiers = false;
-	var activeElement = false;
-    var elementList = {};
+var elementList = {}; // Будет хранить список всех виртуальных элементов
+var specList = {}; // Будет кешировать данные о спеках по мере их подгрузки
+
+/**
+ * конструктор виртуального блока
+ *
+ * @param specId String
+ * @returns {VirtualBlock}
+ * @constructor
+ */
+function VirtualBlock(specId) { console.log("Создан новый виртуальный элемент");
+
+    this.id = 'block-' + Math.round(Math.random()*10000);
+    this.element = {};
+    this.element.specId = specId;
+    this.modifiers = {};
+    this.variation = 0;
+
+    return this;
+}
+
+/**
+ * Сохранить данные о виртуальном блоке
+ *
+ * @param p Object
+ * @param p.variation Number
+ * @param p.modifiers Object { block: [mod, mod, mod] }
+ */
+VirtualBlock.prototype.save = function (p) {
+    if (p.variation) {
+        this.variation = p.variation;
+    }
+
+    if (p.modifiers) {
+        this.modifiers = JSON.parse( JSON.stringify(p.modifiers) );
+    }
+};
+
+
+var modifiers = (function () {
+
+    var allModifiers = false; // Хранит объект всех блоков, элементов и модификаторов
+    var activeElement = false; // Будет хранить id текущего виртуального блока. Возможно, удалить позже
 
     // Получает все доступные модификаторы для всех блоков и эдементов
-	function getCSSMod(callback) {
-		if (allModifiers) return this;
+    function getCSSMod(callback) {
+        var callback = callback || function() {};
 
-		var callback = callback || function() {};
-
-		$.ajax({
-			url: "/cssmod",
-			type: 'POST',
-			data: JSON.stringify({
-				// Массив в перечислением css-файлов для анализа
-				// Может быть импортирован из глобальных настроек или задан вручную
-				files: globalOptions.cssMod.files
-			}),
-			dataType: 'json',
-			contentType: "application/json", // нужен для обработки параметров POST-запроса в express
-			success: function(data) {
-				allModifiers = $.extend({}, data, true);         console.log(allModifiers);
-				callback();
-			}
-		})
-	}
-
-    // Получает HTML-шаблон блока
-	function getHTMLpart(activeElement, callback) {
-		var callback = callback || function() {};
-
-		$.ajax(specsMaster+'/api/specs/html', {
-			contentType: "application/json",
-			data: {
-                id: activeElement.specFileUrl
-            },
-			dataType: "json",
-			type: 'GET',
-			success: function(data) {
-				callback(data);
-			}
-		});
-
-	}
-
-    function applyAttributes(activeElement) {       console.log('apply');
-        var dataId = activeElement.node.getAttribute('data-id');
-        var blockModifiers = elementList[dataId].modifiers;
-
-        for (var currentBlock in blockModifiers) {
-            var allMatchBlocks = document.querySelectorAll('.' + currentBlock);
-            var allBlocksModifiers =  allModifiers[currentBlock]
-            var usedModifiers =  blockModifiers[currentBlock];
-            for (var matchBlockNodeId = 0; matchBlockNodeId < allMatchBlocks.length; matchBlockNodeId++) {
-                for (var currentModifier = 0; currentModifier < allBlocksModifiers.length; currentModifier++) {
-                    allMatchBlocks[matchBlockNodeId].classList.remove(allBlocksModifiers[currentModifier]);
+        if (!allModifiers) {
+            $.ajax({
+                url: "/cssmod",
+                type: 'POST',
+                data: JSON.stringify({
+                    // Массив в перечислением css-файлов для анализа
+                    // Может быть импортирован из глобальных настроек или задан вручную
+                    files: globalOptions.cssMod.files
+                }),
+                dataType: 'json',
+                contentType: "application/json", // нужен для обработки параметров POST-запроса в express
+                success: function(data) {
+                    allModifiers = $.extend({}, data, true);
+                    callback();
                 }
-                for (var currentModifier = 0; currentModifier < usedModifiers.length; currentModifier++) {
-                    allMatchBlocks[matchBlockNodeId].classList.add(usedModifiers[currentModifier]);
-                }
-            }
+            })
+        } else {
+            callback();
         }
     }
 
-	// Проверяет на наличие включенных и выключенных модификаторов
-	// и отражение этого факта в сайдбаре
-	function checkUsedAttributes(activeElement) {
-		$('input[name="modificators"]').each(function() {
+    // Получает HTML-шаблон блока
+    function getHTMLpart(specId, callback) {
+        var callback = callback || function() {};
 
-			var modValue = $(this).attr('data-mod');
-			var elemValue = $(this).attr('data-elem');
-			var affectedNodes = activeElement.node.parentNode.querySelectorAll('[data-active].' + elemValue + '.'+modValue + ', [data-active] .' + elemValue + '.' + modValue);
+        // Если в глобальном объекте спек нет экземпляра с этим id, выкачать и сохранить, иначе отдать готовый
+        if (!specList[specId]) {
+            $.ajax(specsMaster+'/api/specs/html', {
+                contentType: "application/json",
+                data: {
+                    id: specId
+                },
+                dataType: "json",
+                type: 'GET',
+                success: function(data) {
 
-			$(this).prop('checked', false);
+                    var flatSections = [];
 
-			if ( affectedNodes.length ) {
-				$(this).prop('checked', true);
-			}
-		})
-	}
+                    // Нам нужно развернуть древовидную структуру «секция[]»-«подсекция[]»—...—«примеры[]» в плоский массив
+                    // Все html хранятся в глобальном объекте спецификаций, индекс — из параметра
+                    (function flatten(target) {
 
-	// Определение проектного класса на основе сопоставления иерархии разметки и присутствия
-	// классов в дереве модификаторов (рассматриваются все классы в блоке)
-	function detectBlockClassName(allSelectors) {
-		var blockDetect = new RegExp(globalOptions.cssMod.rules.blockRule);
+                        for (var i=0; i<target.length; i++) {
+                            flatSections.push(target[i]);
 
-		// По всем селекторам, содержащим класс
-		for (var currentSelector = 0; currentSelector < allSelectors.length; currentSelector++) {
-			var currentSelectorClassList = allSelectors[ currentSelector ].classList;
+                            if (target[i].nested && target[i].nested.length) {
+                                flatten(target[i].nested);
+                            }
+                        }
+                    })(data.contents);
 
-			// По всем классам в полученных селекторах
-			for (var curClassList = 0; curClassList < currentSelectorClassList.length; curClassList++) {
-				var currElem = currentSelectorClassList[curClassList];
+                    specList[specId] = flatSections;
+                    callback(specList[specId]);
+                }
+            });
+        } else {
+            callback(specList[specId]);
+        }
+    }
 
-				if (blockDetect.test(currElem)) {
-					return currElem;
-				}
-			}
-		}
 
-		// Если блок не найден, возвратим пустоту
-		return '';
-	}
+    // Применяет атрибуты виртуального блока к DOM-узлу
+    function applyAttributes(virtualBlockId, $node) {
 
-	// Поиск доступных для блока+элементов модификаторов и рендер правого сайдбара
-	function searchInBlock(activeElement) {
+        console.log('applyAttributes for', virtualBlockId);
 
-		var $wrap = $('.js-modificators .lego_form-i'),
-			usedModifiers = [],
-			linksBlockToExpand = {},
-			template = '<div class="lego_form-i_w"> \
+        var blockModifiers = elementList[virtualBlockId].modifiers;
+
+        function applyToSelector($selector, allBlocksModifiers, usedModifiers) {
+
+            for (var currentModifier = 0; currentModifier < allBlocksModifiers.length; currentModifier++) {
+                $selector.removeClass(allBlocksModifiers[currentModifier]);
+            }
+            for (var currentModifier = 0; currentModifier < usedModifiers.length; currentModifier++) {
+                $selector.addClass(usedModifiers[currentModifier]);
+            }
+        }
+
+
+        for (var currentBlock in blockModifiers) {
+            var childBlocks = $node.find('.' + currentBlock);
+
+            var allBlocksModifiers = allModifiers[currentBlock];
+            var usedModifiers =  blockModifiers[currentBlock];
+
+            // Применяем к детям в неограниченном количестве
+            childBlocks.each(function () {
+                applyToSelector($(this), allBlocksModifiers, usedModifiers);
+            });
+        }
+    }
+
+
+    // Просматриваем структуру на предмет вариаций, и на основе полученного
+    // генерируем список вариаций в правом сайдбаре
+    function generateVariationList(specId) {
+
+        var $wrap = $('.js-variations .lego_form-i');
+        var template = '<div class="lego_form-i_w"> \
+                    <label class="lego_form-i_txt"> \
+                        <input class="lego_checkbox" type="radio" name="variations"/> \
+                    </label> \
+                </div>';
+
+        $wrap.empty();
+
+        // Проходим по плоскому массиву и забиваем пункты меню данными
+        for (var sectionIndex = 0; sectionIndex < specList[specId].length; sectionIndex++) {
+            var $template = $(template);
+
+            // Сендер секции в сайдбаре
+            $template.find('label').append(specList[specId][sectionIndex].header);
+            $template.find('input').attr('data-variation', sectionIndex);
+            $wrap.append($template);
+        }
+    }
+
+
+    // Определение проектного класса на основе сопоставления иерархии разметки и присутствия
+    // классов в дереве модификаторов (рассматриваются все классы в блоке)
+    function detectBlockClassName(allSelectors) {
+        var blockDetect = new RegExp(globalOptions.cssMod.rules.blockRule);
+
+        // По всем селекторам, содержащим класс
+        for (var currentSelector = 0; currentSelector < allSelectors.length; currentSelector++) {
+            var currentSelectorClassList = allSelectors[ currentSelector ].classList;
+
+            // По всем классам в полученных селекторах
+            for (var curClassList = 0; curClassList < currentSelectorClassList.length; curClassList++) {
+                var currElem = currentSelectorClassList[curClassList];
+
+                if (blockDetect.test(currElem)) {
+                    return currElem;
+                }
+            }
+        }
+
+        // Если блок не найден, возвратим пустоту
+        return '';
+    }
+
+    // Поиск доступных для блока+элементов модификаторов и рендер в правом сайдбаре
+    function generateModificatorsList(virtualBlockId) {
+
+        var $wrap = $('.js-modificators .lego_form-i');
+        var usedModifiers = [];
+        var linksBlockToExpand = {};
+
+        var virtualBlockSpecId = elementList[virtualBlockId].element.specId;
+        var virtualBlockVariation = elementList[virtualBlockId].variation;
+        var virtualBlockHTML = specList[virtualBlockSpecId][virtualBlockVariation].html[0]; // только первый source_example
+
+        var template = '<div class="lego_form-i_w"> \
 						<label class="lego_form-i_txt"> \
 							<input class="lego_checkbox" type="checkbox" name="modificators"/> \
 						</label> \
 					</div>';
 
-		$wrap.empty;
+        $wrap.empty();
 
-		var allSelectors = activeElement.node.parentNode.querySelectorAll('[class]');
+        // Текущий элемент тот, для которого сгенерирован список модификаторов
+        activeElement = virtualBlockId;
 
-		// Если работа со вложенными блоками выключена,
-		// попробуем определить проектный класс
-		activeElement.baseClass = !globalOptions.modifyInnerBlocks
-			? detectBlockClassName(allSelectors)
-			: '';
-        console.log(allModifiers);
-		// По всем селекторам, содержащим класс
-		for (var currentSelector = 0; currentSelector < allSelectors.length; currentSelector++) {
-			var currentSelectorClassList = allSelectors[ currentSelector ].classList;
-			//usedModifiers = [];
+        // Создадим временный узел для работы с классами через DOM
+        $('body').append( '<div class="temp-node" style="position: absolute; left: -9999px;">' + virtualBlockHTML + '</div>' );
 
-			// перебор классов в класслисте
-			for (var curClassList = 0; curClassList < currentSelectorClassList.length; curClassList++) {
+        // Дальше будет удобно работать с массивом классов, переходим на DOM ClassList
+        var allSelectors = document.querySelectorAll('.temp-node [class]');
 
-				// Выбираются только те, которые принадлежат подмножеству проектного класса
-				if ( currentSelectorClassList[curClassList].indexOf(activeElement.baseClass) !== -1) {
+        // Если работа со вложенными блоками выключена,
+        // попробуем определить проектный класс
+        var baseClass = !globalOptions.modifyInnerBlocks
+            ? detectBlockClassName(allSelectors)
+            : '';
 
-					var currElem = currentSelectorClassList[curClassList];
+        // По всем селекторам, содержащим класс
+        for (var currentSelector = 0; currentSelector < allSelectors.length; currentSelector++) {
+            var currentSelectorClassList = allSelectors[ currentSelector ].classList;
 
-					// Если блок обладает модификаторами
-					if ((allModifiers[ currElem ])) {
+            // перебор классов в класслисте
+            for (var curClassList = 0; curClassList < currentSelectorClassList.length; curClassList++) {
 
-						for (var currentModifier = 0; currentModifier < allModifiers[ currElem ].length; currentModifier++) {
+                // Выбираются только те, которые принадлежат подмножеству проектного класса
+                if ( currentSelectorClassList[curClassList].indexOf(baseClass) !== -1) {
 
-							// если такой блок+модификатор уже использовался, выйти
-							if (usedModifiers.indexOf( currElem + allModifiers[currElem][currentModifier] ) !== -1  ) continue;
-							usedModifiers.push( currElem + allModifiers[currElem][currentModifier] );
+                    var currElem = currentSelectorClassList[curClassList];
 
-							if (!linksBlockToExpand[ currElem ]) {
-								var isClosed = false;
-								if (Object.keys(linksBlockToExpand).length) {
-									isClosed = true;
-								}
-								linksBlockToExpand[ currElem ] = component.expand.create($wrap, currElem, isClosed);
-							}
+                    // Если блок обладает модификаторами
+                    if ((allModifiers[ currElem ])) {
 
-							/*if ( activeElement.node.querySelector('.' + currElem + '.' + allModifiers[currElem][currentModifier]) !== null ) {
-								usedModifiers.push( allModifiers[currElem][currentModifier] );
-							}*/
+                        for (var currentModifier = 0; currentModifier < allModifiers[ currElem ].length; currentModifier++) {
 
-							var $template = $(template);
-							$template.find('input')
-								.attr('data-elem', currElem )
-								.attr('data-mod', allModifiers[currentSelectorClassList[curClassList]][currentModifier]);
+                            // если такой блок+модификатор уже использовался, выйти
+                            if (usedModifiers.indexOf( currElem + allModifiers[currElem][currentModifier] ) !== -1  ) continue;
+                            usedModifiers.push( currElem + allModifiers[currElem][currentModifier] );
 
-							$template.find('label').append(currElem + ' ' + allModifiers[currElem][currentModifier]);
+                            if (!linksBlockToExpand[ currElem ]) {
+                                var isClosed = false;
+                                if (Object.keys(linksBlockToExpand).length) {
+                                    isClosed = true;
+                                }
+                                linksBlockToExpand[ currElem ] = component.expand.create($wrap, currElem, isClosed);
+                            }
 
-							component.expand.append(linksBlockToExpand[currElem], $template);
-						}
-					}
-				}
-			}
-		}
+                            var $template = $(template);
+                            $template.find('input')
+                                .attr('data-elem', currElem )
+                                .attr('data-mod', allModifiers[currentSelectorClassList[curClassList]][currentModifier]);
 
-        applyAttributes(activeElement);
-		checkUsedAttributes(activeElement);
-        saveBlockSettings(activeElement);
-	}
+                            $template.find('label').append(allModifiers[currElem][currentModifier]);
 
-	// Просматриваем структуру на предмет вариаций, и на основе полученного
-	// генерируем список вариаций в правом сайдбаре
-	function searchVariations(data) {
-		var flatSections = [],
-			$wrap = $('.js-variations .lego_form-i'),
-			template = '<div class="lego_form-i_w"> \
-						<label class="lego_form-i_txt"> \
-							<input class="lego_checkbox" type="radio" name="variations"/> \
-						</label> \
-					</div>';
-
-		$wrap.empty;
-
-		// Нам нужно развернуть древовидную структуру «секция[]»-«подсекция[]»—...—«примеры[]» в плоский массив
-		(function flatten(target) {
-
-			for (var i=0; i<target.length; i++) {
-				flatSections.push(target[i]);
-
-				if (target[i].nested && target[i].nested.length) {
-					flatten(target[i].nested);
-				}
-			}
-		})(data.contents);
-console.log('var', flatSections);
-		// Проходим по плоскому массиву и забиваем пункты меню данными
-		for (var sectionIndex = 0; sectionIndex < flatSections.length; sectionIndex++) {
-
-			var $template = $(template);
-			$template.find('input')
-				.attr('data-elem', data.url)
-				.attr('data-mod', flatSections[sectionIndex].html[0]); // Названиями обладают только секции и подсекции, так что берем только первый экземпляр примеров
-
-			// Первый пункт автоматически выбирается
-			if (sectionIndex == 0) {
-				$template.find('input').prop('checked', true);
-			}
-
-			// Сендер секции в сайдбаре
-			$template.find('label').append(flatSections[sectionIndex].header);
-			$wrap.append($template);
-
-		}
-	}
-
-	function saveBlockSettings(activeElement) {
-		var variation = $('input[name="variations"]:checked').closest('.lego_form-i_w').index();
-console.log('Block added');
-
-        /* ----- */
-        var modifiers = {};
-        $('input[name="modificators"]:checked').each(function () {
-            var blockClassName = $(this).attr('data-elem');
-            if (!modifiers[blockClassName]) {
-                modifiers[blockClassName] = [];
+                            component.expand.append(linksBlockToExpand[currElem], $template);
+                        }
+                    }
+                }
             }
-            modifiers[blockClassName].push($(this).attr('data-mod'));
+        }
+
+        // Удаляем временный блок
+        $('.temp-node').remove();
+    }
+
+    // Проставляет активную вариацию в сайдбаре
+    function setupVariationsList(virtualBlockId) {
+
+        $('.js-variations .lego_form-i_w')
+            .eq(elementList[virtualBlockId].variation)
+            .find('input')
+            .prop('checked', true);
+
+    }
+
+    // Проставляет галочки модификаторов для хтмл из вариации
+    function setupModificatorsList(virtualBlockId) {
+        var modifiersData = {};
+
+        var virtualBlock = elementList[virtualBlockId];
+        var virtualBlockSpecId = virtualBlock.element.specId;
+        var virtualBlockVariation = virtualBlock.variation;
+        var virtualBlockHTML = '<div>' + specList[virtualBlockSpecId][virtualBlockVariation].html[0] + '</div>'; // только первый source_example
+        var $virtualBlockHTML = $(virtualBlockHTML);
+
+        $('input[name="modificators"]').each(function() {
+
+            var modValue = $(this).attr('data-mod');
+            var elemValue = $(this).attr('data-elem');
+            var affectedNodes = $virtualBlockHTML.find('.' + elemValue + '.'+modValue);
+
+            $(this).prop('checked', false);
+
+            if (affectedNodes.length) {
+                $(this).prop('checked', true);
+
+                if (!modifiersData[elemValue]) {
+                    modifiersData[elemValue] = [];
+                }
+
+                modifiersData[elemValue].push(modValue);
+            }
         });
 
-        var nodeId = activeElement.node.getAttribute('data-id');
-        if (!nodeId) {
-            nodeId = 'block-' + Math.round(Math.random()*10000);
-            activeElement.node.setAttribute('data-id', nodeId);
-            elementList[nodeId] = {};
+        // Сохраним полученные в результате анализа вариации модификаторы в модели
+        virtualBlock.save({
+            modifiers: modifiersData
+        })
+    }
+
+    // Отрисовывает блок с учетом диффа
+    function render() {
+
+        var $activeElement = $('[data-active]');
+        var virtualBlockId = activeElement;
+        var virtualBlockSpecId = elementList[virtualBlockId].element.specId;
+        var virtualBlockVariation = elementList[virtualBlockId].variation;
+        var virtualBlockOriginHTML = specList[virtualBlockSpecId][virtualBlockVariation].html[0]; // Только первый source_example
+
+        // Создадим временный блок и применим к нему дифф из виртуального блока
+        var $tempHTML =  $('<div class="temp-node">' + virtualBlockOriginHTML + '</div>');
+        applyAttributes(virtualBlockId, $tempHTML);
+
+        // На самом деле нам интересно только содержимое временного блока
+        $tempHTML = $tempHTML.children();
+
+        $tempHTML
+            .attr('data-active', true)
+            .attr('data-url', virtualBlockSpecId)
+            .attr('data-id', virtualBlockId);
+
+        $activeElement.replaceWith($tempHTML);
+    }
+
+
+    return {
+        init: function (callback) {
+            getCSSMod(callback);
+            return this;
+        },
+
+        getSpecHTML: function (specId, callback) {
+            console.info('getSpecHTML, specId =', specId);
+
+            var callback = callback || function () {};
+
+            // Если модификаторы не загружены, загрузить и работать дальше
+            getCSSMod(function () {
+
+                // Получить вариации спецификации
+                getHTMLpart(specId, function () {
+                    callback();
+                });
+
+            });
+
+            return this;
+        },
+
+        generateVariationsList: function (specId) {
+            console.info('generateVariationsList, specId =', specId);
+
+            generateVariationList(specId);
+
+            return this;
+        },
+
+        generateModificatorsList: function (virtualBlockId) {
+            console.info('generateModificatorsList, virtualBlockId =', virtualBlockId);
+
+            generateModificatorsList(virtualBlockId);
+
+            return this;
+        },
+
+        setupVariationsList: function (virtualBlockId) {
+            console.info('setupVariationList, virtualBlockId =', virtualBlockId);
+
+            setupVariationsList(virtualBlockId);
+
+            return this;
+        },
+
+        setupModificatorsList: function (virtualBlockId) {
+            console.info('setupModificatorsList, virtualBlockId=', virtualBlockId);
+
+            setupModificatorsList(virtualBlockId);
+
+            return this;
+        },
+
+        render: function () {
+            console.info('render');
+
+            render();
+
+            return this;
         }
-
-        elementList[nodeId].element = activeElement;
-        elementList[nodeId].modifiers = modifiers;
-        elementList[nodeId].variation = variation;
-	}
-
-	function loadBlockSettings(activeElement) {    console.log('LOAD SETTING');
-		var getSectionIndex = activeElement.node.getAttribute('data-section') || 0;
-
-		$('.js-variations .lego_form-i_w').eq(getSectionIndex).find('input').prop('checked', true);
-	}
-
-	return {
-
-		init: function (callback) {
-			getCSSMod( callback );
-			return this;
-		},
-
-		lookForHTMLMod: function (node) {
-			if ( !allModifiers ) {
-				setTimeout(function() {
-					getCSSMod( function() {
-						modifiers.lookForHTMLMod( node );
-					} )
-				}, 1000)
-				return this;
-			}
-
-			if (node === undefined) {
-				activeElement = {};
-
-				activeElement.node = document.querySelector('[data-active="true"]');
-
-				if (activeElement.node === null) {
-					console.log('There\'s no html here');
-					activeElement = false;
-					return;
-				}
-
-				activeElement.specFileUrl = activeElement.node.getAttribute('data-url');
-
-				getHTMLpart(activeElement, function(data) {
-
-					var innerActiveElement = activeElement;
-					modifiers.cleanModificationData();
-					activeElement = innerActiveElement;
-					data.url = activeElement.specFileUrl;
-
-					searchVariations(data);
-					searchInBlock(activeElement);
-					saveBlockSettings(activeElement);
-				})
-
-			} else {
-            	modifiers.updateDOMElem();
-				getHTMLpart(activeElement, function(data) {
-
-					var innerActiveElement = activeElement;
-					modifiers.cleanModificationData();
-					activeElement = innerActiveElement;
-
-
-					searchVariations(data);         console.log('1');
-					searchInBlock(activeElement);    console.log('2');
-					loadBlockSettings(activeElement); console.log('3');
-				})
-			}
-
-
-			return this;
-		},
-
-		lookForCSSMod: function () {
-			if ( !allModifiers ) {
-				setTimeout(function() {
-					getCSSMod( function() {
-						modifiers.lookForCSSMod();
-					} )
-				}, 1000)
-				return this;
-			}
-
-			console.log(allModifiers);
-
-			return this;
-		},
-
-		cleanModificationData: function () {
-			$('.js-variations .lego_form-i').empty();
-			$('.js-modificators .lego_form-i').empty();
-
-			activeElement = false;
-
-			return this;
-		},
-
-		checkUsedAttributes: function () {
-			checkUsedAttributes( activeElement );
-
-			return this;
-		},
-
-		updateDOMElem: function () {
-			activeElement = {};
-
-			activeElement.node = document.querySelector('[data-active="true"]');
-			activeElement.specFileUrl = activeElement.node.getAttribute('data-url');
-
-			return this;
-		},
-
-		saveCurrentBlockSettings: function () {
-			saveBlockSettings( activeElement );
-
-			return this;
-		},
-
-        getElements: function () {
-            return elementList;
-        }
-	}
-
-})()
+    }
+})();
 
 
 $(function() {
-	// Инициализация загрузки модификаторов
-	modifiers.init();
+    // Инициализация загрузки модификаторов
+    modifiers.init();
 
-	// Обработка кликов по вариациям и модификаторам в сайдбаре
-	$('body').on('click', '.lego_checkbox', function() {
+    // Обработка кликов по вариациям и модификаторам в сайдбаре
+    $('body').on('click', '.lego_checkbox', function() {
 
-		var $activeNode = $('[data-active="true"]');
+        var $activeNode = $('[data-active="true"]');
+        var activeVirtualBlockId = $activeNode.attr('data-id');
+        var activeVirtualBlock = elementList[activeVirtualBlockId];
 
-		if ( $(this).attr('name') == 'variations' ) {
+        if ( $(this).attr('name') == 'variations' ) {
 
-			var activeId = $activeNode.attr('data-id'),
-				activeUrl = $activeNode.attr('data-url');
+            // Получить номер выбранной вариации
+            var variationValue = $(this).attr('data-variation');
 
-            modifyElement(activeUrl, activeId, $(this).attr('data-mod'));
+            // Сохранить номер в модели блока
+            activeVirtualBlock.save({
+                variation: variationValue
+            });
+
+            // Перерендерить список модификаторов в соответствии с новой вариацией
             modifiers
-            	.updateDOMElem()
-            	.checkUsedAttributes()
-            	.saveCurrentBlockSettings();
+                .generateModificatorsList(activeVirtualBlockId)
+                .setupModificatorsList(activeVirtualBlockId);
 
-		} else {
-			var modClass = $(this).attr('data-mod');
-			var blockClass = $(this).attr('data-elem');
+        } else {
+            var variationExport = {};
 
-			if ( $(this).is(':checked') ) {
-				$activeNode.parent().find('[data-active].' + blockClass).addClass(modClass);
-			} else {
-				$activeNode.parent().find('[data-active].' + blockClass).removeClass(modClass);
-			}
+            // Собрать новый набор модификаторов
+            $('.js-modificators .lego_expand').each(function () {
+                var blockTitle = $(this).children('.lego_expand_h').text();
 
-            modifiers.saveCurrentBlockSettings();
-		}
-	})
-})
+                variationExport[blockTitle] = [];
+
+                $(this).find('.lego_checkbox').each(function () {
+                    if ($(this).is(':checked')) {
+                        variationExport[blockTitle].push( $(this).attr('data-mod') );
+                    }
+                })
+            });
+
+            // Сохранить новый набор модификаторов
+            activeVirtualBlock.save({
+                modifiers: variationExport
+            });
+        }
+
+        // Перерендерить с учетом изменений
+        modifiers.render();
+    })
+});

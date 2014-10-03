@@ -86,7 +86,7 @@ $('#export-img').on('click', function(e){
     });
 });
 
-var switchActive = function(current) {   console.log(current);
+var switchActive = function(current) {
     if (activeElement != undefined) activeElement.removeAttr('data-active');
     current.attr('data-active', 'true');
     activeElement = current;
@@ -140,23 +140,36 @@ var insertChosen = function(targetContainer){
         var path = chosenNavigation[0]["href"].split('/');
         var name = chosenNavigation.text();
         var url = path[path.length-2] + "/" + path[path.length-1];
-        var currentHTML = $(tempHTML).attr("data-url", url).attr('data-container', acceptsHTML);
+        //var currentHTML = $(tempHTML).attr("data-url", url).attr('data-container', acceptsHTML);
+        var currentHTML = $('<div></div>'); // отрендерим самостоятельно
         var dataId, menuItem;
+
+        var virtualBlock = new VirtualBlock(url);
+        var specId = virtualBlock.element.specId;
+
+        elementList[virtualBlock.id] = virtualBlock;
 
         if (!addedElements[url]) {
             addedElements[url] = [];
         }
 
-        switchActive(currentHTML);
+        switchActive(currentHTML); // повесить data-active и еще какая-то фигня
         $(target).append(currentHTML);
 
-        // Parse inserted elem и сохранить блок в общей базе
-        modifiers
-            .lookForHTMLMod()
-            .saveCurrentBlockSettings();
+        // Работа с виртуальным блоком и рендер
+        modifiers.getSpecHTML(specId, function () {
+
+            modifiers
+                .generateVariationsList(specId)
+                .generateModificatorsList(virtualBlock.id)
+                .setupVariationsList(virtualBlock.id)
+                .setupModificatorsList(virtualBlock.id)
+                .render();
+        });
+
 
         // Добавить ссылку на элемент в правое меню
-        dataId = $('[data-active]').attr('data-id');
+        dataId = virtualBlock.id;
         menuItem = "<li class='lego_widget_ul-i' data-origin = '" + url + "' data-id=" + dataId + ">" +
                 "<a class='lego_lk' href = '" + url + "'>" + name + "</a>" +
                 "<span class='lego_ic lego_ic_close'></span>" +
