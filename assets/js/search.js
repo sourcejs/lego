@@ -1,33 +1,29 @@
-/* Globals */
-var parsedTree = {},
-    parsed = false,
-    template = '',
-    specsMaster = globalOptions.specsMaster.current;
-
-/* /Globals */
+var parsedTree = {};
+var parsed = false;
+var template = '';
+var specsMaster = globalOptions.specsMaster.current;
 
 var prepareSpecsData = function (callback) {
 
     $.ajax(specsMaster+'/api/specs', {
-        contentType: "application/json",
         method: 'GET',
-
+        crossDomain: true,
         data: {
             filter: {
                 cats: ['base'],
                 forceTags: ['lego']
             },
             filterOut: {
-                tags: ['html', 'lego-hide']
+                tags: ['html', 'lego-hide', 'hidden', 'deprecated']
             }
         },
+        contentType: 'application/json',
 
         success: function (data) {
-
             parsedTree = data;
 
             $.ajax({
-                url: '/views/search-result-list.html',
+                url: '/lego/views/search-result-list.html',
                 success: function(d) {
                     template = Handlebars.compile(d);
                     parsed = true;
@@ -130,7 +126,7 @@ var renderLiveSearchResults = function (value) {
             renderLiveSearchResults(value);
         }, 500);
     }
-}
+};
 
 $(function () {
     var $searchInput = $('#search');
@@ -148,4 +144,4 @@ $(function () {
             renderLiveSearchResults($searchInput.val());
         }
     });
-})
+});

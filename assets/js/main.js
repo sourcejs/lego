@@ -1,20 +1,17 @@
-// GLOBALS
-var
-    possibleTargets = ['other', 'navbar', 'tertiary', 'secondary', 'primary']
-    , activeTargets = []
-    , tempHTML
-    , chosenNavigation
-    , activeElement
-    , addedElements = {}
-    , acceptsHTML = false
-;
-// /GLOBALS
+var possibleTargets = ['other', 'navbar', 'tertiary', 'secondary', 'primary'];
+var activeTargets = [];
+var addedElements = {};
+var acceptsHTML = false;
+
+// State variables
+var tempHTML;
+var chosenNavigation;
+var activeElement;
 
 $('#export-img').on('click', function(e){
     e.preventDefault();
 
     console.log('In development...');
-
 });
 
 $('#save-html').on('click', function(e){
@@ -71,20 +68,6 @@ var getTextNodesIn = function(el) {
         return this.nodeType == 3;
     });
 };
-
-$('#export-img').on('click', function(e){
-    e.preventDefault();
-
-    html2canvas($('.lego_main'), {
-        onrendered: function(canvas) {
-            var dataURL= canvas.toDataURL();
-
-            var data = encodeURIComponent(dataURL);
-
-            $("body").append("<iframe src='/screenshot?base64=" + data + "' style='display: none;' ></iframe>");
-        }
-    });
-});
 
 // html - optional new html code
 var modifyElement = function (url, dataId, html) {
@@ -209,23 +192,30 @@ $("#lego_search-result").on("click", ".lego_search-result_i", function(e){
 
     chosenNavigation = _this;
 
-    var rawUrl = chosenNavigation.attr('data-spec-id'),
-        url = rawUrl.substring(1),
-        single = $(this).data('single'),
-        exists = false;
-
+    var rawUrl = chosenNavigation.attr('href');
+    var url = rawUrl.substring(1);
+    var single = $(this).data('single');
+    var exists = false;
     var specsMaster = globalOptions.specsMaster.current;
 
-    $.ajax(specsMaster+'/api/specs/html', {
-        contentType: "application/json",
-        data: {
-            id: url
-        },
-        dataType: "json",
-        type: 'GET',
+    var dataToSend = {
+        id: url
+    };
+
+    $.ajax({
+        url: specsMaster+'/api/specs/html',
+        method: 'GET',
+        crossDomain: true,
+        data: dataToSend,
+        contentType: 'application/json',
         success: function (data) {
-            if (data['contents'][0]['html'][0].length) {
+            // Take first html element from data obj
+            if (data['contents'][0]['html'].length > 0) {
                 tempHTML = data['contents'][0]['html'][0];
+
+            // Or take first nested
+            } else if (data['contents'][0]['nested'].length > 0) {
+                tempHTML = data['contents'][0]['nested'][0]['html'][0];
             } else {
                 $('.editable').removeClass('editable');
                 console.log('No html data there!');
@@ -297,13 +287,12 @@ $('.js-layouts-list').on('click', '.lego_search-result_i', function(e){
     $('.lego_layer')
         .removeClass('__default __one-column __two-column __three-column __hide-bg')
         .addClass('__' + layerMode);
-
 });
 
 $('.lego_layer').on('click', '[data-target]', function( e ) {
-
     $('[contenteditable]').attr('contenteditable', 'false');
 
     var clickedEl = getTextNodesIn( e.target).parent();
     clickedEl.attr('contenteditable', 'true');
 });
+

@@ -1,11 +1,9 @@
 *.iml
 .idea
-
-# Resources from okp
-/public/res
-/public/data
-
 node_modules
 
-# Exported HTMLs from lego
-/public/saved
+# App data
+/data
+
+# User custom settings
+# /user
