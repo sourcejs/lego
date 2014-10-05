@@ -87,7 +87,9 @@ $('#export-img').on('click', function(e){
 });
 
 var switchActive = function(current) {
-    if (activeElement != undefined) activeElement.removeAttr('data-active');
+
+    $('[data-active="true"]').removeAttr('data-active');
+
     current.attr('data-active', 'true');
     activeElement = current;
 }
@@ -147,8 +149,6 @@ var insertChosen = function(targetContainer){
         var virtualBlock = new VirtualBlock(url);
         var specId = virtualBlock.element.specId;
 
-        elementList[virtualBlock.id] = virtualBlock;
-
         if (!addedElements[url]) {
             addedElements[url] = [];
         }
@@ -164,7 +164,7 @@ var insertChosen = function(targetContainer){
                 .generateModificatorsList(virtualBlock.id)
                 .setupVariationsList(virtualBlock.id)
                 .setupModificatorsList(virtualBlock.id)
-                .render();
+                .render(virtualBlock.id);
         });
 
 
@@ -215,7 +215,7 @@ $("#current-elements").on("click", ".lego_lk", function(e) {
     modifiers.lookForHTMLMod(activeElement);
 });
 
-$("#current-elements").on("click", ".lego_ic_close", function() {
+/*$("#current-elements").on("click", ".lego_ic_close", function() {
 
     var parent = $(this).parent();
     var origin  = parent.data("origin");
@@ -223,7 +223,7 @@ $("#current-elements").on("click", ".lego_ic_close", function() {
 
 	modifyElement(origin, dataId);
 	modifiers.cleanModificationData();
-});
+}); */
 
 $(".lego_layer").on("click", ".editable", function(){
     insertChosen(this);

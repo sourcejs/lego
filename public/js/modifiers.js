@@ -19,6 +19,8 @@ function VirtualBlock(specId) { console.log("Создан новый вирту�
     this.modifiers = {};
     this.variation = 0;
 
+    elementList[this.id] = this;
+
     return this;
 }
 
@@ -40,10 +42,10 @@ VirtualBlock.prototype.save = function (p) {
 };
 
 
+
 var modifiers = (function () {
 
     var allModifiers = false; // Хранит объект всех блоков, элементов и модификаторов
-    var activeElement = false; // Будет хранить id текущего виртуального блока. Возможно, удалить позже
 
     // Получает все доступные модификаторы для всех блоков и эдементов
     function getCSSMod(callback) {
@@ -117,17 +119,6 @@ var modifiers = (function () {
 
         var blockModifiers = elementList[virtualBlockId].modifiers;
 
-        function applyToSelector($selector, allBlocksModifiers, usedModifiers) {
-
-            for (var currentModifier = 0; currentModifier < allBlocksModifiers.length; currentModifier++) {
-                $selector.removeClass(allBlocksModifiers[currentModifier]);
-            }
-            for (var currentModifier = 0; currentModifier < usedModifiers.length; currentModifier++) {
-                $selector.addClass(usedModifiers[currentModifier]);
-            }
-        }
-
-
         for (var currentBlock in blockModifiers) {
             var childBlocks = $node.find('.' + currentBlock);
 
@@ -135,9 +126,18 @@ var modifiers = (function () {
             var usedModifiers =  blockModifiers[currentBlock];
 
             // Применяем к детям в неограниченном количестве
+            // Эксперимент: сбросим исходные модификаторы
             childBlocks.each(function () {
-                applyToSelector($(this), allBlocksModifiers, usedModifiers);
+
+                for (var currentModifier = 0; currentModifier < allBlocksModifiers.length; currentModifier++) {
+                    $(this).removeClass(allBlocksModifiers[currentModifier]);
+                }
             });
+
+            // Эксперимент: применять модификатор не ко всем подходящим элементам, а только к одному — первому
+            for (var currentModifier = 0; currentModifier < usedModifiers.length; currentModifier++) {
+                childBlocks.eq(0).addClass(usedModifiers[currentModifier]);
+            }
         }
     }
 
@@ -154,6 +154,10 @@ var modifiers = (function () {
                 </div>';
 
         $wrap.empty();
+
+        if (specId === undefined) {
+            return;
+        }
 
         // Проходим по плоскому массиву и забиваем пункты меню данными
         for (var sectionIndex = 0; sectionIndex < specList[specId].length; sectionIndex++) {
@@ -197,10 +201,6 @@ var modifiers = (function () {
         var usedModifiers = [];
         var linksBlockToExpand = {};
 
-        var virtualBlockSpecId = elementList[virtualBlockId].element.specId;
-        var virtualBlockVariation = elementList[virtualBlockId].variation;
-        var virtualBlockHTML = specList[virtualBlockSpecId][virtualBlockVariation].html[0]; // только первый source_example
-
         var template = '<div class="lego_form-i_w"> \
 						<label class="lego_form-i_txt"> \
 							<input class="lego_checkbox" type="checkbox" name="modificators"/> \
@@ -209,8 +209,13 @@ var modifiers = (function () {
 
         $wrap.empty();
 
-        // Текущий элемент тот, для которого сгенерирован список модификаторов
-        activeElement = virtualBlockId;
+        if (virtualBlockId === undefined) {
+            return;
+        }
+
+        var virtualBlockSpecId = elementList[virtualBlockId].element.specId;
+        var virtualBlockVariation = elementList[virtualBlockId].variation;
+        var virtualBlockHTML = specList[virtualBlockSpecId][virtualBlockVariation].html[0]; // только первый source_example
 
         // Создадим временный узел для работы с классами через DOM
         $('body').append( '<div class="temp-node" style="position: absolute; left: -9999px;">' + virtualBlockHTML + '</div>' );
@@ -274,6 +279,10 @@ var modifiers = (function () {
     // Проставляет активную вариацию в сайдбаре
     function setupVariationsList(virtualBlockId) {
 
+        if (virtualBlockId === undefined) {
+            return;
+        }
+
         $('.js-variations .lego_form-i_w')
             .eq(elementList[virtualBlockId].variation)
             .find('input')
@@ -284,6 +293,10 @@ var modifiers = (function () {
     // Проставляет галочки модификаторов для хтмл из вариации
     function setupModificatorsList(virtualBlockId) {
         var modifiersData = {};
+
+        if (virtualBlockId === undefined) {
+            return;
+        }
 
         var virtualBlock = elementList[virtualBlockId];
         var virtualBlockSpecId = virtualBlock.element.specId;
@@ -317,10 +330,23 @@ var modifiers = (function () {
     }
 
     // Отрисовывает блок с учетом диффа
-    function render() {
+    function render(virtualBlockId) {
 
         var $activeElement = $('[data-active]');
-        var virtualBlockId = activeElement;
+
+        // Если блок для отрисовки не указан явно, накатываем изменения на текущий активный блок
+        if (!virtualBlockId) {
+            virtualBlockId = $activeElement.attr('data-id');
+        } else {
+            // Приоритет узла за блоком с заданным id, однако при инициализации такого атрибута может еще не быть
+            $activeElement = $('.lego_main [data-id="' + virtualBlockId + '"], [data-active]').eq(0);
+        }
+
+        // Может оказаться, что рендерить нечего
+        if (!$activeElement.length) {
+            return;
+        }
+
         var virtualBlockSpecId = elementList[virtualBlockId].element.specId;
         var virtualBlockVariation = elementList[virtualBlockId].variation;
         var virtualBlockOriginHTML = specList[virtualBlockSpecId][virtualBlockVariation].html[0]; // Только первый source_example
@@ -397,10 +423,10 @@ var modifiers = (function () {
             return this;
         },
 
-        render: function () {
+        render: function (virtualBlockId) {
             console.info('render');
 
-            render();
+            render(virtualBlockId);
 
             return this;
         }
@@ -459,4 +485,31 @@ $(function() {
         // Перерендерить с учетом изменений
         modifiers.render();
     })
+
+    // Обработка кликов по иконке удаления блока
+    $('body').on('click', '.lego_ic_close', function () {
+
+        var activeBlockId = $('[data-active]').attr('data-id');
+        var $listItem = $(this).parent('.lego_widget_ul-i');
+        var virtualBlockId = $listItem.attr('data-id');
+        var $blockNode = $('.lego_main [data-id="' + virtualBlockId + '"]');
+        var $candidatListItem = $listItem.prev() || $listItem.next();
+        var candidatVirtualBlockId = false;
+
+        // Переключиться на новый блок и отрендерить его в том случае,
+        // если на холсте вообще остаются какие-либо элементы
+        // и при этом удаляемый элемент является активным
+        if ($candidatListItem.length && activeBlockId === virtualBlockId) {
+            candidatVirtualBlockId = $candidatListItem.attr('data-id');
+        }
+
+
+        if (delete elementList[virtualBlockId]) {
+            $blockNode.remove(); // удалить блок с холста
+            $listItem.remove(); // удалить элемент в списке
+
+            modifiers.render(candidatVirtualBlockId);
+        }
+    });
+
 });

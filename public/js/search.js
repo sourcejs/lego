@@ -6,9 +6,8 @@ var parsedTree = {},
 
 /* /Globals */
 
-var prepareSpecsData = function () {
+var prepareSpecsData = function (callback) {
 
-    //$.ajax('/bootstrap/bootstrap-tree.json', {
     $.ajax(specsMaster+'/api/specs', {
         contentType: "application/json",
         method: 'GET',
@@ -23,17 +22,16 @@ var prepareSpecsData = function () {
             }
         },
 
-        success: function (data) {     console.log(data);
+        success: function (data) {
 
             parsedTree = data;
-            parsed = true;
 
             $.ajax({
                 url: '/views/search-result-list.html',
                 success: function(d) {
                     template = Handlebars.compile(d);
-                    //$("#lego_search-result").html(template(parsedTree));
-                    processSpecsData(parsedTree);
+                    parsed = true;
+                    processSpecsData(parsedTree, callback);
                 }
             });
         }
@@ -46,9 +44,10 @@ var prepareSpecsData = function () {
     });
 }
 
-var processSpecsData = function (specsTree) {
+var processSpecsData = function (specsTree, callback) {
     var resultTree = {};
     var closedSection = false;
+    var callback = callback || function () {};
 
     for (var specsPath in specsTree) {
         var specPathParts =  specsPath.split('/');
@@ -73,6 +72,8 @@ var processSpecsData = function (specsTree) {
 
         closedSection = true;
     }
+
+    callback();
 }
 
 var fuzzySearch = function (q, allData) {
@@ -117,7 +118,7 @@ var renderLiveSearchResults = function (value) {
             processSpecsData(result);
         }
     } else {
-        $("#lego_search-result").html("Байты не готовы!!!");
+        $("#lego_search-result").html("Загрузка списка спецификаций...");
 
         setTimeout(function () {
             renderLiveSearchResults(value);
@@ -126,11 +127,19 @@ var renderLiveSearchResults = function (value) {
 }
 
 $(function () {
-    // Загрузить дерево спецификаций и шаблон поисковой выдачи
-    prepareSpecsData();
+    var $searchInput = $('#search');
 
-    $('#search').on("keyup", function(){
-        var value = $(this).val();
-        renderLiveSearchResults(value);
+    // Загрузить дерево спецификаций и шаблон поисковой выдачи
+    // После завершения обработки отрендерить значение фильтра
+    prepareSpecsData(function () {
+        renderLiveSearchResults($searchInput.val());
+    });
+
+    $searchInput.on("keyup", function() {
+
+        // Нет смысла дергать поиск, если нет данных и шаблона
+        if (parsed) {
+            renderLiveSearchResults($searchInput.val());
+        }
     });
 })
