@@ -11,7 +11,7 @@ var specList = {}; // Будет кешировать данные о спека
  * @returns {VirtualBlock}
  * @constructor
  */
-function VirtualBlock(specId) { console.log("Создан новый виртуальный элемент");
+function VirtualBlock(specId) {
 
     this.id = 'block-' + Math.round(Math.random()*10000);
     this.element = {};
@@ -106,7 +106,6 @@ var modifiers = (function () {
                         }
                     })(data.contents);
 
-console.log(flatSections);
                     specList[specId] = flatSections;
                     callback(specList[specId]);
                 }
@@ -119,9 +118,6 @@ console.log(flatSections);
 
     // Применяет атрибуты виртуального блока к DOM-узлу
     function applyAttributes(virtualBlockId, $node) {
-
-        console.log('applyAttributes for', virtualBlockId);
-
         var blockModifiers = elementList[virtualBlockId].modifiers;
 
         for (var currentBlock in blockModifiers) {
@@ -180,23 +176,28 @@ console.log(flatSections);
     // классов в дереве модификаторов (рассматриваются все классы в блоке)
     function detectBlockClassName(allSelectors) {
         var blockDetect = new RegExp(globalOptions.cssMod.rules.blockRule);
+        var result = '';
 
         // По всем селекторам, содержащим класс
         for (var currentSelector = 0; currentSelector < allSelectors.length; currentSelector++) {
             var currentSelectorClassList = allSelectors[ currentSelector ].classList;
+
+            if (result) {
+                break;
+            }
 
             // По всем классам в полученных селекторах
             for (var curClassList = 0; curClassList < currentSelectorClassList.length; curClassList++) {
                 var currElem = currentSelectorClassList[curClassList];
 
                 if (blockDetect.test(currElem)) {
-                    return currElem;
+                    result = currElem;
+                    break;
                 }
             }
         }
 
-        // Если блок не найден, возвратим пустоту
-        return '';
+        return result;
     }
 
     // Поиск доступных для блока+элементов модификаторов и рендер в правом сайдбаре
@@ -207,10 +208,10 @@ console.log(flatSections);
         var linksBlockToExpand = {};
 
         var template = '<div class="lego_form-i_w"> \
-						<label class="lego_form-i_txt"> \
-							<input class="lego_checkbox" type="checkbox" name="modificators"/> \
-						</label> \
-					</div>';
+                            <label class="lego_form-i_txt"> \
+                                <input class="lego_checkbox" type="checkbox" name="modificators"/> \
+                            </label> \
+                        </div>';
 
         $wrap.empty();
 
@@ -230,8 +231,9 @@ console.log(flatSections);
 
         // Если работа со вложенными блоками выключена,
         // попробуем определить проектный класс
+        var projectClass = detectBlockClassName(allSelectors);
         var baseClass = !globalOptions.modifyInnerBlocks
-            ? detectBlockClassName(allSelectors)
+            ? projectClass
             : '';
 
         // По всем селекторам, содержащим класс
@@ -387,58 +389,44 @@ console.log(flatSections);
         },
 
         getSpecHTML: function (specId, callback) {
-            console.info('getSpecHTML, specId =', specId);
-
             var callback = callback || function () {};
 
             // Если модификаторы не загружены, загрузить и работать дальше
             getCSSMod(function () {
-
                 // Получить вариации спецификации
                 getHTMLpart(specId, function () {
                     callback();
                 });
-
             });
 
             return this;
         },
 
         generateVariationsList: function (specId) {
-            console.info('generateVariationsList, specId =', specId);
-
             generateVariationList(specId);
 
             return this;
         },
 
         generateModificatorsList: function (virtualBlockId) {
-            console.info('generateModificatorsList, virtualBlockId =', virtualBlockId);
-
             generateModificatorsList(virtualBlockId);
 
             return this;
         },
 
         setupVariationsList: function (virtualBlockId) {
-            console.info('setupVariationList, virtualBlockId =', virtualBlockId);
-
             setupVariationsList(virtualBlockId);
 
             return this;
         },
 
         setupModificatorsList: function (virtualBlockId) {
-            console.info('setupModificatorsList, virtualBlockId =', virtualBlockId);
-
             setupModificatorsList(virtualBlockId);
 
             return this;
         },
 
         render: function (virtualBlockId) {
-            console.info('render, virtualBlockId = ', virtualBlockId);
-
             render(virtualBlockId);
 
             return this;

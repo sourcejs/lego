@@ -17,7 +17,7 @@ module.exports = {
 			"http://127.0.0.1:8080/res/css/prod/main/nmain.css"
 		],
 		rules: {
-			blockRule: "^[a-zA-Z0-9]+$",
+			blockRule: "^[a-zA-Z0-9\-]+$",
 			modifierRule: "__",
 			startModifierRule: "^__"
 		},
