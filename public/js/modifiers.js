@@ -102,6 +102,13 @@ var modifiers = (function () {
                         }
                     })(data.contents);
 
+                    // Выбросим блоки, в которых нет html-кода
+                    for (var variationNo = 0; variationNo < flatSections.length; variationNo++) {
+                        if (!flatSections[variationNo].html.length) {
+                            flatSections.splice(variationNo, 1);
+                        }
+                    }
+
                     specList[specId] = flatSections;
                     callback(specList[specId]);
                 }
@@ -332,20 +339,28 @@ var modifiers = (function () {
     // Отрисовывает блок с учетом диффа
     function render(virtualBlockId) {
 
-        var $activeElement = $('[data-active]');
+        var $activeElement = '';
 
         // Если блок для отрисовки не указан явно, накатываем изменения на текущий активный блок
         if (!virtualBlockId) {
+            $activeElement = $('[data-active]');
             virtualBlockId = $activeElement.attr('data-id');
         } else {
             // Приоритет узла за блоком с заданным id, однако при инициализации такого атрибута может еще не быть
-            $activeElement = $('.lego_main [data-id="' + virtualBlockId + '"], [data-active]').eq(0);
+            $activeElement = $('.lego_main [data-id="' + virtualBlockId + '"]');
+
+            if (!$activeElement.length) {
+                $activeElement = $('[data-active]');
+            }
         }
 
         // Может оказаться, что рендерить нечего
         if (!$activeElement.length) {
             return;
         }
+
+        // Мы знаем, с каким элементом мы работаем, можно удалить признак активности
+        $('[data-active="true"]').removeAttr('data-active');
 
         var virtualBlockSpecId = elementList[virtualBlockId].element.specId;
         var virtualBlockVariation = elementList[virtualBlockId].variation;
@@ -416,7 +431,7 @@ var modifiers = (function () {
         },
 
         setupModificatorsList: function (virtualBlockId) {
-            console.info('setupModificatorsList, virtualBlockId=', virtualBlockId);
+            console.info('setupModificatorsList, virtualBlockId =', virtualBlockId);
 
             setupModificatorsList(virtualBlockId);
 
@@ -424,7 +439,7 @@ var modifiers = (function () {
         },
 
         render: function (virtualBlockId) {
-            console.info('render');
+            console.info('render, virtualBlockId = ', virtualBlockId);
 
             render(virtualBlockId);
 
@@ -486,6 +501,20 @@ $(function() {
         modifiers.render();
     })
 
+    // Обработка кликов переключения блоков
+    $('body').on('click', '#current-elements .lego_lk', function (e) {
+        e.preventDefault();
+
+        var virtualBlockId = $(this).parent().attr('data-id');
+
+        if (virtualBlockId) {
+            $("#current-elements .lego_lk").removeClass("__active");
+            $(this).addClass('__active');
+
+            modifiers.render(virtualBlockId);
+        }
+    });
+
     // Обработка кликов по иконке удаления блока
     $('body').on('click', '.lego_ic_close', function () {
 
@@ -493,20 +522,27 @@ $(function() {
         var $listItem = $(this).parent('.lego_widget_ul-i');
         var virtualBlockId = $listItem.attr('data-id');
         var $blockNode = $('.lego_main [data-id="' + virtualBlockId + '"]');
-        var $candidatListItem = $listItem.prev() || $listItem.next();
+        var $candidatListItem = $listItem.prev();
         var candidatVirtualBlockId = false;
 
-        // Переключиться на новый блок и отрендерить его в том случае,
-        // если на холсте вообще остаются какие-либо элементы
-        // и при этом удаляемый элемент является активным
-        if ($candidatListItem.length && activeBlockId === virtualBlockId) {
-            candidatVirtualBlockId = $candidatListItem.attr('data-id');
+        // По умолчанию при удалении переключаемся на предыдущий элемент,
+        // Но если его нет, то пытаемся на следующий
+        if (!$candidatListItem.length) {
+            var $candidatListItem = $listItem.next();
         }
 
-
         if (delete elementList[virtualBlockId]) {
+
             $blockNode.remove(); // удалить блок с холста
             $listItem.remove(); // удалить элемент в списке
+
+            // Переключиться на новый блок и отрендерить его в том случае,
+            // если на холсте вообще остаются какие-либо элементы
+            // и при этом удаляемый элемент является активным
+            if ($candidatListItem.length && activeBlockId === virtualBlockId) {
+                candidatVirtualBlockId = $candidatListItem.attr('data-id');
+                $candidatListItem.children('.lego_lk').addClass('__active');
+            }
 
             modifiers.render(candidatVirtualBlockId);
         }

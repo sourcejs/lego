@@ -1,7 +1,7 @@
 {{#each this}}
 	{{#if title}}
 		<div class="lego_search-result_w">
-			<a href="{{url}}" class="lego_lk lego_search-result_i" data-target="{{target}}" data-accepts="{{isContainer}}">
+			<a href="{{fullUrl url}}" data-spec-id="{{url}}" class="lego_lk lego_search-result_i" data-target="{{target}}" data-accepts="{{isContainer}}">
 				<div class="lego_search-result_n">{{title}}</div>
 			</a>
 		</div>

@@ -86,14 +86,6 @@ $('#export-img').on('click', function(e){
     });
 });
 
-var switchActive = function(current) {
-
-    $('[data-active="true"]').removeAttr('data-active');
-
-    current.attr('data-active', 'true');
-    activeElement = current;
-}
-
 // html - optional new html code
 var modifyElement = function (url, dataId, html) {
 
@@ -143,7 +135,7 @@ var insertChosen = function(targetContainer){
         var name = chosenNavigation.text();
         var url = path[path.length-2] + "/" + path[path.length-1];
         //var currentHTML = $(tempHTML).attr("data-url", url).attr('data-container', acceptsHTML);
-        var currentHTML = $('<div></div>'); // отрендерим самостоятельно
+        var currentHTML = $('<div data-active="true"></div>'); // отрендерим самостоятельно
         var dataId, menuItem;
 
         var virtualBlock = new VirtualBlock(url);
@@ -153,7 +145,9 @@ var insertChosen = function(targetContainer){
             addedElements[url] = [];
         }
 
-        switchActive(currentHTML); // повесить data-active и еще какая-то фигня
+        // Добавляем новый элемент, сбросим признак активности
+        $('[data-active="true"]').removeAttr('data-active');
+
         $(target).append(currentHTML);
 
         // Работа с виртуальным блоком и рендер
@@ -170,8 +164,8 @@ var insertChosen = function(targetContainer){
 
         // Добавить ссылку на элемент в правое меню
         dataId = virtualBlock.id;
-        menuItem = "<li class='lego_widget_ul-i' data-origin = '" + url + "' data-id=" + dataId + ">" +
-                "<a class='lego_lk' href = '" + url + "'>" + name + "</a>" +
+        menuItem = "<li class='lego_widget_ul-i' data-id=" + dataId + ">" +
+                "<a class='lego_lk' href = '" + globalOptions.specsMaster.current + '/' +  url + "'>" + name + "</a>" +
                 "<span class='lego_ic lego_ic_close'></span>" +
             "</li>";
         $("#current-elements").append(menuItem);
@@ -203,28 +197,6 @@ $(".lego_toggler").on("click", ".lego_toggle_i", function () {
 
 });
 
-$("#current-elements").on("click", ".lego_lk", function(e) {
-    e.preventDefault();
-    $("#current-elements .lego_lk").removeClass("__active");
-    $(this).addClass('__active');
-    var parent = $(this).parent();
-    var origin = parent.data("origin");
-    var dataId = parent.data("id") ;
-
-    switchActive(addedElements[origin][dataId]);
-    modifiers.lookForHTMLMod(activeElement);
-});
-
-/*$("#current-elements").on("click", ".lego_ic_close", function() {
-
-    var parent = $(this).parent();
-    var origin  = parent.data("origin");
-    var dataId = parent.data("id");
-
-	modifyElement(origin, dataId);
-	modifiers.cleanModificationData();
-}); */
-
 $(".lego_layer").on("click", ".editable", function(){
     insertChosen(this);
 });
@@ -236,9 +208,8 @@ $("#lego_search-result").on("click", ".lego_search-result_i", function(e){
     acceptsHTML = _this.data('accepts');
 
     chosenNavigation = _this;
-    e.preventDefault();
 
-    var rawUrl = chosenNavigation.attr('href'),
+    var rawUrl = chosenNavigation.attr('data-spec-id'),
         url = rawUrl.substring(1),
         single = $(this).data('single'),
         exists = false;
@@ -329,12 +300,10 @@ $('.js-layouts-list').on('click', '.lego_search-result_i', function(e){
 
 });
 
-$('.lego_layer')
-    .on('click', '[data-target]', function( e ) {
+$('.lego_layer').on('click', '[data-target]', function( e ) {
 
-        $('[contenteditable]').attr('contenteditable', 'false');
+    $('[contenteditable]').attr('contenteditable', 'false');
 
-        var clickedEl = getTextNodesIn( e.target).parent();
-        clickedEl.attr('contenteditable', 'true');
-    });
-
+    var clickedEl = getTextNodesIn( e.target).parent();
+    clickedEl.attr('contenteditable', 'true');
+});

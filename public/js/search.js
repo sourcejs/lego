@@ -42,6 +42,12 @@ var prepareSpecsData = function (callback) {
 
         return specsMaster + url + "/thumbnail.png";
     });
+
+    Handlebars.registerHelper("fullUrl", function(url) {
+        url = url.toString();
+
+        return specsMaster + url;
+    });
 }
 
 var processSpecsData = function (specsTree, callback) {
