@@ -192,7 +192,7 @@ $("#lego_search-result").on("click", ".lego_search-result_i", function(e){
 
     chosenNavigation = _this;
 
-    var rawUrl = chosenNavigation.attr('href');
+    var rawUrl = chosenNavigation.attr('data-spec-id');
     var url = rawUrl.substring(1);
     var single = $(this).data('single');
     var exists = false;
