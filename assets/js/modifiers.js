@@ -94,7 +94,11 @@ var modifiers = (function () {
                     (function flatten(target) {
 
                         for (var i=0; i<target.length; i++) {
-                            flatSections.push(target[i]);
+
+                            // Выбросим блоки, в которых нет html-кода
+                            if (target[i].html.length) {
+                                flatSections.push(target[i]);
+                            }
 
                             if (target[i].nested && target[i].nested.length) {
                                 flatten(target[i].nested);
@@ -102,13 +106,7 @@ var modifiers = (function () {
                         }
                     })(data.contents);
 
-                    // Выбросим блоки, в которых нет html-кода
-                    for (var variationNo = 0; variationNo < flatSections.length; variationNo++) {
-                        if (!flatSections[variationNo].html.length) {
-                            flatSections.splice(variationNo, 1);
-                        }
-                    }
-
+console.log(flatSections);
                     specList[specId] = flatSections;
                     callback(specList[specId]);
                 }
@@ -511,7 +509,12 @@ $(function() {
             $("#current-elements .lego_lk").removeClass("__active");
             $(this).addClass('__active');
 
-            modifiers.render(virtualBlockId);
+            modifiers
+                .generateVariationsList(elementList[virtualBlockId].element.specId)
+                .generateModificatorsList(virtualBlockId)
+                .setupVariationsList(virtualBlockId)
+                .setupModificatorsList(virtualBlockId)
+                .render(virtualBlockId);
         }
     });
 
@@ -544,7 +547,12 @@ $(function() {
                 $candidatListItem.children('.lego_lk').addClass('__active');
             }
 
-            modifiers.render(candidatVirtualBlockId);
+            modifiers
+                .generateVariationsList(elementList[candidatVirtualBlockId].element.specId)
+                .generateModificatorsList(candidatVirtualBlockId)
+                .setupVariationsList(candidatVirtualBlockId)
+                .setupModificatorsList(candidatVirtualBlockId)
+                .render(candidatVirtualBlockId);
         }
     });
 

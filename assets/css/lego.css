@@ -122,15 +122,6 @@
 
 	}
 
-    /*.lego_search-result_id { -- inused rule^
-        font-size: 12px;
-        color: #fff;
-        display: inline-block;
-        padding: 2px 5px 2px 0;
-        border-right: 1px solid #999;
-        }
-*/
-
 .lego_search-result_i {
 	display: inline-block;
 	width: 85px;
@@ -145,12 +136,6 @@
 	font-size: 12px;
 	color: #fff;
 	}
-
-/*
-.lego_search-result_sub { --inused rule?
-    display: block;
-    margin: 5px 0 5px 10px;
-    }
 
 /* /left column
 ---------------------------------------------------------------------------------- */
@@ -178,7 +163,6 @@
 .lego_widget_h {
 	border-bottom: 1px solid #bababa;
 	margin-bottom: 15px;
-
 	font-size: 16px;
 	}
 
@@ -192,7 +176,6 @@
 	position: relative;
 	padding-right: 20px;
 	padding-bottom: 5px;
-
 	font-size: 12px;
 	}
 
@@ -249,8 +232,7 @@
 	color: #555;
 	}
 
-.lego_it.__short,
-.__short {
+.lego_it.__short {
 	width: 80px;
 	}
 
@@ -269,7 +251,6 @@
 .lego_ic.lego_ic_close {
 	background: url(/lego/assets/i/close.png);
 	}
-
 	.lego_ic.lego_ic_close:hover {
 		background: url(/lego/assets/i/close_h.png);
 		}
