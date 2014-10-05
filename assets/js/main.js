@@ -5,6 +5,81 @@ var acceptsHTML = false;
 // State variables
 var chosenNavigation;
 
+/* --- Служебные функции --- */
+
+//  0 или пусто - overlay (добавляется автоматически)
+//  1 - primary
+//  2 - secondary
+//  4 - tertiary
+//  8 - navbar
+//  16 - other
+
+var parseTargets = function(targets) {
+    var result = [];
+    for (var mask = 16, i = 0; mask > 0; mask >>= 1, i++) {
+        if (mask & targets) {
+            result.push(possibleTargets[i]);
+        }
+    }
+    result.push('overlay');
+    return result;
+};
+
+//Clearing chosen
+var clearChosen = function() {
+    chosenNavigation = false;
+    $('.lego_layer *').removeClass('editable');
+};
+
+// Вставка нового блока
+var insertChosen = function($targetContainer) {
+
+    if (chosenNavigation) {
+        var name = chosenNavigation.text();
+        var url = chosenNavigation.attr('data-spec-id').slice(1);
+
+        var currentHTML = $('<div data-active="true"></div>').attr('data-container', acceptsHTML);
+        var menuItem;
+
+        // Создадим новый виртуальный блок
+        var virtualBlock = new VirtualBlock(url);
+        var specId = virtualBlock.element.specId;
+
+        // Добавляем новый элемент, сбросим признак активности
+        $('[data-active="true"]').removeAttr('data-active');
+
+        $targetContainer.append(currentHTML);
+
+        // Добавить ссылку на элемент в правое меню
+        menuItem = "<li class='lego_widget_ul-i' data-id=" + virtualBlock.id + ">" +
+            "<a class='lego_lk' href = '" + globalOptions.specsMaster.current + '/' +  url + "'>" + name + "</a>" +
+            "<span class='lego_ic lego_ic_close'></span>" +
+            "</li>";
+        $("#current-elements").append(menuItem);
+
+        // Работа с виртуальным блоком и рендер
+        modifiers.getSpecHTML(specId, function () {
+            modifiers
+                .generateVariationsList(specId)
+                .generateModificatorsList(virtualBlock.id)
+                .setupVariationsList(virtualBlock.id)
+                .setupModificatorsList(virtualBlock.id)
+                .render(virtualBlock.id);
+        });
+
+        // После добавления элемента скрыть сетку
+        $(".lego_layer").addClass('__hide-bg');
+    }
+
+    // Сбросить информацию для добавления блока в контейнер
+    clearChosen();
+};
+
+/* --- Инициализация загрузки модификаторов --- */
+modifiers.init();
+
+/* --- Обработчики кликов --- */
+
 $('#export-img').on('click', function(e){
     e.preventDefault();
 
@@ -42,86 +117,7 @@ $('#save-html').on('click', function(e){
     });
 });
 
-//  0 или пусто - overlay (добавляется автоматически)
-//  1 - primary
-//  2 - secondary
-//  4 - tertiary
-//  8 - navbar
-//  16 - other
-
-var parseTargets = function(targets) {
-    var result = [];
-    for (var mask = 16, i = 0; mask > 0; mask >>= 1, i++) {
-        if (mask & targets) {
-            result.push(possibleTargets[i]);
-        }
-    }
-    result.push('overlay');
-    return result;
-};
-
-var getTextNodesIn = function(el) {
-    return $(el).find(":not(iframe)").addBack().contents().filter(function() {
-        return this.nodeType == 3;
-    });
-};
-
-
-//Clearing chosen
-var clearChosen = function() {
-    chosenNavigation = false;
-    $('.lego_layer *').removeClass('editable');
-};
-
-// Вставка нового блока
-var insertChosen = function($targetContainer) {
-
-    if (chosenNavigation) {
-        var name = chosenNavigation.text();
-        var url = chosenNavigation.attr('data-spec-id').slice(1);
-
-        var currentHTML = $('<div data-active="true"></div>').attr('data-container', acceptsHTML);
-        var menuItem;
-
-        // Создадим новый виртуальный блок
-        var virtualBlock = new VirtualBlock(url);
-        var specId = virtualBlock.element.specId;
-
-        // Добавляем новый элемент, сбросим признак активности
-        $('[data-active="true"]').removeAttr('data-active');
-
-        $targetContainer.append(currentHTML);
-
-        // Работа с виртуальным блоком и рендер
-        modifiers.getSpecHTML(specId, function () {
-            modifiers
-                .generateVariationsList(specId)
-                .generateModificatorsList(virtualBlock.id)
-                .setupVariationsList(virtualBlock.id)
-                .setupModificatorsList(virtualBlock.id)
-                .render(virtualBlock.id);
-        });
-
-        // Добавить ссылку на элемент в правое меню
-        menuItem = "<li class='lego_widget_ul-i' data-id=" + virtualBlock.id + ">" +
-                "<a class='lego_lk' href = '" + globalOptions.specsMaster.current + '/' +  url + "'>" + name + "</a>" +
-                "<span class='lego_ic lego_ic_close'></span>" +
-            "</li>";
-        $("#current-elements").append(menuItem);
-
-        // После добавления элемента скрыть сетку
-        $(".lego_layer").addClass('__hide-bg');
-    }
-
-    // Перещелкнуть активную ссылку на блок в меню
-    $("#current-elements .lego_lk").removeClass("__active");
-    $("#current-elements .lego_widget_ul-i:last-child .lego_lk").addClass('__active');
-
-    // Сбросить информацию для добавления блока в контейнер
-    clearChosen();
-};
-
-// Компонент-переключатель
+// Компонент тогглер-переключатель
 $(".lego_toggler").on("click", ".lego_toggle_i", function () {
     var targetNode = $('.lego_search-result.__layout');
 
@@ -140,7 +136,7 @@ $(".lego_toggler").on("click", ".lego_toggle_i", function () {
 
 // Вставить элемент в подсвеченную область, доступную для работы
 $(".lego_layer").on("click", ".editable", function(){
-    insertChosen(this);
+    insertChosen($(this));
 });
 
 // Клик по результатам поиска — выбор блока для вставки
@@ -206,10 +202,128 @@ $('body').on('click', '.js-layouts-list .lego_search-result_i', function(e) {
         .addClass('__' + layerMode);
 });
 
-$('.lego_layer').on('click', '[data-target]', function( e ) {
-    $('[contenteditable]').attr('contenteditable', 'false');
+// Подсветить блоки по клику
+$('body').on('click', '.lego_main [data-id]', function (e) {
+    var virtualBlockId = $(this).attr('data-id') || $(this).closest('.lego_main [data-id]').attr('data-id');
 
-    var clickedEl = getTextNodesIn( e.target).parent();
-    clickedEl.attr('contenteditable', 'true');
+    modifiers
+        .generateVariationsList(elementList[virtualBlockId].element.specId)
+        .generateModificatorsList(virtualBlockId)
+        .setupVariationsList(virtualBlockId)
+        .setupModificatorsList(virtualBlockId)
+        .render(virtualBlockId);
+
+    return false;
+})
+
+// Обработка кликов по вариациям и модификаторам в сайдбаре
+$('body').on('click', '.lego_checkbox', function() {
+
+    var $activeNode = $('[data-active="true"]');
+    var activeVirtualBlockId = $activeNode.attr('data-id');
+    var activeVirtualBlock = elementList[activeVirtualBlockId];
+
+    if ( $(this).attr('name') == 'variations' ) {
+
+        // Получить номер выбранной вариации
+        var variationValue = $(this).attr('data-variation');
+
+        // Сохранить номер в модели блока
+        activeVirtualBlock.save({
+            variation: variationValue
+        });
+
+        // Перерендерить список модификаторов в соответствии с новой вариацией
+        modifiers
+            .generateModificatorsList(activeVirtualBlockId)
+            .setupModificatorsList(activeVirtualBlockId);
+
+    } else {
+        var variationExport = {};
+
+        // Собрать новый набор модификаторов
+        $('.js-modificators .lego_expand').each(function () {
+            var blockTitle = $(this).children('.lego_expand_h').text();
+
+            variationExport[blockTitle] = [];
+
+            $(this).find('.lego_checkbox').each(function () {
+                if ($(this).is(':checked')) {
+                    variationExport[blockTitle].push( $(this).attr('data-mod') );
+                }
+            })
+        });
+
+        // Сохранить новый набор модификаторов
+        activeVirtualBlock.save({
+            modifiers: variationExport
+        });
+    }
+
+    // Перерендерить с учетом изменений
+    modifiers.render();
+})
+
+// Обработка кликов переключения блоков
+$('body').on('click', '#current-elements .lego_lk', function (e) {
+    e.preventDefault();
+
+    var virtualBlockId = $(this).parent().attr('data-id');
+
+    if (virtualBlockId) {
+        $("#current-elements .lego_lk").removeClass("__active");
+        $(this).addClass('__active');
+
+        modifiers
+            .generateVariationsList(elementList[virtualBlockId].element.specId)
+            .generateModificatorsList(virtualBlockId)
+            .setupVariationsList(virtualBlockId)
+            .setupModificatorsList(virtualBlockId)
+            .render(virtualBlockId);
+    }
 });
 
+// Обработка кликов по иконке удаления блока
+$('body').on('click', '.lego_ic_close', function () {
+
+    var activeBlockId = $('[data-active]').attr('data-id');
+    var $listItem = $(this).parent('.lego_widget_ul-i');
+    var virtualBlockId = $listItem.attr('data-id');
+    var $blockNode = $('.lego_main [data-id="' + virtualBlockId + '"]');
+    var $candidatListItem = $listItem.prev();
+    var candidatVirtualBlockId = false;
+
+    // По умолчанию при удалении переключаемся на предыдущий элемент,
+    // Но если его нет, то пытаемся на следующий
+    if (!$candidatListItem.length) {
+        var $candidatListItem = $listItem.next();
+    }
+
+    if (delete elementList[virtualBlockId]) {
+
+        $blockNode.remove(); // удалить блок с холста
+        $listItem.remove(); // удалить элемент в списке
+
+        // Переключиться на новый блок и отрендерить его в том случае,
+        // если на холсте вообще остаются какие-либо элементы
+        // и при этом удаляемый элемент является активным
+        if ($candidatListItem.length && activeBlockId === virtualBlockId) {
+            candidatVirtualBlockId = $candidatListItem.attr('data-id');
+
+            modifiers
+                .generateVariationsList(elementList[candidatVirtualBlockId].element.specId)
+                .generateModificatorsList(candidatVirtualBlockId)
+                .setupVariationsList(candidatVirtualBlockId)
+                .setupModificatorsList(candidatVirtualBlockId)
+                .render(candidatVirtualBlockId);
+        } else {
+
+            // Если элементов нет, очистить сайдбар
+            if (!Object.keys(elementList).length) {
+                modifiers
+                    .generateVariationsList()
+                    .generateModificatorsList();
+            }
+        }
+    }
+});

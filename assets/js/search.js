@@ -137,7 +137,7 @@ $(function () {
         renderLiveSearchResults($searchInput.val());
     });
 
-    $searchInput.on("keyup", function() {
+    $searchInput.on("keyup search", function() {
 
         // Нет смысла дергать поиск, если нет данных и шаблона
         if (parsed) {

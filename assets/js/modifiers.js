@@ -315,11 +315,11 @@ var modifiers = (function () {
 
             var modValue = $(this).attr('data-mod');
             var elemValue = $(this).attr('data-elem');
-            var affectedNodes = $virtualBlockHTML.find('.' + elemValue + '.'+modValue);
+            var $affectedNodes = $virtualBlockHTML.find('.' + elemValue + '.'+modValue);
 
             $(this).prop('checked', false);
 
-            if (affectedNodes.length) {
+            if ($affectedNodes.length) {
                 $(this).prop('checked', true);
 
                 if (!modifiersData[elemValue]) {
@@ -329,6 +329,19 @@ var modifiers = (function () {
                 modifiersData[elemValue].push(modValue);
             }
         });
+
+        // Восстановим данные из виртуального блока, если они там существуют
+        if (Object.keys(virtualBlock.modifiers).length) {
+            for (var block in virtualBlock.modifiers) {
+                $('input[name="modificators"][data-elem="' + block + '"]').prop('checked', false);
+
+                for (var modifier = 0; modifier < virtualBlock.modifiers[block].length; modifier++) {
+                    $('input[name="modificators"][data-elem="' + block + '"][data-mod="' + virtualBlock.modifiers[block][modifier] + '"]').prop('checked', true);
+                }
+            }
+
+            modifiersData = virtualBlock.modifiers;
+        }
 
         // Сохраним полученные в результате анализа вариации модификаторы в модели
         virtualBlock.save({
@@ -379,6 +392,11 @@ var modifiers = (function () {
             .attr('data-id', virtualBlockId);
 
         $activeElement.replaceWith($tempHTML);
+
+        // Перещелкнуть пункт в меню
+        // Перещелкнуть активную ссылку на блок в меню
+        $('#current-elements .lego_lk').removeClass('__active');
+        $('#current-elements .lego_widget_ul-i[data-id="' + virtualBlockId + '"] .lego_lk').addClass('__active');
     }
 
 
@@ -433,115 +451,3 @@ var modifiers = (function () {
         }
     }
 })();
-
-
-$(function() {
-    // Инициализация загрузки модификаторов
-    modifiers.init();
-
-    // Обработка кликов по вариациям и модификаторам в сайдбаре
-    $('body').on('click', '.lego_checkbox', function() {
-
-        var $activeNode = $('[data-active="true"]');
-        var activeVirtualBlockId = $activeNode.attr('data-id');
-        var activeVirtualBlock = elementList[activeVirtualBlockId];
-
-        if ( $(this).attr('name') == 'variations' ) {
-
-            // Получить номер выбранной вариации
-            var variationValue = $(this).attr('data-variation');
-
-            // Сохранить номер в модели блока
-            activeVirtualBlock.save({
-                variation: variationValue
-            });
-
-            // Перерендерить список модификаторов в соответствии с новой вариацией
-            modifiers
-                .generateModificatorsList(activeVirtualBlockId)
-                .setupModificatorsList(activeVirtualBlockId);
-
-        } else {
-            var variationExport = {};
-
-            // Собрать новый набор модификаторов
-            $('.js-modificators .lego_expand').each(function () {
-                var blockTitle = $(this).children('.lego_expand_h').text();
-
-                variationExport[blockTitle] = [];
-
-                $(this).find('.lego_checkbox').each(function () {
-                    if ($(this).is(':checked')) {
-                        variationExport[blockTitle].push( $(this).attr('data-mod') );
-                    }
-                })
-            });
-
-            // Сохранить новый набор модификаторов
-            activeVirtualBlock.save({
-                modifiers: variationExport
-            });
-        }
-
-        // Перерендерить с учетом изменений
-        modifiers.render();
-    })
-
-    // Обработка кликов переключения блоков
-    $('body').on('click', '#current-elements .lego_lk', function (e) {
-        e.preventDefault();
-
-        var virtualBlockId = $(this).parent().attr('data-id');
-
-        if (virtualBlockId) {
-            $("#current-elements .lego_lk").removeClass("__active");
-            $(this).addClass('__active');
-
-            modifiers
-                .generateVariationsList(elementList[virtualBlockId].element.specId)
-                .generateModificatorsList(virtualBlockId)
-                .setupVariationsList(virtualBlockId)
-                .setupModificatorsList(virtualBlockId)
-                .render(virtualBlockId);
-        }
-    });
-
-    // Обработка кликов по иконке удаления блока
-    $('body').on('click', '.lego_ic_close', function () {
-
-        var activeBlockId = $('[data-active]').attr('data-id');
-        var $listItem = $(this).parent('.lego_widget_ul-i');
-        var virtualBlockId = $listItem.attr('data-id');
-        var $blockNode = $('.lego_main [data-id="' + virtualBlockId + '"]');
-        var $candidatListItem = $listItem.prev();
-        var candidatVirtualBlockId = false;
-
-        // По умолчанию при удалении переключаемся на предыдущий элемент,
-        // Но если его нет, то пытаемся на следующий
-        if (!$candidatListItem.length) {
-            var $candidatListItem = $listItem.next();
-        }
-
-        if (delete elementList[virtualBlockId]) {
-
-            $blockNode.remove(); // удалить блок с холста
-            $listItem.remove(); // удалить элемент в списке
-
-            // Переключиться на новый блок и отрендерить его в том случае,
-            // если на холсте вообще остаются какие-либо элементы
-            // и при этом удаляемый элемент является активным
-            if ($candidatListItem.length && activeBlockId === virtualBlockId) {
-                candidatVirtualBlockId = $candidatListItem.attr('data-id');
-                $candidatListItem.children('.lego_lk').addClass('__active');
-            }
-
-            modifiers
-                .generateVariationsList(elementList[candidatVirtualBlockId].element.specId)
-                .generateModificatorsList(candidatVirtualBlockId)
-                .setupVariationsList(candidatVirtualBlockId)
-                .setupModificatorsList(candidatVirtualBlockId)
-                .render(candidatVirtualBlockId);
-        }
-    });
-
-});
