@@ -1,0 +1,13 @@
+{
+  "author": "Odnoklassniki front-end team",
+  "name": "design-lego-parser",
+  "version": "0.0.1",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sourcejs/lego.git"
+  },
+  "dependencies": {
+    "jsdom": "~1.0.1",
+    "fs-extra": "~0.12.0"
+  }
+}
