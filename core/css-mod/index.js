@@ -2,40 +2,79 @@
 * CSS modifiers analyzer
 */
 
-var fs = require('fs'),
-	css = require('css'),
-	request = require('request'),
-	q = require('q');
+var fs = require('fs');
+var css = require('css');
+var request = require('request');
 
 module.exports = function cssMod() {
-
 	var debug = false;
 	var modifierDetect = /__/;
 	var startModifierDetect = /^__/;
+    var lastProcessedObj = {};
+    var lastEtags = {};
+    var cssFilesCache = {};
 
-	var cssFiles = []; // Будет содержать список css-файлов для анализа (передается в параметрах вызова)
-	var outputTree = {}; // Будет содержать структуру «блок(элемент) -> модификаторы»
+    // CSS Files collection
+	var cssFiles = [];
 
-	// Импорт стилей, склейка и построение дерева
-	function prepareCssList() {
+    // Output tree with block, element, modifier structure
+	var outputTree = {};
 
-		var deferred = q.defer();
+
+    // Download all styles and parse CSS modifiers
+	function parseCSS(callback) {
+        var _callback = callback || function () {};
+
+        // String with all concatenated CSS files
 		var importCss = '';
 
-		for (var i = 0, complete = 0; i < cssFiles.length; i++) {
-			request(cssFiles[i], function (error, response, body) {
-				if (!error && response.statusCode == 200) {
-					importCss += body;
-					complete++;
+		for (var i = 0, complete = 0, chachedCount = 0; i < cssFiles.length; i++) {
+            var currentFile = cssFiles[i];
+            var options = {
+                url: cssFiles[i],
+                headers: {
+                    // Setting etag for cache
+                    'If-None-Match' : lastEtags[currentFile]
+                }
+            };
 
-					if (complete == cssFiles.length) {
-						deferred.resolve(css.parse(importCss).stylesheet.rules);
-					}
-				}
+			request(options, function (err, response, body) {
+                if (err) {
+                    _callback(err);
+                    return;
+                }
+
+                var currentFile = response.request.uri.href;
+
+                // Saving etag in memory
+                lastEtags[currentFile] = response.headers.etag;
+
+                // If file new
+				if (response.statusCode == 200) {
+					importCss += body;
+                    cssFilesCache[currentFile] = body;
+
+                // If file is cached
+				} else if (response.statusCode == 304) {
+                    importCss += cssFilesCache[currentFile];
+                    chachedCount++;
+                }
+
+                complete++;
+
+                // When loop is done
+                if (complete === cssFiles.length) {
+                    // If all files are cached, return last parsed CSS
+                    if (chachedCount === cssFiles.length) {
+                        _callback(null, lastProcessedObj)
+
+                    // Or parse it again
+                    } else {
+                        _callback(null, processCssList(css.parse(importCss).stylesheet.rules))
+                    }
+                }
 			})
 		}
-
-		return deferred.promise;
 	}
 
 	// Добавление селектора в итоговый список
@@ -169,20 +208,30 @@ module.exports = function cssMod() {
 					}
 				}
 			}
-
 		}
 
+        // Caching parse output
+        lastProcessedObj = outputTree;
 		return outputTree;
 	}
 
 	return {
-		getCssMod: function (config) {
+		getCssMod: function (config, callback) {
+            var _callback = callback || function () {};
+
 			cssFiles = config.files;
 			modifierDetect = new RegExp(config.rules.modifierRule) || modifierDetect;
 			startModifierDetect = new RegExp(config.rules.startModifierRule) || startModifierDetect;
 			debug = config.debug || debug;
 
-			return q.fcall(prepareCssList).then(processCssList);
+            parseCSS(function(err, data){
+                if (err) {
+                    _callback(err);
+                    return;
+                }
+
+                _callback(null, data);
+            });
 		}
 	}
 }();

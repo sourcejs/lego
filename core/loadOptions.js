@@ -12,7 +12,8 @@ module.exports = function(){
     };
     var coreSettings = requireUncached(path.join(pathToApp,'options'));
 
-    var userSettingsFile = path.join(pathToApp, coreSettings.common.pathToUser, 'options.js');
+    var pathToUser = global.commander.user ? global.commander.user : coreSettings.common.pathToUser;
+    var userSettingsFile = path.join(pathToApp, pathToUser, 'options.js');
 
     // If user settings file is present, override core settings
     if(fs.existsSync(userSettingsFile)) {

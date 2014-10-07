@@ -5,13 +5,23 @@ var mustache = require('mustache');
 var gzippo = require('gzippo');
 var sh = require('shorthash');
 var colors = require('colors');
+var commander = require('commander');
 var cssMod = require('./core/css-mod');
-var q = require('q');
 var bodyParser = require('body-parser');
 var getView = require('./core/getView');
+var defOpts = require('./options');
 
 
 /* Globals */
+
+// Parameters
+commander
+    .option('-u, --user [string]', 'Path to user folder (default: ' + defOpts.common.pathToUser + ')', defOpts.common.pathToUser)
+    .option('-p, --port [number]', 'Server port (default: ' + defOpts.common.port + ')', defOpts.common.port)
+    .parse(process.argv);
+
+global.commander = commander;
+
 var app = global.app = express();
 var opts = global.opts = require('./core/loadOptions')();
 
@@ -21,8 +31,11 @@ var MODE = global.MODE = process.env.NODE_ENV || 'development';
 if (global.opts.specsMaster.prod && global.opts.specsMaster.dev) {
     opts.specsMaster.current = global.MODE === 'production' ? global.opts.specsMaster.prod : global.opts.specsMaster.dev;
 }
-/* /Globals */
 
+// Overriding options from specified arguments
+if (commander.port) global.opts.common.port = commander.port;
+if (commander.user) global.opts.common.pathToUser = commander.user;
+/* /Globals */
 
 
 /* Express settings */
@@ -123,7 +136,12 @@ app.post('/cssmod', function (req, res) {
 	var config = JSON.parse(JSON.stringify(opts.cssMod));
 	config.files = req.body.files;
 
-	q.when(cssMod.getCssMod(config), function(parsedCss) {
+    cssMod.getCssMod(config, function(err, parsedCss) {
+        if (err) {
+            res.satus(500).send('Error getting specified CSS files for modifier analysis, check options.js.')
+            return;
+        }
+
 		res.send(parsedCss)
 	});
 });
@@ -193,5 +211,5 @@ if (!module.parent) {
 
     var dateString = dateArr.join(':').red;
 
-    console.log('[LEGO] '.blue + dateString +' Server started on http://localhost:'.blue + portString.red + ' in '.blue + MODE.blue + ' mode...'.blue);
+    console.log('[LEGO] '.blue + dateString +' Server started on http://localhost:'.blue + portString.red + ', from '.blue + global.opts.common.pathToUser.red + ' folder in '.blue + MODE.blue + ' mode...'.blue);
 }
