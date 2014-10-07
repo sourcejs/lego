@@ -21,6 +21,12 @@ var parseTargets = function(targets) {
             result.push(possibleTargets[i]);
         }
     }
+
+    // Предполагаем, что если цель явно не задана, элемент может упасть в произвольный контейнер
+    if (!result.length) {
+        result = possibleTargets.slice(0);
+    }
+
     result.push('overlay');
     return result;
 };
@@ -46,7 +52,7 @@ var insertChosen = function($targetContainer) {
         var specId = virtualBlock.element.specId;
 
         // Добавляем новый элемент, сбросим признак активности
-        $('[data-active="true"]').removeAttr('data-active');
+        modifiers.clearActiveNode();
 
         $targetContainer.append(currentHTML);
 
@@ -135,7 +141,8 @@ $(".lego_toggler").on("click", ".lego_toggle_i", function () {
 });
 
 // Вставить элемент в подсвеченную область, доступную для работы
-$(".lego_layer").on("click", ".editable", function(){
+$("body").on("click", ".editable", function (e) {
+    e.stopPropagation(); // Не нужно сбрасывать фокус, это происходит при всплытии клика на контейнер
     insertChosen($(this));
 });
 
@@ -158,7 +165,7 @@ $("#lego_search-result").on("click", ".lego_search-result_i", function(e){
 
     var targets = $(this)[0].dataset.target;
     var results = parseTargets(targets);
-
+console.log(results);
     for (var j = 0; j < results.length; j++) {
         var elem = $('[data-target="' + results[j] + '"]');
         activeTargets.push(elem);
@@ -211,7 +218,7 @@ $('body').on('click', '.lego_main [data-id]', function (e) {
         .generateModificatorsList(virtualBlockId)
         .setupVariationsList(virtualBlockId)
         .setupModificatorsList(virtualBlockId)
-        .render(virtualBlockId);
+        .setActiveNode(virtualBlockId); // Перерендер по клику не нужен
 
     return false;
 })
@@ -219,7 +226,7 @@ $('body').on('click', '.lego_main [data-id]', function (e) {
 // Обработка кликов по вариациям и модификаторам в сайдбаре
 $('body').on('click', '.lego_checkbox', function() {
 
-    var $activeNode = $('[data-active="true"]');
+    var $activeNode = modifiers.getActiveNode();
     var activeVirtualBlockId = $activeNode.attr('data-id');
     var activeVirtualBlock = elementList[activeVirtualBlockId];
 
@@ -286,7 +293,7 @@ $('body').on('click', '#current-elements .lego_lk', function (e) {
 // Обработка кликов по иконке удаления блока
 $('body').on('click', '.lego_ic_close', function () {
 
-    var activeBlockId = $('[data-active]').attr('data-id');
+    var activeBlockId = modifiers.getActiveNode().attr('data-id');
     var $listItem = $(this).parent('.lego_widget_ul-i');
     var virtualBlockId = $listItem.attr('data-id');
     var $blockNode = $('.lego_main [data-id="' + virtualBlockId + '"]');
@@ -296,7 +303,7 @@ $('body').on('click', '.lego_ic_close', function () {
     // По умолчанию при удалении переключаемся на предыдущий элемент,
     // Но если его нет, то пытаемся на следующий
     if (!$candidatListItem.length) {
-        var $candidatListItem = $listItem.next();
+        $candidatListItem = $listItem.next();
     }
 
     if (delete elementList[virtualBlockId]) {
@@ -327,3 +334,7 @@ $('body').on('click', '.lego_ic_close', function () {
         }
     }
 });
+
+$('body').on('click', '.lego_main', function () {
+    modifiers.clearActiveNode();
+})

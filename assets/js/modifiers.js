@@ -304,6 +304,16 @@ var modifiers = (function () {
         $('.temp-node').remove();
     }
 
+    // Перещелкнуть пункт в меню
+    function setupBlockList (virtualBlockId) {
+        // Перещелкнуть активную ссылку на блок в меню
+        $('#current-elements .lego_lk').removeClass('__active');
+
+        if (virtualBlockId) {
+            $('#current-elements .lego_widget_ul-i[data-id="' + virtualBlockId + '"] .lego_lk').addClass('__active');
+        }
+    }
+
     // Проставляет активную вариацию в сайдбаре
     function setupVariationsList(virtualBlockId) {
 
@@ -377,14 +387,14 @@ var modifiers = (function () {
 
         // Если блок для отрисовки не указан явно, накатываем изменения на текущий активный блок
         if (!virtualBlockId) {
-            $activeElement = $('[data-active]');
+            $activeElement = getActiveNode();
             virtualBlockId = $activeElement.attr('data-id');
         } else {
             // Приоритет узла за блоком с заданным id, однако при инициализации такого атрибута может еще не быть
             $activeElement = $('.lego_main [data-id="' + virtualBlockId + '"]');
 
             if (!$activeElement.length) {
-                $activeElement = $('[data-active]');
+                $activeElement = getActiveNode();
             }
         }
 
@@ -394,7 +404,7 @@ var modifiers = (function () {
         }
 
         // Мы знаем, с каким элементом мы работаем, можно удалить признак активности
-        $('[data-active="true"]').removeAttr('data-active');
+        clearActiveNode();
 
         var virtualBlockSpecId = elementList[virtualBlockId].element.specId;
         var virtualBlockVariation = elementList[virtualBlockId].variation;
@@ -414,10 +424,32 @@ var modifiers = (function () {
 
         $activeElement.replaceWith($tempHTML);
 
-        // Перещелкнуть пункт в меню
-        // Перещелкнуть активную ссылку на блок в меню
-        $('#current-elements .lego_lk').removeClass('__active');
-        $('#current-elements .lego_widget_ul-i[data-id="' + virtualBlockId + '"] .lego_lk').addClass('__active');
+        // Перещелкнуть список блоков
+        setupBlockList(virtualBlockId);
+    }
+
+    // Получить активную ноду
+    function getActiveNode() {
+        return $('.lego_main [data-active="true"]').eq(0);
+    }
+
+    // Сбросить фокус с активной ноды
+    function clearActiveNode() {
+        getActiveNode().removeAttr('data-active');
+    }
+
+    // Поставить фокус на узел
+    function setActiveNode(virtualBlockId) {
+        clearActiveNode();
+
+        if (!virtualBlockId) {
+            return;
+        }
+
+        $('.lego_main [data-id="' + virtualBlockId + '"]').attr('data-active', true);
+
+        // Подсветить в списке блоков
+        setupBlockList(virtualBlockId);
     }
 
 
@@ -461,6 +493,30 @@ var modifiers = (function () {
 
         setupModificatorsList: function (virtualBlockId) {
             setupModificatorsList(virtualBlockId);
+
+            return this;
+        },
+
+
+        getActiveNode: function () {
+
+            return getActiveNode();
+        },
+
+        clearActiveNode: function () {
+            // Для публичного метода делаем больше работы:
+            // сбрасываем фокус, очищаем правый сайдбар и сбрасываем выделение в списке блоков
+
+            clearActiveNode();
+            generateVariationList();
+            generateModificatorsList();
+            setupBlockList();
+
+            return this;
+        },
+
+        setActiveNode: function (virtualBlockId) {
+            setActiveNode(virtualBlockId);
 
             return this;
         },
