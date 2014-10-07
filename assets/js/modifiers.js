@@ -85,6 +85,7 @@ var modifiers = (function () {
                 console.log('processData',data);
 
                 var flatSections = [];
+                var tempNode;
 
                 // Нам нужно развернуть древовидную структуру «секция[]»-«подсекция[]»—...—«примеры[]» в плоский массив
                 // Все html хранятся в глобальном объекте спецификаций, индекс — из параметра
@@ -94,6 +95,13 @@ var modifiers = (function () {
 
                         // Выбросим блоки, в которых нет html-кода
                         if (target[i].html.length) {
+
+                            // Для хорошей вставки шаблона нужно, чтобы был только один корневой узел
+                            tempNode = '<div>' + target[i].html + '</div>';
+                            if ($(tempNode).children().length > 1) {
+                                target[i].html = [tempNode];
+                            }
+
                             flatSections.push(target[i]);
                         }
 
