@@ -1,37 +1,49 @@
 var parsedTree = {};
 var parsed = false;
 var template = '';
-var specsMaster = globalOptions.specsMaster.current;
 
 var prepareSpecsData = function (callback) {
+    var specsMaster = globalOptions.specsMaster.current;
+    var customDataUrl = globalOptions.specsMaster.customDataUrl;
 
-    $.ajax(specsMaster+'/api/specs', {
-        method: 'GET',
-        crossDomain: true,
-        data: {
-            filter: {
-                cats: ['base'],
-                forceTags: ['lego']
-            },
-            filterOut: {
-                tags: ['html', 'lego-hide', 'hidden', 'deprecated']
+    var drawNavigation = function(data){
+        parsedTree = data;
+
+        $.ajax({
+            url: '/lego/views/search-result-list.html',
+            success: function(d) {
+                template = Handlebars.compile(d);
+                parsed = true;
+                processSpecsData(parsedTree, callback);
             }
-        },
-        contentType: 'application/json',
+        });
+    };
 
-        success: function (data) {
-            parsedTree = data;
+    if (customDataUrl) {
+        $.ajax(customDataUrl, {
+            method: 'GET',
+            contentType: 'application/json',
 
-            $.ajax({
-                url: '/lego/views/search-result-list.html',
-                success: function(d) {
-                    template = Handlebars.compile(d);
-                    parsed = true;
-                    processSpecsData(parsedTree, callback);
+            success: drawNavigation
+        });
+    } else {
+        $.ajax(specsMaster+'/api/specs', {
+            method: 'GET',
+            crossDomain: true,
+            data: {
+                filter: {
+                    cats: ['base'],
+                    forceTags: ['lego']
+                },
+                filterOut: {
+                    tags: ['html', 'lego-hide', 'hidden', 'deprecated']
                 }
-            });
-        }
-    });
+            },
+            contentType: 'application/json',
+
+            success: drawNavigation
+        });
+    }
 
     Handlebars.registerHelper("imageUrl", function(url) {
         url = url.toString();
@@ -42,22 +54,32 @@ var prepareSpecsData = function (callback) {
     Handlebars.registerHelper("fullUrl", function(url) {
         url = url.toString();
 
-        return specsMaster + url;
+        return specsMaster ? specsMaster + url : url;
     });
-}
+};
 
 var processSpecsData = function (specsTree, callback) {
     var resultTree = {};
     var closedSection = false;
     var callback = callback || function () {};
 
+    // Separating spec cats
+    resultTree.root = [];
     for (var specsPath in specsTree) {
         var specPathParts =  specsPath.split('/');
 
-        if (!resultTree[specPathParts[0]]) {
-            resultTree[specPathParts[0]] = [];
+        if (specPathParts.length === 1) {
+           resultTree.root.push(specsTree[specsPath]);
+        } else {
+            if (!resultTree[specPathParts[0]]) {
+                resultTree[specPathParts[0]] = [];
+            }
+            resultTree[specPathParts[0]].push(specsTree[specsPath]);
         }
-        resultTree[specPathParts[0]].push(specsTree[specsPath]);
+    }
+
+    if (resultTree.root.length === 0) {
+        delete resultTree.root;
     }
 
     for (var specsSection in resultTree) {
@@ -76,7 +98,7 @@ var processSpecsData = function (specsTree, callback) {
     }
 
     callback();
-}
+};
 
 var fuzzySearch = function (q, allData) {
     var result = {};

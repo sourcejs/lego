@@ -1,5 +1,5 @@
 /**
-* Модуль анализа css для извлечения модификаторов
+* CSS modifiers analyzer
 */
 
 var fs = require('fs'),

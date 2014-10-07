@@ -36,7 +36,7 @@ var insertChosen = function($targetContainer) {
 
     if (chosenNavigation) {
         var name = chosenNavigation.text();
-        var url = chosenNavigation.attr('data-spec-id').slice(1);
+        var url = chosenNavigation.attr('data-spec-id');
 
         var currentHTML = $('<div data-active="true"></div>').attr('data-container', acceptsHTML);
         var menuItem;

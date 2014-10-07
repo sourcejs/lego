@@ -1,5 +1,5 @@
 var express = require('express');
-var fs = require('fs');
+var fs = require('fs-extra');
 var path = require('path');
 var mustache = require('mustache');
 var gzippo = require('gzippo');
@@ -18,7 +18,9 @@ var opts = global.opts = require('./core/loadOptions')();
 var MODE = global.MODE = process.env.NODE_ENV || 'development';
 
 // Preparing environment
-opts.specsMaster.current = global.MODE === 'production' ? global.opts.specsMaster.prod : global.opts.specsMaster.dev;
+if (global.opts.specsMaster.prod && global.opts.specsMaster.dev) {
+    opts.specsMaster.current = global.MODE === 'production' ? global.opts.specsMaster.prod : global.opts.specsMaster.dev;
+}
 /* /Globals */
 
 
@@ -67,34 +69,48 @@ arr.map(function(item) {
 
 // Share link
 app.get('/s/:page', function (req, res) {
-    var data = req.params.page;
+    var page = req.params.page;
 
-    var legoContainer = mustache.to_html(getView('lego-сontainer.html'), {
-        legoLayer: fs.readFileSync(__dirname+'/data/saved/'+data+'.html', "utf8"),
-        legoLayouts: getView('lego-layouts.html'),
-        globalOptions: JSON.stringify(opts)
+    fs.readFile(path.join(app.get('user'), 'saved', page + '.html'), "utf8", function(err, data){
+        if(err) {
+            console.log(err);
+            res.send('No saved data with this id.');
+            return;
+        }
+
+        var legoContainer = mustache.to_html(getView('lego-сontainer.html'), {
+            legoLayer: data,
+            legoLayouts: getView('lego-layouts.html'),
+            globalOptions: JSON.stringify(opts)
+        });
+
+        var htmlToSend = mustache.to_html(getView('index.html'), {
+            legoContainer: legoContainer
+        });
+
+        res.send(htmlToSend);
     });
-
-    var htmlToSend = mustache.to_html(getView('index.html'), {
-        legoContainer: legoContainer
-    });
-
-    res.send(htmlToSend);
 });
 
 // Clean html link
 app.get('/clean/:page', function (req, res) {
-    var data = req.params.page;
+    var page = req.params.page;
+    var view = getView('clean.html');
 
-    var indexPage = getView('clean.html');
-    var savedHTML = fs.readFileSync(__dirname+'/data/saved/'+data+'.html', "utf8");
+    fs.readFile(path.join(app.get('user'), 'saved', page + '.html'), "utf8", function(err, data){
+        if(err) {
+            console.log(err);
+            res.send('No saved data with this id.');
+            return;
+        }
 
-    var htmlToSend = mustache.to_html(indexPage, {
-        legoLayer: savedHTML,
-        globalOptions: JSON.stringify(opts)
+        var htmlToSend = mustache.to_html(view, {
+            legoLayer: data,
+            globalOptions: JSON.stringify(opts)
+        });
+
+        res.send(htmlToSend);
     });
-
-    res.send(htmlToSend);
 });
 /* /Route for static files */
 
@@ -114,19 +130,22 @@ app.post('/cssmod', function (req, res) {
 
 // Save working html
 app.get('/save', function (req, res) {
-    var data = req.query.html;
+    var html = req.query.html;
 
-    var outputDir = './data/saved';
+    var outputDir = path.join(app.get('user'), 'saved');
 
-    var name = sh.unique(data);
+    var name = sh.unique(html);
 
-    var go = function() {
-        fs.writeFile(outputDir+"/"+name+".html", data, function(err) {
+    fs.mkdirp(outputDir, function (err) {
+        if (err) return console.error(err);
+
+        fs.writeFile(path.join(outputDir, name + ".html"), html, function(err) {
             if(err){
                 console.log(err);
                 res.send({
                     success: false
                 });
+                return;
             }
 
             res.send({
@@ -134,17 +153,6 @@ app.get('/save', function (req, res) {
                 name: name
             });
         });
-    };
-
-    fs.readdir(outputDir,function(e){
-        if(!e || (e && e.code === 'EEXIST')){
-            go();
-        } else if (e.code === 'ENOENT') {
-            fs.mkdir(outputDir);
-            go();
-        } else {
-            console.log(e);
-        }
     });
 });
 /* /API */

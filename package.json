@@ -16,6 +16,7 @@
     "q": "^1.0.1",
     "shorthash": "0.0.2",
     "request": "~2.44.0",
-    "deep-extend": "~0.2.11"
+    "deep-extend": "~0.2.11",
+    "fs-extra": "~0.12.0"
   }
 }

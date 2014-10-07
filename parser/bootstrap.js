@@ -1,6 +1,7 @@
 var jsdom = require('jsdom');
 var fs = require('fs-extra');
 var path = require('path');
+var jquery = fs.readFileSync("./lib/jquery.js", "utf-8");
 
 var generateJSON = function(window){
     var $ = window.$;
@@ -17,10 +18,16 @@ var generateJSON = function(window){
 
         $t.find('.bs-example').each(function(){
             var html = [];
+            html.push($(this).children()[0].outerHTML);
 
-            html.push($(this).find('*').first().parent().html());
+            var header = $(this).prevAll('h4').html();
+
+            if (!header) header = $(this).prevAll('h3').html();
+            if (!header) header = $(this).prevAll('h2').html();
+            if (!header) header = $(this).prevAll('h1').html();
 
             contents.push({
+                header: header,
                 id: exampleID,
                 html: html
             });
@@ -28,42 +35,12 @@ var generateJSON = function(window){
             exampleID++;
         });
 
-        output[id] = {};
-        output[id].specFile = {
+        output[id] = {
             id: id,
+            url: 'http://getbootstrap.com/components#' + id,
             title: title,
             contents: contents
         };
-
-//        "base-test": {
-//        "button": {
-//            "specFile": {
-//                "id": "base-test/button",
-//                "css": "",
-//                "js": "",
-//                "contents": [
-//                    {
-//                        "id": "1",
-//                        "class": "",
-//                        "title": "",
-//                        "html": [
-//                            "<button type='button' class='btn btn-default'><span class='glyphicon glyphicon-align-right'></span></button>"
-//                        ],
-//                        "nested": [
-//                            {
-//                                "id": "1_1",
-//                                "class": "",
-//                                "title": "",
-//                                "html": [
-//                                    "<button type='button' class='btn btn-default btn-lg'><span class='glyphicon glyphicon-star'></span> Star</button>"
-//                                ],
-//                                "nested": []
-//                            }
-//                        ]
-//                    }
-//                ]
-//            }
-//        },
     });
 
     return output;
@@ -72,14 +49,11 @@ var generateJSON = function(window){
 jsdom.env({
     file: 'raw/bootstrap.html',
 //    url: "http://getbootstrap.com/components",
-    scripts: ["http://code.jquery.com/jquery.js"],
+    src: [jquery],
     done: function (errors, window) {
-        var dataPath = '../user/data';
+        var dataPath = '../user-bootstrap/data/bootstrap';
         var fileName = 'bootstrap.json';
         var fullPath = path.join(dataPath, fileName);
-
-        console.log('go');
-
 
         var data = generateJSON(window);
 

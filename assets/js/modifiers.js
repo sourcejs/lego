@@ -78,38 +78,51 @@ var modifiers = (function () {
 
         // Если в глобальном объекте спек нет экземпляра с этим id, выкачать и сохранить, иначе отдать готовый
         if (!specList[specId]) {
-            $.ajax(specsMaster+'/api/specs/html', {
-                contentType: "application/json",
-                data: {
-                    id: specId
-                },
-                dataType: "json",
-                type: 'GET',
-                success: function(data) {
+            var specsMaster = globalOptions.specsMaster.current;
+            var customDataUrl = globalOptions.specsMaster.customDataUrl;
 
-                    var flatSections = [];
+            var processData = function(data){
+                console.log('processData',data);
 
-                    // Нам нужно развернуть древовидную структуру «секция[]»-«подсекция[]»—...—«примеры[]» в плоский массив
-                    // Все html хранятся в глобальном объекте спецификаций, индекс — из параметра
-                    (function flatten(target) {
+                var flatSections = [];
 
-                        for (var i=0; i<target.length; i++) {
+                // Нам нужно развернуть древовидную структуру «секция[]»-«подсекция[]»—...—«примеры[]» в плоский массив
+                // Все html хранятся в глобальном объекте спецификаций, индекс — из параметра
+                (function flatten(target) {
 
-                            // Выбросим блоки, в которых нет html-кода
-                            if (target[i].html.length) {
-                                flatSections.push(target[i]);
-                            }
+                    for (var i=0; i<target.length; i++) {
 
-                            if (target[i].nested && target[i].nested.length) {
-                                flatten(target[i].nested);
-                            }
+                        // Выбросим блоки, в которых нет html-кода
+                        if (target[i].html.length) {
+                            flatSections.push(target[i]);
                         }
-                    })(data.contents);
 
-                    specList[specId] = flatSections;
-                    callback(specList[specId]);
-                }
-            });
+                        if (target[i].nested && target[i].nested.length) {
+                            flatten(target[i].nested);
+                        }
+                    }
+                })(data.contents);
+
+                specList[specId] = flatSections;
+                callback(specList[specId]);
+            };
+
+            if (customDataUrl) {
+                console.log('parsedTree',parsedTree);
+                console.log('specId',specId);
+
+                processData(parsedTree[specId]);
+            } else {
+                $.ajax(specsMaster+'/api/specs/html', {
+                    contentType: "application/json",
+                    data: {
+                        id: specId
+                    },
+                    dataType: "json",
+                    type: 'GET',
+                    success: processData
+                });
+            }
         } else {
             callback(specList[specId]);
         }
