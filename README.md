@@ -1,6 +1,6 @@
 # Design-lego
 
-**v0.1.0-beta**
+**v0.1.0-alpha (first concept)**
 
 [SourceJS](http://sourcejs.com) companion app, for layout prototyping base on own blocks library. Could be also used separately, without SourceJS, check `/user-bootstrap` demo (runs by default).
 
@@ -31,6 +31,7 @@ NodeJS will run local server, with pre-build bootstrap library for playing in De
 
 ## Upcoming features
 
+* Configurable layouts
 * Improved UI
 * Improved prototyping features with drag n drop
 * Easy to setup configuration with SourceJS

@@ -110,11 +110,9 @@ $('#save-html').on('click', function(e){
         success:function( data ) {
             if (data.success) {
                 if($('#save-html-lk').length === 0) {
-                    $('#save-html').after('<input type="text" id="save-html-lk" class="lego_lt" value="' + hostUrl+ '/s/'+data.name+'">');
+                    $('#save-html').after('<input type="text" id="save-html-lk" class="lego_lt" value="' + hostUrl+ '/clean/'+data.name+'">');
                 } else {
-                    console.log(hostUrl +'/s/'+data.name);
-
-                    $('#save-html-lk').val(hostUrl +'/s/'+data.name);
+                    $('#save-html-lk').val(hostUrl +'/clean/'+data.name);
                 }
 
                 $('#save-html-lk').trigger('select');
