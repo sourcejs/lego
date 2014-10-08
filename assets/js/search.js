@@ -137,12 +137,12 @@ var renderLiveSearchResults = function (value) {
     if (parsed) {
         var result = fuzzySearch(value, parsedTree);
         if ($.isEmptyObject(result)) {
-            $("#lego_search-result").html("Ничего не найдено");
+            $("#lego_search-result").html("No search results");
         } else {
             processSpecsData(result);
         }
     } else {
-        $("#lego_search-result").html("Загрузка списка спецификаций...");
+        $("#lego_search-result").html("Loading components...");
 
         setTimeout(function () {
             renderLiveSearchResults(value);
