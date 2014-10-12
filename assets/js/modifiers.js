@@ -381,9 +381,11 @@ var modifiers = (function () {
     }
 
     // Отрисовывает блок с учетом диффа
-    function render(virtualBlockId) {
-
+    function render(virtualBlockId, applyVirtualProperties) {
         var $activeElement = '';
+        var applyVirtualProperties = applyVirtualProperties === false
+            ? false
+            : true;
 
         // Если блок для отрисовки не указан явно, накатываем изменения на текущий активный блок
         if (!virtualBlockId) {
@@ -412,7 +414,9 @@ var modifiers = (function () {
 
         // Создадим временный блок и применим к нему дифф из виртуального блока
         var $tempHTML =  $('<div class="temp-node">' + virtualBlockOriginHTML + '</div>');
-        applyAttributes(virtualBlockId, $tempHTML);
+        if (applyVirtualProperties) {
+            applyAttributes(virtualBlockId, $tempHTML);
+        }
 
         // На самом деле нам интересно только содержимое временного блока
         $tempHTML = $tempHTML.children();
@@ -521,8 +525,8 @@ var modifiers = (function () {
             return this;
         },
 
-        render: function (virtualBlockId) {
-            render(virtualBlockId);
+        render: function (virtualBlockId, applyVirtualProperties) {
+            render(virtualBlockId, applyVirtualProperties);
 
             return this;
         }

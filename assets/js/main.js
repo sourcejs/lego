@@ -70,7 +70,7 @@ var insertChosen = function($targetContainer) {
                 .generateModificatorsList(virtualBlock.id)
                 .setupVariationsList(virtualBlock.id)
                 .setupModificatorsList(virtualBlock.id)
-                .render(virtualBlock.id);
+                .render(virtualBlock.id, false);
         });
 
         // После добавления элемента скрыть сетку
