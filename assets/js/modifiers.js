@@ -82,8 +82,6 @@ var modifiers = (function () {
             var customDataUrl = globalOptions.specsMaster.customDataUrl;
 
             var processData = function(data){
-                console.log('processData',data);
-
                 var flatSections = [];
                 var tempNode;
 
@@ -97,7 +95,7 @@ var modifiers = (function () {
                         if (target[i].html.length) {
 
                             // Для хорошей вставки шаблона нужно, чтобы был только один корневой узел
-                            tempNode = '<div>' + target[i].html + '</div>';
+                            tempNode = '<div>' + target[i].html[0] + '</div>';
                             if ($(tempNode).children().length > 1) {
                                 target[i].html = [tempNode];
                             }
@@ -116,13 +114,9 @@ var modifiers = (function () {
             };
 
             if (customDataUrl) {
-                console.log('parsedTree',parsedTree);
-                console.log('specId',specId);
-
                 processData(parsedTree[specId]);
             } else {
                 $.ajax(specsMaster+'/api/specs/html', {
-                    contentType: "application/json",
                     data: {
                         id: specId
                     },
@@ -151,6 +145,7 @@ var modifiers = (function () {
             // Эксперимент: сбросим исходные модификаторы
             childBlocks.each(function () {
 
+                // TODO: remove mods removal
                 for (var currentModifier = 0; currentModifier < allBlocksModifiers.length; currentModifier++) {
                     $(this).removeClass(allBlocksModifiers[currentModifier]);
                 }
