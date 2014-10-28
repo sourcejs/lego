@@ -132,13 +132,15 @@ app.get('/clean/:page', function (req, res) {
 /* API */
 // Get Css modifiers
 app.post('/cssmod', function (req, res) {
-	// Переопределим конфигурацию с учетом пришедших с клиента настроек
+	// Preparing config for cssMod parser from options file and received info
 	var config = JSON.parse(JSON.stringify(opts.cssMod));
 	config.files = req.body.files;
 
     cssMod.getCssMod(config, function(err, parsedCss) {
         if (err) {
-            res.satus(500).send('Error getting specified CSS files for modifier analysis, check options.js.')
+            console.log('getCssMod error: ', err);
+
+            res.status(500).send('Error getting specified CSS files for modifier analysis, check options.js.');
             return;
         }
 

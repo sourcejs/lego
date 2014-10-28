@@ -28,9 +28,9 @@ module.exports = function cssMod() {
         // String with all concatenated CSS files
 		var importCss = '';
 
-		for (var i = 0, complete = 0, chachedCount = 0; i < cssFiles.length; i++) {
+		for (var i = 0, allReqComplete = 0, chachedCount = 0, reqErrors = 0; i < cssFiles.length; i++) {
             var currentFile = cssFiles[i];
-            var options = {
+            var requrestOptions = {
                 url: cssFiles[i],
                 headers: {
                     // Setting etag for cache
@@ -38,42 +38,46 @@ module.exports = function cssMod() {
                 }
             };
 
-			request(options, function (err, response, body) {
+			request(requrestOptions, function(err, response, body) {
                 if (err) {
-                    _callback(err);
-                    return;
-                }
+					console.log('Error loading stylesheet for modifiers parsing:', requrestOptions.url);
 
-                var currentFile = response.request.uri.href;
+					reqErrors++;
+                } else {
+					var currentFile = response.request.uri.href;
 
-                // Saving etag in memory
-                lastEtags[currentFile] = response.headers.etag;
+					// Saving etag in memory
+					lastEtags[currentFile] = response.headers.etag;
 
-                // If file new
-				if (response.statusCode == 200) {
-					importCss += body;
-                    cssFilesCache[currentFile] = body;
+					// If file new
+					if (response.statusCode == 200) {
+						importCss += body;
+						cssFilesCache[currentFile] = body;
 
-                // If file is cached
-				} else if (response.statusCode == 304) {
-                    importCss += cssFilesCache[currentFile];
-                    chachedCount++;
-                }
+					// If file is cached
+					} else if (response.statusCode == 304) {
+						importCss += cssFilesCache[currentFile];
+						chachedCount++;
+					}
+				}
 
-                complete++;
+				allReqComplete++;
 
                 // When loop is done
-                if (complete === cssFiles.length) {
-                    // If all files are cached, return last parsed CSS
-                    if (chachedCount === cssFiles.length) {
-                        _callback(null, lastProcessedObj)
+                if (allReqComplete === cssFiles.length) {
 
-                    // Or parse it again
+					// Check we have at lest some downloaded files
+					if (reqErrors === cssFiles.length) {
+						_callback('All CSS files for modifier parsing are unreachable.', null);
+					} else if (chachedCount === cssFiles.length) {
+						// If all files are cached, return last parsed CSS
+                        _callback(null, lastProcessedObj);
                     } else {
+						// Or parse it again
                         _callback(null, processCssList(css.parse(importCss).stylesheet.rules))
                     }
                 }
-			})
+			});
 		}
 	}
 
@@ -219,19 +223,13 @@ module.exports = function cssMod() {
 		getCssMod: function (config, callback) {
             var _callback = callback || function () {};
 
+			// TODO: Add automatic style parsing, based on page-content
 			cssFiles = config.files;
 			modifierDetect = new RegExp(config.rules.modifierRule) || modifierDetect;
 			startModifierDetect = new RegExp(config.rules.startModifierRule) || startModifierDetect;
 			debug = config.debug || debug;
 
-            parseCSS(function(err, data){
-                if (err) {
-                    _callback(err);
-                    return;
-                }
-
-                _callback(null, data);
-            });
+            parseCSS(_callback);
 		}
 	}
 }();

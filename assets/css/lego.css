@@ -1,4 +1,4 @@
-/* base
+/* Base
 ---------------------------------------------------------------------------------- */
 
 .lego_lk:link,
@@ -15,19 +15,60 @@
     color:#EB722E;
     }
 
-.cf:before,
-.cf:after {
+/* Clearfix */
+.lego_cf:before,
+.lego_cf:after {
 	content: " ";
 	display: table;
 	}
 
-.cf:after {
+.lego_cf:after {
 	clear: both;
 	}
 
+/* Expand */
+.lego_expand {
+	}
 
-/* /base
+.lego_expand_h {
+	position: relative;
+	margin-bottom: 10px;
+	color: #bababa;
+	font-size: 14px;
+	cursor: pointer;
+    display: block;
+	}
+	.lego_expand_h:before{
+        display: inline-block;
+		content: '▼';
+		margin-right: 5px;
+		font-size: 12px;
+        transform: rotate(0deg);
+        transition: transform 0.2s;
+		}
+	.lego_expand.__closed .lego_expand_h:before {
+		transform: rotate(-90deg);
+		}
+
+.lego_expand_cnt {
+    padding-left: 0;
+	}
+    .lego_search-result.__list .lego_expand_cnt {
+        padding-left: 17px;
+        }
+	.lego_expand.__closed .lego_expand_cnt {
+		display: none;
+		}
+
+/* /Base
 ---------------------------------------------------------------------------------- */
+
+
+
+/* Project
+---------------------------------------------------------------------------------- */
+
+/* Layout */
 
 .lego_container {
 	position: relative;
@@ -66,10 +107,6 @@
 	background: #999; /* color of cover  */
 	height: 600px;
 }
-
-
-/* left column
----------------------------------------------------------------------------------- */
 
 .lego_toggler {
 	margin: 10px;
@@ -136,13 +173,6 @@
 	font-size: 12px;
 	color: #fff;
 	}
-
-/* /left column
----------------------------------------------------------------------------------- */
-
-
-/* right column
----------------------------------------------------------------------------------- */
 
 .lego_export-select {
 	display: block;
@@ -255,12 +285,8 @@
 		background: url(/lego/assets/i/close_h.png);
 		}
 
-/* /right column
----------------------------------------------------------------------------------- */
 
-
-/* layers
----------------------------------------------------------------------------------- */
+/* Layers */
 
 /* default styles for all layers */
 .lego_layer {
@@ -400,47 +426,7 @@
 	width: 500px;
 	}
 
-/* /layers
----------------------------------------------------------------------------------- */
-
-/* components
----------------------------------------------------------------------------------- */
-
-.lego_expand {
-
-	}
-
-.lego_expand_h {
-	position: relative;
-	margin-bottom: 10px;
-	color: #bababa;
-	font-size: 14px;
-	cursor: pointer;
-    display: block;
-	}
-	.lego_expand_h:before{
-        display: inline-block;
-		content: '▼';
-		margin-right: 5px;
-		font-size: 12px;
-        transform: rotate(0deg);
-        transition: transform 0.2s;
-		}
-	.lego_expand.__closed .lego_expand_h:before {
-		transform: rotate(-90deg);
-		}
-
-.lego_expand_cnt {
-    padding-left: 0;
-	}
-    .lego_search-result.__list .lego_expand_cnt {
-        padding-left: 17px;
-        }
-	.lego_expand.__closed .lego_expand_cnt {
-		display: none;
-		}
-
-/* /components
+/* /Project
 ---------------------------------------------------------------------------------- */
 
 /* temp */

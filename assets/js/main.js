@@ -163,7 +163,7 @@ $("#lego_search-result").on("click", ".lego_search-result_i", function(e){
 
     var targets = $(this)[0].dataset.target;
     var results = parseTargets(targets);
-console.log(results);
+
     for (var j = 0; j < results.length; j++) {
         var elem = $('[data-target="' + results[j] + '"]');
         activeTargets.push(elem);
