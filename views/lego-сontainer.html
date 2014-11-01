@@ -1,11 +1,7 @@
 <div class="lego_container">
     <div class="lego_aside">
-        <input class="lego_aside_search" type="search" name="searh" id="search" placeholder="Search"/>
+        <input class="lego_aside_search" type="search" name="searh" id="search" placeholder="Search" />
 
-        <!--<div class="lego_toggler">-->
-            <!--<a class="lego_lk lego_toggle_i __active" href="#">Grid</a>-->
-            <!--<a class="lego_lk lego_toggle_i" data-target="list" href="#">List</a>-->
-        <!--</div>-->
         <div class="lego_search-result __layout">
             <div class="lego_search-result_w js-layouts-list">
                 <div class="lego_expand">
@@ -17,51 +13,58 @@
             </div>
         </div>
 
-		<div id="lego_search-result" class="lego_search-result __list">Loading components...</div>
-	</div>
-	<div class="lego_main">
-		{{{legoLayer}}}
-	</div>
-	<div class="lego_aside __right">
+        <div id="lego_search-result" class="lego_search-result __list">Loading components...</div>
+    </div>
+    <div class="lego_main">
+        {{{legoLayer}}}
+    </div>
+    <div class="lego_aside __right">
 
-		<div class="lego_widget">
-			<div class="lego_widget_h">Export to</div>
-			<ul class="lego_widget_ul">
-				<li class="lego_widget_ul-i"><a class="lego_lk" id="export-img" href="#">PNG (coming soon)</a></li>
-				<li class="lego_widget_ul-i"><a class="lego_lk" href="#" id="save-html">HTML</a></li>
-			</ul>
-		</div>
+        <div class="lego_widget">
+            <div class="lego_widget_h">Export to</div>
+            <ul class="lego_widget_ul">
+                <li class="lego_widget_ul-i"><a class="lego_lk" id="export-img" href="#">PNG (coming soon)</a></li>
+                <li class="lego_widget_ul-i"><a class="lego_lk" href="#" id="save-html">HTML</a></li>
+            </ul>
+        </div>
 
-		<div class="lego_widget">
-			<div class="lego_widget_h">Content</div>
-			<ul class="lego_widget_ul" id="current-elements"></ul>
-		</div>
+        <div class="lego_widget">
+            <div class="lego_widget_h">Content</div>
+            <ul class="lego_widget_ul" id="current-elements"></ul>
+        </div>
 
-		<div class="lego_widget js-variations">
-			<div class="lego_widget_h">Variations</div>
-			<div class="lego_form-i">
+        <div class="lego_widget js-variations">
+            <div class="lego_widget_h">Variations</div>
+            <div class="lego_form-i">
 
-			</div>
+            </div>
 
-		</div>
+        </div>
 
-		<div class="lego_widget js-modificators">
-			<div class="lego_widget_h">Modificators</div>
-			<div class="lego_form-i">
+        <div class="lego_widget js-modificators">
+            <div class="lego_widget_h">Modificators</div>
+            <div class="lego_form-i">
 
-			</div>
+            </div>
 
 
-		</div>
-	</div>
- </div>
+        </div>
+    </div>
+</div>
 
- <!-- Sharing global options from server  -->
- <script>var globalOptions = {{{globalOptions}}};</script>
+<!-- Sharing global options from server  -->
+<script>
+    var lego = {
+        globalOptions: {{{globalOptions}}}
+    }
+</script>
 
- <script src="/lego/assets/js/jquery.js"></script>
- <script src="/lego/assets/js/handlebars.js"></script>
- <script src="/lego/assets/js/search.js"></script>
- <script src="/lego/assets/js/modifiers.js"></script>
- <script src="/lego/assets/js/components.js"></script>
- <script src="/lego/assets/js/main.js"></script>
+<script src="/lego/assets/js/jquery.js"></script>
+<script src="/lego/assets/js/handlebars.js"></script>
+<script src="/lego/assets/js/global.js"></script>
+<script src="/lego/assets/js/client-templates.js"></script>
+<script src="/lego/assets/js/components.js"></script>
+<script src="/lego/assets/js/search.js"></script>
+<script src="/lego/assets/js/virtualblock.js"></script>
+<script src="/lego/assets/js/modifiers.js"></script>
+<script src="/lego/assets/js/main.js"></script>
