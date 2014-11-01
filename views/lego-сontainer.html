@@ -1,53 +1,58 @@
 <div class="lego_container">
     <div class="lego_aside">
-        <input class="lego_aside_search" type="search" name="searh" id="search" placeholder="Search" />
+        <div class="lego_aside_panel">
+            <div class="lego_aside_cnt">
+                <input class="lego_aside_search" type="search" name="searh" id="search" placeholder="Search" />
 
-        <div class="lego_search-result __layout">
-            <div class="lego_search-result_w js-layouts-list">
-                <div class="lego_expand">
-                    <div class="lego_expand_h">Layouts</div>
-                    <div class="lego_expand_cnt">
-                        {{{legoLayouts}}}
+                <div class="lego_search-result __layout">
+                    <div class="lego_search-result_w js-layouts-list">
+                        <div class="lego_expand">
+                            <div class="lego_expand_h">Layouts</div>
+                            <div class="lego_expand_cnt">
+                                {{{legoLayouts}}}
+                            </div>
+                        </div>
                     </div>
                 </div>
+
+                <div id="lego_search-result" class="lego_search-result __list">Loading components...</div>
             </div>
         </div>
-
-        <div id="lego_search-result" class="lego_search-result __list">Loading components...</div>
     </div>
     <div class="lego_main">
         {{{legoLayer}}}
     </div>
     <div class="lego_aside __right">
+        <div class="lego_aside_panel">
+            <div class="lego_aside_cnt">
+                <div class="lego_widget">
+                    <div class="lego_widget_h">Export to</div>
+                    <ul class="lego_widget_ul">
+                        <li class="lego_widget_ul-i"><a class="lego_lk" id="export-img" href="#">PNG (coming soon)</a></li>
+                        <li class="lego_widget_ul-i"><a class="lego_lk" href="#" id="save-html">HTML</a></li>
+                    </ul>
+                </div>
 
-        <div class="lego_widget">
-            <div class="lego_widget_h">Export to</div>
-            <ul class="lego_widget_ul">
-                <li class="lego_widget_ul-i"><a class="lego_lk" id="export-img" href="#">PNG (coming soon)</a></li>
-                <li class="lego_widget_ul-i"><a class="lego_lk" href="#" id="save-html">HTML</a></li>
-            </ul>
-        </div>
+                <div class="lego_widget">
+                    <div class="lego_widget_h">Content</div>
+                    <ul class="lego_widget_ul" id="current-elements"></ul>
+                </div>
 
-        <div class="lego_widget">
-            <div class="lego_widget_h">Content</div>
-            <ul class="lego_widget_ul" id="current-elements"></ul>
-        </div>
+                <div class="lego_widget js-variations">
+                    <div class="lego_widget_h">Variations</div>
+                    <div class="lego_form-i">
 
-        <div class="lego_widget js-variations">
-            <div class="lego_widget_h">Variations</div>
-            <div class="lego_form-i">
+                    </div>
 
+                </div>
+
+                <div class="lego_widget js-modificators">
+                    <div class="lego_widget_h">Modificators</div>
+                    <div class="lego_form-i">
+
+                    </div>
+                </div>
             </div>
-
-        </div>
-
-        <div class="lego_widget js-modificators">
-            <div class="lego_widget_h">Modificators</div>
-            <div class="lego_form-i">
-
-            </div>
-
-
         </div>
     </div>
 </div>

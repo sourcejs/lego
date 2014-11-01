@@ -1,3 +1,9 @@
+html,
+body {
+    position: relative;
+    height: 100%;
+    }
+
 /* Base
 ---------------------------------------------------------------------------------- */
 
@@ -71,9 +77,9 @@
 /* Layout */
 
 .lego_container {
-	position: relative;
-	width: 1420px;
-	margin: 0 auto;
+    position: relative;
+    height: 100%;
+	display: flex;
 	}
 
 .lego_aside,
@@ -82,30 +88,68 @@
 	}
 
 .lego_aside {
-	position: fixed;
-	left: 50%;
-	top: 0;
-	height: 100%;
-	overflow-y: auto;
-	overflow-x: hidden;
-	width: 215px;
-	margin-left: -710px;
-
-	background: #444;
+    position: relative;
+    flex: 1;
+    min-width: 120px;
 	}
+    .lego_aside.__right {
+        flex: initial;
+        width: 200px;
+        }
 
-	.lego_aside.__right {
-		width: 200px;
-		margin-left: 505px;
-		}
+.lego_aside_panel {
+    position: absolute;
+    top: 0;
+    left: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    width: 100%;
+    min-width: 100%;
+    height: 100%;
+    background: #444;
+    z-index: 1000;
+    box-shadow: none;
+    transition: width 0.3s 0.15s, box-shadow 0.3s 0.15s;
+    }
+    .lego_aside_panel:hover {
+        width: 215px;
+        box-shadow: 0 0 10px #000;
+        }
+        .lego_aside_panel:hover:after {
+            box-shadow: none;
+            }
+
+        .lego_aside_panel:after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            height: 100%;
+            box-shadow: 0 0 10px 1px #000;
+            transition: box-shadow 0.3s;
+            }
+
+    .lego_aside.__right .lego_aside_panel {
+        left: auto;
+        right: 0;
+        }
+        .lego_aside.__right .lego_aside_panel:after {
+            right: auto;
+            left: 0;
+            }
+
+.lego_aside_cnt {
+    width: 215px;
+    padding-right: 10px;
+    box-sizing: border-box;
+    }
 
 .lego_main {
-	top: 0;
-	left: 50%;
-	width: 1000px;
-	margin-left: 215px;
+    position: relative;
+    height: 100%;
+	overflow: auto;
 	background: #999; /* color of cover  */
-	height: 600px;
+    width: 1015px; /* 1000 + scroll width */
 }
 
 .lego_toggler {
@@ -290,10 +334,20 @@
 
 /* default styles for all layers */
 .lego_layer {
+    display: flex;
 	position: relative;
-	width: 1000px;
     overflow: hidden;
+    margin: 10px;
+    min-height: calc(100% - 20px);
 	}
+    .lego_layer.__one-column,
+    .lego_layer.__two-column,
+    .lego_layer.__three-column {
+        width: 1000px;
+        margin: 0;
+        margin-right: 20px;
+        }
+
 
 /* without background of grid */
 .lego_layer.__hide-bg .lego_right-column,
@@ -337,8 +391,8 @@
 
 .lego_content[data-target="primary"],
 .lego_content[data-target="overlay"]{
-	min-height: 600px;
 	width: 1000px;
+    padding-bottom: 50px;
 	background: #FFF4F8;
 	}
 
@@ -363,23 +417,24 @@
 	display: inline-block;
 	width: auto;
     min-width: 150px;
+    padding: 10px;
 	text-align: left;
 	background: #fff;
 	}
 
 .lego_layer.__default .lego_content_dec {
+    display: flex;
+    align-items: center;
+    justify-content: center;
 	text-align: center;
-	padding-top: 100px;
+	padding-top: 50px;
 	}
 
 .lego_layer.__default .lego_content_w {
+    display: flex;
+    justify-content: center;
 	margin-top: 0;
 	}
-
-.lego_layer.__default .lego_content_w,{
-	margin-top: 0;
-	}
-
 
 /* two column layout */
 .lego_layer.__two-column .lego_navbar,
