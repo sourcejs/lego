@@ -5,7 +5,6 @@
 
     var $ = global.jQuery;
     var console = global.console;
-    var globalOptions = global.lego.globalOptions;
     var modifiers = global.lego.modifiers;
     var clientTemplates = global.lego.clientTemplates;
 
@@ -162,12 +161,14 @@
 
     // Клик по результатам поиска — выбор блока для вставки
     $("#lego_search-result").on("click", ".lego_search-result_i", function (e) {
+        if (e.metaKey || e.ctrlKey) {
+            return;
+        }
+
         e.preventDefault();
 
-        var $this = $(this);
-        acceptsHTML = $this.data('accepts');
-
-        chosenNavigation = $this;
+        chosenNavigation = $(this);
+        acceptsHTML = chosenNavigation.data('accepts');
 
         var i, j;
 
@@ -290,6 +291,10 @@
 
     // Обработка кликов переключения блоков
     $body.on('click', '#current-elements .lego_lk', function (e) {
+        if (e.metaKey || e.ctrlKey) {
+            return;
+        }
+
         e.preventDefault();
 
         var virtualBlockId = $(this).parent().attr('data-id');

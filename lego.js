@@ -84,7 +84,7 @@ arr.map(function(item) {
 app.get('/s/:page', function (req, res) {
     var page = req.params.page;
 
-    fs.readFile(path.join(app.get('user'), 'saved', page + '.html'), "utf8", function(err, data){
+    fs.readFile(path.join(app.get('user'), 'saved', page + '.html'), "utf8", function (err, data) {
         if(err) {
             console.log(err);
             res.send('No saved data with this id.');
@@ -110,8 +110,8 @@ app.get('/clean/:page', function (req, res) {
     var page = req.params.page;
     var view = getView('clean.html');
 
-    fs.readFile(path.join(app.get('user'), 'saved', page + '.html'), "utf8", function(err, data){
-        if(err) {
+    fs.readFile(path.join(app.get('user'), 'saved', page + '.html'), "utf8", function (err, data) {
+        if (err) {
             console.log(err);
             res.send('No saved data with this id.');
             return;
@@ -132,9 +132,9 @@ app.get('/clean/:page', function (req, res) {
 /* API */
 // Get Css modifiers
 app.post('/cssmod', function (req, res) {
-	// Preparing config for cssMod parser from options file and received info
-	var config = JSON.parse(JSON.stringify(opts.cssMod));
-	config.files = req.body.files;
+    // Preparing config for cssMod parser from options file and received info
+    var config = JSON.parse(JSON.stringify(opts.cssMod));
+    config.files = req.body.files;
 
     cssMod.getCssMod(config, function(err, parsedCss) {
         if (err) {
@@ -144,23 +144,23 @@ app.post('/cssmod', function (req, res) {
             return;
         }
 
-		res.send(parsedCss)
-	});
+        res.send(parsedCss);
+    });
 });
 
 // Save working html
 app.get('/save', function (req, res) {
     var html = req.query.html;
-
     var outputDir = path.join(app.get('user'), 'saved');
-
     var name = sh.unique(html);
 
     fs.mkdirp(outputDir, function (err) {
-        if (err) return console.error(err);
+        if (err) {
+            return console.error(err);
+        }
 
         fs.writeFile(path.join(outputDir, name + ".html"), html, function(err) {
-            if(err){
+            if (err) {
                 console.log(err);
                 res.send({
                     success: false
@@ -209,9 +209,11 @@ if (!module.parent) {
 
     var d = new Date();
     var dateArr = [d.getHours(), d.getMinutes(), d.getSeconds()];
-    dateArr = dateArr.map(function (el) { return (el > 9)? el : '0'+ el; });
+    dateArr = dateArr.map(function (el) {
+        return (el > 9) ? el : '0' + el;
+    });
 
     var dateString = dateArr.join(':').red;
 
-    console.log('[LEGO] '.blue + dateString +' Server started on http://localhost:'.blue + portString.red + ', from '.blue + global.opts.common.pathToUser.red + ' folder in '.blue + MODE.blue + ' mode...'.blue);
+    console.log('[LEGO] '.blue + dateString + ' Server started on http://localhost:'.blue + portString.red + ', from '.blue + global.opts.common.pathToUser.red + ' folder in '.blue + MODE.blue + ' mode...'.blue);
 }
