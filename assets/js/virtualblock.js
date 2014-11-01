@@ -11,10 +11,10 @@
      */
     var VirtualBlock = global.lego.VirtualBlock = function (specId) {
         this.id = 'block-' + Math.round(Math.random() * 10000);
-        this.element = {};
-        this.element.specId = specId;
+        this.specId = specId;
         this.modifiers = {};
         this.variation = 0;
+        this.changed = false;
 
         global.lego.elementList[this.id] = this;
 
@@ -35,6 +35,10 @@
 
         if (p.modifiers) {
             this.modifiers = JSON.parse(JSON.stringify(p.modifiers));
+        }
+
+        if (p.changed) {
+            this.changed = true;
         }
     };
 }(window));

@@ -190,7 +190,7 @@
             return;
         }
 
-        var virtualBlockSpecId = global.lego.elementList[virtualBlockId].element.specId;
+        var virtualBlockSpecId = global.lego.elementList[virtualBlockId].specId;
         var virtualBlockVariation = global.lego.elementList[virtualBlockId].variation;
         var virtualBlockHTML = global.lego.specList[virtualBlockSpecId][virtualBlockVariation].html[0]; // только первый source_example
 
@@ -293,7 +293,7 @@
         }
 
         var virtualBlock = global.lego.elementList[virtualBlockId];
-        var virtualBlockSpecId = virtualBlock.element.specId;
+        var virtualBlockSpecId = virtualBlock.specId;
         var virtualBlockVariation = virtualBlock.variation;
         var virtualBlockHTML = '<div>' + global.lego.specList[virtualBlockSpecId][virtualBlockVariation].html[0] + '</div>'; // только первый source_example
         var $virtualBlockHTML = $(virtualBlockHTML);
@@ -365,9 +365,8 @@
     }
 
     // Отрисовывает блок с учетом диффа
-    function render(virtualBlockId, applyVirtualProperties) {
+    function render(virtualBlockId) {
         var $activeElement = '';
-        var localApplyVirtualProperties = applyVirtualProperties !== false;
 
         // Если блок для отрисовки не указан явно, накатываем изменения на текущий активный блок
         if (!virtualBlockId) {
@@ -390,13 +389,16 @@
         // Мы знаем, с каким элементом мы работаем, можно удалить признак активности
         clearActiveNode();
 
-        var virtualBlockSpecId = global.lego.elementList[virtualBlockId].element.specId;
-        var virtualBlockVariation = global.lego.elementList[virtualBlockId].variation;
+        var virtualBlock = global.lego.elementList[virtualBlockId];
+        var virtualBlockSpecId = virtualBlock.specId;
+        var virtualBlockVariation = virtualBlock.variation;
         var virtualBlockOriginHTML = global.lego.specList[virtualBlockSpecId][virtualBlockVariation].html[0]; // Только первый source_example
 
         // Создадим временный блок и применим к нему дифф из виртуального блока
         var $tempHTML =  $('<div class="temp-node">' + virtualBlockOriginHTML + '</div>');
-        if (localApplyVirtualProperties) {
+
+        // Накладывать будем только на измененный блок
+        if (virtualBlock.changed) {
             applyAttributes(virtualBlockId, $tempHTML);
         }
 
@@ -482,8 +484,8 @@
             return this;
         },
 
-        render: function (virtualBlockId, applyVirtualProperties) {
-            render(virtualBlockId, applyVirtualProperties);
+        render: function (virtualBlockId) {
+            render(virtualBlockId);
 
             return this;
         }

@@ -438,6 +438,9 @@
 [data-active="true"] {
     outline: 1px solid #0CF;
     }
+    [data-target="overlay"] [data-active="true"] {
+        outline: 0 none;
+        }
 
 [data-url]:before,
 [data-url]:after {

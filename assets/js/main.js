@@ -63,7 +63,7 @@
 
             // Создадим новый виртуальный блок
             var virtualBlock = new global.lego.VirtualBlock(shortUrl);
-            var specId = virtualBlock.element.specId;
+            var specId = virtualBlock.specId;
 
             // Добавляем новый элемент, сбросим признак активности
             modifiers.clearActiveNode();
@@ -85,7 +85,7 @@
                     .generateModificatorsList(virtualBlock.id)
                     .setupVariationsList(virtualBlock.id)
                     .setupModificatorsList(virtualBlock.id)
-                    .render(virtualBlock.id, false);
+                    .render(virtualBlock.id);
             });
 
             // После добавления элемента скрыть сетку
@@ -230,7 +230,7 @@
         var virtualBlockId = $(this).attr('data-id') || $(this).closest('.lego_main [data-id]').attr('data-id');
 
         modifiers
-            .generateVariationsList(global.lego.elementList[virtualBlockId].element.specId)
+            .generateVariationsList(global.lego.elementList[virtualBlockId].specId)
             .generateModificatorsList(virtualBlockId)
             .setupVariationsList(virtualBlockId)
             .setupModificatorsList(virtualBlockId)
@@ -279,7 +279,8 @@
 
             // Сохранить новый набор модификаторов
             activeVirtualBlock.save({
-                modifiers: variationExport
+                modifiers: variationExport,
+                changed: true
             });
         }
 
@@ -299,7 +300,7 @@
             $(this).addClass('__active');
 
             modifiers
-                .generateVariationsList(global.lego.elementList[virtualBlockId].element.specId)
+                .generateVariationsList(global.lego.elementList[virtualBlockId].specId)
                 .generateModificatorsList(virtualBlockId)
                 .setupVariationsList(virtualBlockId)
                 .setupModificatorsList(virtualBlockId)
@@ -335,7 +336,7 @@
                 candidatVirtualBlockId = $candidatListItem.attr('data-id');
 
                 modifiers
-                    .generateVariationsList(global.lego.elementList[candidatVirtualBlockId].element.specId)
+                    .generateVariationsList(global.lego.elementList[candidatVirtualBlockId].specId)
                     .generateModificatorsList(candidatVirtualBlockId)
                     .setupVariationsList(candidatVirtualBlockId)
                     .setupModificatorsList(candidatVirtualBlockId)
@@ -353,6 +354,9 @@
     });
 
     $body.on('click', '.lego_main', function () {
-        modifiers.clearActiveNode();
+        // Очищать выделение только при наличии сетки
+        if (!$('.lego_layer.__default').length) {
+            modifiers.clearActiveNode();
+        }
     });
 }(window));
