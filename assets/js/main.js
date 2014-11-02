@@ -16,6 +16,7 @@
 
     // State variables
     var chosenNavigation;
+    var $dragged = false;
 
     /* --- Служебные функции --- */
 
@@ -57,7 +58,7 @@
             var shortUrl = chosenNavigation.attr('data-spec-id');
             var fullUrl = global.lego.parsedTree[shortUrl].url;
 
-            var currentHTML = $('<div data-active="true"></div>').attr('data-container', acceptsHTML);
+            var currentHTML = $('<div data-active="true" draggable="true"></div>').attr('data-container', acceptsHTML);
             var menuItem;
 
             // Создадим новый виртуальный блок
@@ -227,7 +228,11 @@
     });
 
     // Подсветить блоки по клику
-    $body.on('click', '.lego_main [data-id]', function () {
+    $body.on('click', '.lego_main [data-id]', function (e) {
+        if (e.metaKey || e.ctrlKey) {
+            return;
+        }
+
         var virtualBlockId = $(this).attr('data-id') || $(this).closest('.lego_main [data-id]').attr('data-id');
 
         modifiers
@@ -361,7 +366,86 @@
     $body.on('click', '.lego_main', function () {
         // Очищать выделение только при наличии сетки
         if (!$('.lego_layer.__default').length) {
+            $('.lego_layer').addClass('__hide-bg');
             modifiers.clearActiveNode();
         }
     });
+
+    /* Drag and drop */
+    $body.on('dragstart', function (e) {
+        $dragged = $(e.target);
+
+        // Не запускать в режиме по умолчанию
+        if ($('.lego_layer.__default').length) {
+            return false;
+        }
+
+        // Перетаскивание блока на холсте
+        if ($dragged.attr('data-id') !== undefined) {
+            $('.lego_layer').removeClass('__hide-bg');
+            e.target.style.opacity = 0.5;
+        } else {
+            // Перетаскивание блока из нав.меню
+            if ($dragged.attr('data-spec-id') !== undefined) {
+                $('.lego_layer').removeClass('__hide-bg');
+                chosenNavigation = $dragged;
+            } else {
+                $dragged = false;
+                e.preventDefault();
+            }
+        }
+    });
+
+    $body.on('dragend', function (e) {
+        if ($dragged) {
+            $('.lego_layer').addClass('__hide-bg');
+            e.target.style.opacity = "";
+        }
+    });
+
+    $body.on('dragover', function (e) {
+        // prevent default to allow drop
+        e.preventDefault();
+    });
+
+    $body.on('dragenter', function (e) {
+        e.preventDefault();
+
+        if ($dragged) {
+            var $closestDataTarget = $(e.target).closest('[data-target]');
+
+            if ($closestDataTarget.length) {
+                $closestDataTarget.addClass('editable');
+            }
+        }
+    });
+
+    $body.on('dragleave', function (e) {
+        if ($dragged) {
+            var $closestDataTarget = $(e.target).closest('[data-target]');
+
+            if ($closestDataTarget.length) {
+                $closestDataTarget.removeClass('editable');
+            }
+        }
+    });
+
+    $body.on('drop', function (e) {
+        e.preventDefault();
+        if ($dragged) {
+            var $closestDataTarget = $(e.target).closest('[data-target]');
+            if ($closestDataTarget.length) {
+                if ($dragged.attr('data-id') !== undefined) {
+                    $closestDataTarget
+                        .append($dragged)
+                        .removeClass('editable');
+                } else if ($dragged.attr('data-spec-id')) {
+                    insertChosen($closestDataTarget);
+                    $closestDataTarget
+                        .removeClass('editable');
+                }
+            }
+        }
+    });
+
 }(window));

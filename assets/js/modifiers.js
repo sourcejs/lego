@@ -406,6 +406,7 @@
         $tempHTML = $tempHTML.children();
 
         $tempHTML
+            .attr('draggable', true)
             .attr('data-active', true)
             .attr('data-url', virtualBlockSpecId)
             .attr('data-id', virtualBlockId);

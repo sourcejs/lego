@@ -392,7 +392,6 @@ body {
 .lego_content[data-target="primary"],
 .lego_content[data-target="overlay"]{
 	width: 1000px;
-    padding-bottom: 50px;
 	background: #FFF4F8;
 	}
 
@@ -436,6 +435,24 @@ body {
 	margin-top: 0;
 	}
 
+/* one column */
+.lego_layer.__one-column .lego_toolbar,
+.lego_layer.__one-column .lego_content[data-target="primary"] {
+    display: block;
+    }
+
+.lego_layer.__one-column .lego_content[data-target="primary"] {
+    width: 970px;
+    margin: 15px;
+    }
+
+.lego_layer.__one-column .lego_navbar {
+    display: block;
+    width: auto;
+    float: none;
+    margin-left: 15px;
+    }
+
 /* two column layout */
 .lego_layer.__two-column .lego_navbar,
 .lego_layer.__two-column .lego_sidebar,
@@ -448,25 +465,15 @@ body {
 
 .lego_layer.__two-column .lego_navbar {
 	width: 715px;
+    margin-bottom: 15px;
 	}
 
 .lego_layer.__two-column .lego_content[data-target="primary"] {
 	float: right;
 	width: 715px;
 	margin-right: 15px;
-
+    min-height: 40px;
 	text-align: left;
-	}
-
-/* one column */
-.lego_layer.__one-column .lego_toolbar,
-.lego_layer.__one-column .lego_content[data-target="primary"] {
-	display: block;
-	}
-
-.lego_layer.__one-column .lego_content[data-target="primary"] {
-	width: 970px;
-	margin: 15px;
 	}
 
 /* three column */
@@ -479,7 +486,12 @@ body {
 .lego_layer.__three-column .lego_content[data-target="primary"] {
 	float: right;
 	width: 500px;
+    min-height: 40px;
 	}
+
+.lego_layer.__three-column .lego_navbar {
+    margin-bottom: 15px;
+    }
 
 /* /Project
 ---------------------------------------------------------------------------------- */
@@ -512,3 +524,8 @@ body {
 	top: -9999px;
 	left: -9999px;
 }
+
+.__moved {
+    position: absolute;
+    opacity: 0.5;
+    }
