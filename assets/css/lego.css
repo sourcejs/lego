@@ -173,6 +173,12 @@ body {
 
 	border: 1px solid #bababa;
 	}
+    input[type="search"].lego_aside_search {
+        -webkit-appearance: searchfield;
+        }
+    input[type="search"].lego_aside_search::-webkit-search-cancel-button {
+        -webkit-appearance: searchfield-cancel-button;
+        }
 
 .lego_search-result {
 	padding: 10px;
@@ -444,6 +450,7 @@ body {
 .lego_layer.__one-column .lego_content[data-target="primary"] {
     width: 970px;
     margin: 15px;
+    min-height: 40px;
     }
 
 .lego_layer.__one-column .lego_navbar {
