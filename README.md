@@ -6,7 +6,7 @@
 
 ![image](http://habrastorage.org/files/6fd/bd8/4e4/6fdbd84e4ea2492f902c250d7dcd1d50.png)
 
-**[Demo video.](https://www.youtube.com/watch?v=cefy_U5NU4o).**
+**[Demo video](https://www.youtube.com/watch?v=cefy_U5NU4o)**
 
 If you're already using [SourceJS](http://sourcejs.com) engine for organising your front-end component library, check demo configuration folder for integration `/user-source-ok-demo`. As from 0.4.0 SourceJS has own Content API, that lets you request any block resources from your library, all you need is to set some basic configuration for Design-Lego app.
 
