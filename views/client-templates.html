@@ -1,0 +1,38 @@
+<script id="search-item" type="text/x-handlebars-template">
+    {{#each this}}
+        {{#if title}}
+        <div class="lego_search-result_w">
+            <a href="{{fullUrl url}}" data-spec-id="{{id}}" class="lego_lk lego_search-result_i" data-target="{{target}}" data-accepts="{{isContainer}}">
+                <div class="lego_search-result_n">{{title}}</div>
+            </a>
+        </div>
+        {{/if}}
+    {{/each}}
+</script>
+
+<script id="variation-item" type="text/x-handlebars-template">
+    {{#each this}}
+        <div class="lego_form-i_w">
+            <label class="lego_form-i_txt">
+                <input class="lego_checkbox" type="radio" name="variations" data-variation="{{@index}}" />
+                {{header}}
+            </label>
+        </div>
+    {{/each}}
+</script>
+
+<script id="modifier-item" type="text/x-handlebars-template">
+    <div class="lego_form-i_w">
+        <label class="lego_form-i_txt">
+            <input class="lego_checkbox" type="checkbox" name="modificators" data-elem="{{element}}" data-mod="{{modifier}}" />
+            {{modifierName}}
+        </label>
+    </div>
+</script>
+
+<script id="element-item" type="text/x-handlebars-template">
+    <li class='lego_widget_ul-i' data-id="{{blockId}}">
+        <a class='lego_lk' href='{{specLink}}'>{{specName}}</a>
+        <span class='lego_ic lego_ic_close'></span>
+    </li>
+</script>
