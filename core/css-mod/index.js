@@ -33,10 +33,13 @@ module.exports = function cssMod() {
             var requrestOptions = {
                 url: cssFiles[i],
                 headers: {
-                    // Setting etag for cache
-                    'If-None-Match' : lastEtags[currentFile]
                 }
             };
+			var currentFileEtags = lastEtags[currentFile];
+			if (currentFileEtags) {
+				// Setting etag for cache
+				requrestOptions.headers['If-None-Match'] = currentFileEtags;
+			}
 
 			request(requrestOptions, function(err, response, body) {
                 if (err) {
