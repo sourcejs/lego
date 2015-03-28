@@ -1,5 +1,7 @@
 # Design-lego
 
+[![Gitter chat](https://badges.gitter.im/gitterHQ/gitter.png)](https://gitter.im/sourcejs/Source)
+
 **v0.1.0-alpha (first concept)**
 
 [SourceJS](http://sourcejs.com) companion app, for layout prototyping based on own blocks library. Could be also used separately, without SourceJS, check `/user-bootstrap` demo (runs by default).
